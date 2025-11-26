@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start": "npm run build && npm run serve:ssr:livingston-ui",
+    "start:dev": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "start:frontend": "ng serve",
     "start:backend": "tsx src/dev-server.ts",
     "start:server": "npm run build && npm run serve:ssr:livingston-ui",

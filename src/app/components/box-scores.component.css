@@ -1,0 +1,339 @@
+.box-scores-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.box-scores-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #0B1F3B; /* Dark navy */
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .box-scores-title {
+    font-size: 1.25rem;
+  }
+}
+
+.box-scores-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: #0B1F3B;
+  text-align: center;
+  margin: 0;
+  opacity: 0.8;
+}
+
+@media (max-width: 767px) {
+  .box-scores-subtitle {
+    font-size: 0.75rem;
+  }
+}
+
+.loading-state,
+.error-state,
+.no-games-state {
+  text-align: center;
+  padding: 2rem;
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+.game-card {
+  background-color: #FDB927; /* Warriors Gold */
+  border-radius: 0.5rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 767px) {
+  .game-card {
+    padding: 0.75rem;
+  }
+}
+
+.game-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: #f5c91a;
+}
+
+.game-score {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.team-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.team-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #1A1A1A; /* Charcoal */
+  margin-bottom: 0.25rem;
+}
+
+.score {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #1D428A; /* Royal Blue */
+}
+
+@media (max-width: 767px) {
+  .score {
+    font-size: 1.25rem;
+  }
+}
+
+.vs-divider {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: #1A1A1A;
+  opacity: 0.6;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.modal-content {
+  background-color: #1D428A; /* Royal Blue */
+  border-radius: 0.75rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 100%;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 767px) {
+  .modal-content {
+    max-width: 95vw;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .modal-title {
+    font-size: 1.25rem;
+  }
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.game-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+}
+
+.game-matchup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.away-team,
+.home-team {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: #FFFFFF;
+}
+
+.score-display {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #FDB927; /* Warriors Gold */
+}
+
+.game-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.box-score-tables {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (max-width: 767px) {
+  .box-score-tables {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+}
+
+.team-box-score {
+  width: 100%;
+}
+
+.team-box-score-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #FFFFFF;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .team-box-score-title {
+    font-size: 1rem;
+  }
+}
+
+.box-score-table-container {
+  overflow-x: auto;
+  background-color: #FDB927; /* Warriors Gold */
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.box-score-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 767px) {
+  .box-score-table {
+    font-size: 0.75rem;
+  }
+}
+
+.box-score-table thead {
+  background-color: #1D428A; /* Royal Blue */
+}
+
+.box-score-table th {
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .box-score-table th {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.625rem;
+  }
+}
+
+.box-score-table tbody tr {
+  border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.box-score-table tbody tr:hover {
+  background-color: rgba(29, 66, 138, 0.1);
+}
+
+.box-score-table td {
+  padding: 0.5rem;
+  text-align: center;
+  color: #1A1A1A; /* Charcoal */
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .box-score-table td {
+    padding: 0.375rem 0.25rem;
+  }
+}
+
+.box-score-table .player-name {
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  padding-left: 1rem;
+}
+
+

@@ -1,0 +1,141 @@
+<div class="box-scores-container">
+  <h2 class="box-scores-title">Box Scores</h2>
+  <p class="box-scores-subtitle">Select a game to view detailed stats and AI summaries.</p>
+  @if (isLoading()) {
+    <div class="loading-state">
+      <p>Loading previous night's games...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (games().length === 0) {
+    <div class="no-games-state">
+      <p>No games from the previous night.</p>
+    </div>
+  } @else {
+    <div class="games-grid">
+      @for (game of games(); track game.game_id) {
+        <div class="game-card" (click)="openModal(game)">
+          <div class="game-score">
+            <div class="team-score">
+              <div class="team-name">{{ game.away_team_abbr }}</div>
+              <div class="score">{{ game.away_score ?? '-' }}</div>
+            </div>
+            <div class="vs-divider">@</div>
+            <div class="team-score">
+              <div class="team-name">{{ game.home_team_abbr }}</div>
+              <div class="score">{{ game.home_score ?? '-' }}</div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Modal -->
+  @if (isModalOpen() && selectedGame()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">Box Score</h2>
+          <button class="modal-close" (click)="closeModal()">&times;</button>
+        </div>
+        
+        <div class="game-header">
+          <div class="game-matchup">
+            <span class="away-team">{{ selectedGame()!.away_team_name }}</span>
+            <span class="score-display">{{ selectedGame()!.away_score ?? '-' }} - {{ selectedGame()!.home_score ?? '-' }}</span>
+            <span class="home-team">{{ selectedGame()!.home_team_name }}</span>
+          </div>
+          <div class="game-date">{{ selectedGame()!.game_date | date:'mediumDate' }}</div>
+        </div>
+
+        <div class="box-score-tables">
+          <!-- Away Team Box Score -->
+          <div class="team-box-score">
+            <h3 class="team-box-score-title">{{ selectedGame()!.away_team_abbr }}</h3>
+            <div class="box-score-table-container">
+              <table class="box-score-table">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>MIN</th>
+                    <th>PTS</th>
+                    <th>REB</th>
+                    <th>AST</th>
+                    <th>STL</th>
+                    <th>BLK</th>
+                    <th>TO</th>
+                    <th>FG</th>
+                    <th>3PT</th>
+                    <th>FT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (player of getBoxScoresByTeam(selectedGame()!, selectedGame()!.away_team_abbr); track player.id) {
+                    <tr>
+                      <td class="player-name">{{ player.player_name }}</td>
+                      <td>{{ formatMinutes(player.minutes) }}</td>
+                      <td>{{ player.points ?? '-' }}</td>
+                      <td>{{ player.rebounds ?? '-' }}</td>
+                      <td>{{ player.assists ?? '-' }}</td>
+                      <td>{{ player.steals ?? '-' }}</td>
+                      <td>{{ player.blocks ?? '-' }}</td>
+                      <td>{{ player.turnovers ?? '-' }}</td>
+                      <td>{{ player.fgm ?? 0 }}/{{ player.fga ?? 0 }} {{ calculateFGPercentage(player.fgm, player.fga) }}</td>
+                      <td>{{ player.tpm ?? 0 }}/{{ player.tpa ?? 0 }} {{ calculate3PPercentage(player.tpm, player.tpa) }}</td>
+                      <td>{{ player.ftm ?? 0 }}/{{ player.fta ?? 0 }} {{ calculateFTPercentage(player.ftm, player.fta) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Home Team Box Score -->
+          <div class="team-box-score">
+            <h3 class="team-box-score-title">{{ selectedGame()!.home_team_abbr }}</h3>
+            <div class="box-score-table-container">
+              <table class="box-score-table">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>MIN</th>
+                    <th>PTS</th>
+                    <th>REB</th>
+                    <th>AST</th>
+                    <th>STL</th>
+                    <th>BLK</th>
+                    <th>TO</th>
+                    <th>FG</th>
+                    <th>3PT</th>
+                    <th>FT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (player of getBoxScoresByTeam(selectedGame()!, selectedGame()!.home_team_abbr); track player.id) {
+                    <tr>
+                      <td class="player-name">{{ player.player_name }}</td>
+                      <td>{{ formatMinutes(player.minutes) }}</td>
+                      <td>{{ player.points ?? '-' }}</td>
+                      <td>{{ player.rebounds ?? '-' }}</td>
+                      <td>{{ player.assists ?? '-' }}</td>
+                      <td>{{ player.steals ?? '-' }}</td>
+                      <td>{{ player.blocks ?? '-' }}</td>
+                      <td>{{ player.turnovers ?? '-' }}</td>
+                      <td>{{ player.fgm ?? 0 }}/{{ player.fga ?? 0 }} {{ calculateFGPercentage(player.fgm, player.fga) }}</td>
+                      <td>{{ player.tpm ?? 0 }}/{{ player.tpa ?? 0 }} {{ calculate3PPercentage(player.tpm, player.tpa) }}</td>
+                      <td>{{ player.ftm ?? 0 }}/{{ player.fta ?? 0 }} {{ calculateFTPercentage(player.ftm, player.fta) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

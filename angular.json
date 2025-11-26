@@ -44,6 +44,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
@@ -86,7 +91,8 @@
               "buildTarget": "livingston-ui:build:production"
             },
             "development": {
-              "buildTarget": "livingston-ui:build:development"
+              "buildTarget": "livingston-ui:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
@@ -102,6 +108,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
@@ -111,5 +122,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "cf6d2c98-6ea2-415e-8c5d-8e8f2f906435"
   }
 }

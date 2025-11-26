@@ -1,0 +1,75 @@
+<div class="standings-container">
+  <h2 class="standings-title">2025 Conference Standings</h2>
+  <p class="standings-subtitle">Updated nightly · Regular season</p>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <p>Loading standings...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <div class="standings-grid">
+      <!-- Eastern Conference -->
+      <div class="conference-panel">
+        <div class="panel-header">
+          <span>Eastern Conference</span>
+        </div>
+        <div class="table-container">
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th>Seed</th>
+                <th>Team</th>
+                <th>W-L</th>
+                <th>GB</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (team of eastStandings(); track team.teamId) {
+                <tr>
+                  <td class="seed-cell">{{ team.seed }}</td>
+                  <td class="team-cell">{{ team.team }}</td>
+                  <td class="record-cell">{{ team.wins }}-{{ team.losses }}</td>
+                  <td class="gb-cell">{{ team.gamesBack }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Western Conference -->
+      <div class="conference-panel">
+        <div class="panel-header">
+          <span>Western Conference</span>
+        </div>
+        <div class="table-container">
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th>Seed</th>
+                <th>Team</th>
+                <th>W-L</th>
+                <th>GB</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (team of westStandings(); track team.teamId) {
+                <tr>
+                  <td class="seed-cell">{{ team.seed }}</td>
+                  <td class="team-cell">{{ team.team }}</td>
+                  <td class="record-cell">{{ team.wins }}-{{ team.losses }}</td>
+                  <td class="gb-cell">{{ team.gamesBack }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

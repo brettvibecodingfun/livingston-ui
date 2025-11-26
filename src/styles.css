@@ -1,1 +1,774 @@
-/* You can add global styles to this file, and also import other style files */
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #0B1F3B; /* Deep navy */
+  color: #FFFFFF;
+  line-height: 1.6;
+}
+
+/* Main Container Layout */
+.main-container {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.content-container {
+  max-width: 64rem; /* widen layout */
+  margin: 0 auto;
+  padding: 1.5rem;
+  width: 100%;
+}
+
+/* Title Styling */
+.main-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600; /* Semi-Bold */
+  font-size: 1.5rem; /* text-2xl */
+  color: #FFFFFF; /* Pure White */
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .main-title {
+    font-size: 2.25rem; /* text-4xl */
+  }
+}
+
+.subtitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  color: #FFFFFF; /* Pure White */
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .subtitle {
+    font-size: 1.125rem;
+  }
+}
+
+/* Card Styling - Yellow Panels */
+.card {
+  background-color: #FDB927; /* Warriors Gold */
+  border-radius: 0.5rem;
+  border: none;
+  box-shadow: none;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.card-subtle {
+  background-color: #F7F7F8; /* Light Cream White */
+  border-radius: 0.5rem;
+  border: none;
+}
+
+/* Form Styling */
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  background-color: #F7F7F8; /* Light Cream White */
+  color: #1A1A1A; /* Charcoal */
+  transition: all 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: #1A1A1A; /* Charcoal */
+  opacity: 0.7;
+}
+
+.form-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #FFFFFF;
+}
+
+.form-input:disabled {
+  background-color: #E5E5E5;
+  cursor: not-allowed;
+}
+
+.form-button {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background-color: #1D428A; /* Royal Blue */
+  color: #FFFFFF; /* Pure White */
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-button:hover:not(:disabled) {
+  background-color: #1a3a7a;
+  transform: translateY(-1px);
+}
+
+.form-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+.form-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #1D428A;
+  cursor: pointer;
+}
+
+input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #FFFFFF;
+}
+
+.text-charcoal {
+  color: #1A1A1A; /* Charcoal */
+  font-family: 'Inter', sans-serif;
+}
+
+/* Table Styling */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #1D428A; /* Royal Blue */
+}
+
+.table-header {
+  background-color: #1D428A; /* Royal Blue */
+}
+
+.table-header-cell {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: #FFFFFF; /* Pure White */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.table-body {
+  background-color: #1D428A; /* Royal Blue */
+}
+
+.table-row {
+  transition: background-color 0.15s ease;
+}
+
+.table-row:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.table-cell {
+  padding: 1rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-family: 'Roboto Mono', monospace; /* Monospaced for numbers */
+  color: #FFFFFF; /* Pure White */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.headshot-header {
+  width: 56px;
+  padding: 0.75rem 0.5rem;
+}
+
+.headshot-cell {
+  padding: 0.5rem 0.5rem;
+  width: 56px;
+}
+
+.headshot-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  object-fit: cover;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: block;
+}
+
+.table-cell-bold {
+  padding: 1rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif; /* Regular font for player names */
+  font-weight: 400;
+  color: #FFFFFF; /* Pure White */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Alert/Info Boxes */
+.alert-info {
+  background-color: #FDB927; /* Warriors Gold */
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #1A1A1A; /* Charcoal */
+}
+
+.alert-error {
+  background-color: #FDB927; /* Warriors Gold */
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: #1A1A1A; /* Charcoal */
+}
+
+.alert-success {
+  background-color: #FDB927; /* Warriors Gold */
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: #1A1A1A; /* Charcoal */
+}
+
+.alert-warning {
+  background-color: #FDB927; /* Warriors Gold */
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: #1A1A1A; /* Charcoal */
+}
+
+/* Debug Box - Yellow Panel */
+.debug-box {
+  background-color: #FDB927; /* Warriors Gold */
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.debug-content {
+  font-size: 0.875rem;
+  font-family: 'Roboto Mono', monospace;
+  color: #1A1A1A; /* Charcoal */
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  border: none;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.mb-12 {
+  margin-bottom: 3rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.ml-3 {
+  margin-left: 0.75rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.text-gray-600 {
+  color: #4b5563;
+}
+
+.text-gray-700 {
+  color: #374151;
+}
+
+.text-gray-800 {
+  color: #1f2937;
+}
+
+.text-gray-900 {
+  color: #111827;
+}
+
+.text-blue-400 {
+  color: #60a5fa;
+}
+
+.text-blue-700 {
+  color: #1d4ed8;
+}
+
+.text-blue-800 {
+  color: #1e40af;
+}
+
+.text-red-400 {
+  color: #f87171;
+}
+
+.text-red-700 {
+  color: #b91c1c;
+}
+
+.text-red-800 {
+  color: #991b1b;
+}
+
+.text-white {
+  color: #FFFFFF;
+}
+
+.bg-white {
+  background-color: #FFFFFF;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6;
+}
+
+.bg-blue-600 {
+  background-color: #2563eb;
+}
+
+.bg-blue-700 {
+  background-color: #1d4ed8;
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-gray-200 {
+  border-color: #e5e7eb;
+}
+
+.border-gray-300 {
+  border-color: #d1d5db;
+}
+
+.border-blue-200 {
+  border-color: #bfdbfe;
+}
+
+.border-red-200 {
+  border-color: #fecaca;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.w-4 {
+  width: 1rem;
+}
+
+.h-5 {
+  height: 1.25rem;
+}
+
+.w-5 {
+  width: 1.25rem;
+}
+
+.h-12 {
+  height: 3rem;
+}
+
+.w-12 {
+  width: 3rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Responsive Design */
+@media (min-width: 640px) {
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+  
+  .sm\:px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .form-button {
+    width: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:text-4xl {
+    font-size: 2.25rem;
+  }
+  
+  .md\:text-xl {
+    font-size: 1.25rem;
+  }
+}
+
+/* Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.-ml-1 {
+  margin-left: -0.25rem;
+}
+
+.mr-3 {
+  margin-right: 0.75rem;
+}
+
+/* Focus states */
+.focus-ring {
+  transition: all 0.2s ease;
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #FFFFFF;
+}
+
+/* Hover effects */
+.hover\:bg-gray-50:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: #1a3a7a;
+}
+
+/* Custom scrollbar for better UX */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* =============================================
+   PLAYER COMPARISON STYLES
+   ============================================= */
+
+.comparison-container {
+  margin-bottom: 2rem;
+}
+
+.comparison-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.75rem;
+  color: #FFFFFF;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.comparison-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 1.25rem;
+  color: #FFFFFF;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.comparison-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .comparison-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.player-card {
+  background-color: #FDB927; /* Warriors Gold */
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.player-photo-container {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.player-photo {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 3px solid #FDB927; /* Gold outline */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.player-name {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #1A1A1A; /* Charcoal */
+  text-align: center;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.player-info {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(26, 26, 26, 0.1);
+}
+
+.info-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #1A1A1A;
+  letter-spacing: 0.05em;
+}
+
+.info-value {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: #1A1A1A;
+}
+
+.team-badge {
+  background-color: #1D428A; /* Royal Blue */
+  color: #FFFFFF;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+.player-stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #1A1A1A; /* Charcoal */
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 400;
+  font-size: 1rem;
+  color: #1A1A1A; /* Charcoal */
+}

@@ -1,0 +1,15 @@
+What we have right now:
+- Working UI
+- Able to ask a question and OpenAI API is able to parse it into a JSON Schema
+- AI Generated Summary
+- Table returning players
+
+Things we want:
+- Add specific players to the Schema - done
+- Add a comparison of two players (Give me a comparison of Steph Curry and Austin Reaves) - done
+- Add pictures of the players to the Table - done
+- An info modal for each player
+- Generate a logo
+- Include Age/Years played as a part of this - (sorta) done
+- Add previous night box score summaries
+- Add team standings and ability to ask questions about team records

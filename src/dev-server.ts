@@ -163,6 +163,19 @@ Parse this question into the structured query format. Only include optional fiel
 
     const parsed = JSON.parse(content);
     
+    // Ensure required fields are present with defaults
+    if (!parsed.metric || parsed.metric === 'undefined') {
+      console.warn('OpenAI returned query without metric, defaulting to ppg');
+      parsed.metric = 'ppg';
+    }
+    if (!parsed.task) {
+      console.warn('OpenAI returned query without task, defaulting to rank');
+      parsed.task = 'rank';
+    }
+    if (!parsed.season) {
+      parsed.season = DEFAULT_SEASON;
+    }
+    
     // Transform null or empty string values to undefined for optional fields
     if (parsed.team === null || parsed.team === '') parsed.team = undefined;
     if (parsed.position === null || parsed.position === '') parsed.position = undefined;

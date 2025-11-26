@@ -29,20 +29,11 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   const collegeFilter = q.filters?.colleges?.map((c) => c.toLowerCase()) ?? [];
   const hasCollegeFilter = collegeFilter.length > 0;
 
-  // Decide path: use leaders table for rank/leaders with pts/reb/ast/stl/blk,
-
-  // For compare tasks, always use season_averages table for accurate stats
-  // For rank/leaders, use leaders table for main stats but season_averages for percentages
-  const leadersStatType: Record<string, string> = {
-    ppg: 'pts',
-    rpg: 'reb',
-    apg: 'ast',
-    spg: 'stl',
-    bpg: 'blk',
-  };
-  const canUseLeaders = (q.task === 'leaders' || q.task === 'rank') && leadersStatType[q.metric];
-
-  // Use season_averages for compare tasks
+  // All queries use season_averages table for accurate stats
+  // This includes: compare, rank, and leaders tasks
+  // Never use the leaders table - always query season_averages directly
+  
+  // Special handling for compare tasks with specific players
   if (q.task === 'compare' && hasPlayerFilter) {
     // Compare query using season_averages table
     params.push(q.season); i++; // $1 season
@@ -103,102 +94,15 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     return result.rows;
   }
 
-  // Use leaders table for rank/leaders when metric supports it
-  if (canUseLeaders && !hasPlayerFilter && !hasDraftFilter && !hasCollegeFilter) {
-    // Leaders query - join multiple leader rows to get all stats
-    const statType = leadersStatType[q.metric];
-    params.push(statType); i++;                 // $1 stat_type
-    
-    const where: string[] = [
-      `l_main.stat_type = $1`,
-    ];
-
-    let seasonParamIndex = 0;
-    // Add season filter if explicitly provided
-    if (q.season) {
-      params.push(q.season); i++;
-      seasonParamIndex = i;
-      where.push(`l_main.season = $${i}`);
-    }
-
-    if (q.team) { params.push(q.team); i++; where.push(`t.abbreviation = $${i}`); }
-    if (q.position) {
-      const position = mapPositionGroup(q.position);
-      if (position) {
-        params.push(position); i++; 
-        where.push(`p.position = $${i}`);
-      }
-    }
-
-    if (draftRange?.gte != null) {
-      params.push(draftRange.gte); i++;
-      where.push(`p.draft_year >= $${i}`);
-    }
-    if (draftRange?.lte != null) {
-      params.push(draftRange.lte); i++;
-      where.push(`p.draft_year <= $${i}`);
-    }
-
-    if (hasCollegeFilter) {
-      params.push(collegeFilter); i++;
-      where.push(`LOWER(p.college) = ANY($${i})`);
-    }
-
-    if (normalizedPlayerNames.length > 0) {
-      // Use LIKE for case-insensitive partial matching to handle name variations
-      const nameConditions = normalizedPlayerNames.map((name) => {
-        params.push(`%${name}%`); i++;
-        const paramIdx = i;
-        return `LOWER(p.full_name) LIKE $${paramIdx}`;
-      });
-      where.push(`(${nameConditions.join(' OR ')})`);
-    }
-
-    // For compare queries, use a higher limit to ensure we get all requested players
-    const finalLimitForLeaders = q.task === 'compare' ? 100 : limit;
-    params.push(finalLimitForLeaders); i++; // final limit
-
-    // Join all stat types to get complete stats, using season_averages for percentages
-    const sql = `
-      SELECT
-        p.full_name,
-        t.abbreviation AS team,
-        l_main.games_played AS games_played,
-        l_pts.value AS ppg,
-        l_ast.value AS apg,
-        l_reb.value AS rpg,
-        l_stl.value AS spg,
-        l_blk.value AS bpg,
-        sa.fg_pct,
-        sa.three_pct,
-        sa.ft_pct
-      FROM leaders l_main
-      INNER JOIN players p ON l_main.player_id = p.id
-      LEFT JOIN teams t ON p.team_id = t.id
-      LEFT JOIN leaders l_pts ON l_pts.player_id = p.id AND l_pts.stat_type = 'pts' AND l_pts.season = l_main.season
-      LEFT JOIN leaders l_ast ON l_ast.player_id = p.id AND l_ast.stat_type = 'ast' AND l_ast.season = l_main.season
-      LEFT JOIN leaders l_reb ON l_reb.player_id = p.id AND l_reb.stat_type = 'reb' AND l_reb.season = l_main.season
-      LEFT JOIN leaders l_stl ON l_stl.player_id = p.id AND l_stl.stat_type = 'stl' AND l_stl.season = l_main.season
-      LEFT JOIN leaders l_blk ON l_blk.player_id = p.id AND l_blk.stat_type = 'blk' AND l_blk.season = l_main.season
-      LEFT JOIN season_averages sa ON sa.player_id = p.id AND sa.season = l_main.season
-      WHERE ${where.join(' AND ')}
-      ORDER BY l_main.rank ASC
-      LIMIT $${i}
-    `;
-
-    console.log('Leaders SQL:', sql);
-    console.log('Leaders params:', params);
-    const result = await pool.query(sql, params);
-    return result.rows;
-  }
-
-  // Aggregate season stats from season_averages table
+  // Main query path: All rank/leaders/lookup queries use season_averages table
+  // This includes queries like "best scorers on the knicks" (leaders task with team filter)
   params.push(q.season); i++; // $1 season
 
   const whereAgg: string[] = [
     `sa.season = $1`,
   ];
 
+  // Add team filter if specified (e.g., "best scorers on the knicks")
   if (q.team) { params.push(q.team); i++; whereAgg.push(`t.abbreviation = $${i}`); }
   if (q.position) {
     const position = mapPositionGroup(q.position);
@@ -244,7 +148,8 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     finalLimit = limit;
   }
 
-  // Use season_averages table for aggregate queries (fallback path)
+  // Query season_averages table for all rank/leaders/lookup tasks
+  // This ensures accurate, up-to-date statistics from the player stats table
   const sql = `
     SELECT
       p.full_name,
@@ -266,6 +171,10 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     LIMIT ${finalLimit}
   `;
 
+  console.log('Query SQL (season_averages):', sql);
+  console.log('Query params:', params);
+  console.log('Task:', q.task, 'Metric:', q.metric);
   const result = await pool.query(sql, params);
+  console.log(`Found ${result.rows.length} players in season_averages`);
   return result.rows;
 }

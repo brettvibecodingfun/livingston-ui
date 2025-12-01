@@ -5,11 +5,6 @@ What we have right now:
 - Table returning players
 
 Things we want:
-- Add specific players to the Schema - done
-- Add a comparison of two players (Give me a comparison of Steph Curry and Austin Reaves) - done
-- Add pictures of the players to the Table - done
 - An info modal for each player
-- Generate a logo
-- Include Age/Years played as a part of this - (sorta) done
-- Add previous night box score summaries
-- Add team standings and ability to ask questions about team records
+- Add previous night box score summaries - done (need to add summaries)
+- Add team standings and ability to ask questions about team records - teams standings has been added

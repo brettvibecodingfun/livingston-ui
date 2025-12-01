@@ -11,7 +11,8 @@ export const METRIC_COL_MAP = {
   fg_pct: 'field_goal_percentage',
   three_pct: 'three_point_percentage',
   ft_pct: 'free_throw_percentage',
-  bpm: 'box_plus_minus'
+  bpm: 'box_plus_minus',
+  all: 'points_per_game' // For 'all' metric, default to ppg for ordering/display purposes
 } as const;
 
 // Team name to abbreviation mapping

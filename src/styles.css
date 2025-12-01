@@ -22,7 +22,7 @@ html, body {
 }
 
 .content-container {
-  max-width: 64rem; /* widen layout */
+  max-width: 100%;
   margin: 0 auto;
   padding: 1.5rem;
   width: 100%;

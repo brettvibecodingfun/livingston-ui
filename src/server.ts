@@ -59,6 +59,7 @@ Available metrics:
 - three_pct: three-point percentage
 - ft_pct: free throw percentage
 - bpm: box plus/minus
+- all: use when the user asks about players in general without specifying a particular stat (e.g., "show me all the raptors players", "find me the greatest duke players", "team best players", "who on the nuggets are playing the highest performing")
 
 Available tasks:
 - rank: rank players by a metric
@@ -121,7 +122,10 @@ College filters:
 - Recognize common abbreviations or nicknames (e.g., "UNC" for "North Carolina").
 
 Metric rules:
-- Always set metric to one of the allowed values. If the user does not specify a metric but is asking who is better overall, default to "ppg".
+- Always set metric to one of the allowed values.
+- If the user asks about players in general without mentioning a specific stat (e.g., "show me all the raptors players", "find me the greatest duke players", "team best players", "who on the nuggets are playing the highest performing"), use metric = "all".
+- If the user mentions a specific stat (points, assists, rebounds, steals, blocks, shooting percentages, etc.), use the corresponding metric.
+- If the user does not specify a metric but is asking who is better overall in a comparison context, default to "ppg".
 - Do NOT return an empty string for metric.
 
 Default limit: 10 (max 25)

@@ -23,6 +23,9 @@
   padding: 1.5rem;
   margin-bottom: 0;
   width: 100%;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .form-input {
@@ -92,9 +95,16 @@
 /* Table Styling */
 .data-table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0;
   background-color: #102244;
+  table-layout: auto;
+}
+
+/* Ensure player column has enough width for names */
+.data-table th:nth-child(2),
+.data-table td:nth-child(2) {
+  min-width: 160px;
 }
 
 .table-header {
@@ -102,8 +112,8 @@
 }
 
 .table-header-cell {
-  padding: 0.75rem 1rem;
-  text-align: left;
+  padding: 0.75rem 0.75rem;
+  text-align: center;
   font-size: 0.75rem;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
@@ -111,12 +121,13 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
 }
 
 @media (max-width: 767px) {
   .table-header-cell {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.625rem;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.65rem;
   }
 }
 
@@ -133,47 +144,53 @@
 }
 
 .table-cell {
-  padding: 1rem;
+  padding: 0.75rem 0.5rem;
   white-space: nowrap;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-family: 'Roboto Mono', monospace;
   color: #E5E7EB;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
 }
 
 @media (max-width: 767px) {
   .table-cell {
-    padding: 0.75rem 0.5rem;
+    padding: 0.6rem 0.4rem;
     font-size: 0.75rem;
   }
 }
 
 .table-cell-bold {
-  padding: 1rem;
+  padding: 0.75rem 0.5rem;
   white-space: nowrap;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   color: #FFFFFF;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
 }
 
 @media (max-width: 767px) {
   .table-cell-bold {
-    padding: 0.75rem 0.5rem;
+    padding: 0.6rem 0.4rem;
     font-size: 0.75rem;
   }
 }
 
 .headshot-header {
   width: 50px;
-  padding-left: 1rem;
+  min-width: 50px;
+  max-width: 50px;
+  padding-left: 0.75rem;
   padding-right: 0.5rem;
 }
 
 .headshot-cell {
   width: 50px;
-  padding-left: 1rem;
+  min-width: 50px;
+  max-width: 50px;
+  padding-left: 0.75rem;
   padding-right: 0.5rem;
   display: flex;
   align-items: center;
@@ -193,6 +210,15 @@
   .headshot-img {
     width: 32px;
     height: 32px;
+  }
+  
+  .headshot-header,
+  .headshot-cell {
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    padding-left: 0.5rem;
+    padding-right: 0.3rem;
   }
 }
 
@@ -449,6 +475,16 @@
 
 .overflow-x-auto {
   overflow-x: auto;
+}
+
+/* Table container - prevent horizontal scroll */
+.card.overflow-hidden {
+  overflow-x: hidden;
+}
+
+.card.overflow-hidden > .overflow-x-auto {
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .text-center {

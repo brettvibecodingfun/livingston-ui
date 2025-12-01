@@ -141,7 +141,8 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     // Order column mapping based on computed aliases below
     const orderColumnMap: Record<string, string> = {
       ppg: 'ppg', apg: 'apg', rpg: 'rpg', spg: 'spg', bpg: 'bpg',
-      fg_pct: 'fg_pct', three_pct: 'three_pct', ft_pct: 'ft_pct', bpm: 'ppg' // fallback
+      fg_pct: 'fg_pct', three_pct: 'three_pct', ft_pct: 'ft_pct', bpm: 'ppg', // fallback
+      all: 'ppg' // For "all" metric, order by ppg as default
     };
     const orderBy = orderColumnMap[q.metric] || 'ppg';
     orderByClause = `ORDER BY ${orderBy} DESC NULLS LAST`;

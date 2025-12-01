@@ -70,6 +70,12 @@ export class LivingstonComponent {
 
     const metric = query.metric;
 
+    // If metric is "all", show all stats
+    if (metric === 'all') {
+      columns.push('ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct');
+      return columns;
+    }
+
     // For PPG, show PPG + shooting percentages + steals + blocks
     if (metric === 'ppg') {
       columns.push(metric);
@@ -153,8 +159,42 @@ export class LivingstonComponent {
   }
 
   getHeadshotSrc(player: PlayerStatsRow): string {
-    const name = player.full_name ? player.full_name.replace(/ /g, '_') : player.full_name;
-    if (!name || this.headshotErrorMap.has(name)) {
+    if (!player.full_name) {
+      return '';
+    }
+    
+    // Normalize name: replace spaces with underscores and remove special characters
+    let name = player.full_name.replace(/ /g, '_');
+    
+    // Replace special characters with English equivalents
+    name = name
+      .replace(/č/g, 'c').replace(/ć/g, 'c')
+      .replace(/š/g, 's').replace(/Š/g, 'S')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+      .replace(/ž/g, 'z').replace(/Ž/g, 'Z')
+      .replace(/á/g, 'a').replace(/í/g, 'i').replace(/ó/g, 'o').replace(/ú/g, 'u')
+      .replace(/Á/g, 'A').replace(/Í/g, 'I').replace(/Ó/g, 'O').replace(/Ú/g, 'U')
+      .replace(/ģ/g, 'g').replace(/Ģ/g, 'G')
+      .replace(/ī/g, 'i').replace(/Ī/g, 'I')
+      .replace(/ū/g, 'u').replace(/Ū/g, 'U')
+      .replace(/ņ/g, 'n').replace(/Ņ/g, 'N')
+      .replace(/é/g, 'e').replace(/É/g, 'E')
+      .replace(/ñ/g, 'n').replace(/Ñ/g, 'N')
+      .replace(/ë/g, 'e').replace(/Ë/g, 'E')
+      .replace(/ä/g, 'a').replace(/Ä/g, 'A')
+      .replace(/ü/g, 'u').replace(/Ü/g, 'U')
+      .replace(/ô/g, 'o').replace(/Ô/g, 'O')
+      .replace(/ö/g, 'o').replace(/Ö/g, 'O')
+      .replace(/ê/g, 'e').replace(/Ê/g, 'E')
+      .replace(/î/g, 'i').replace(/Î/g, 'I')
+      .replace(/â/g, 'a').replace(/Â/g, 'A')
+      .replace(/à/g, 'a').replace(/À/g, 'A')
+      .replace(/è/g, 'e').replace(/È/g, 'E')
+      .replace(/ì/g, 'i').replace(/Ì/g, 'I')
+      .replace(/ò/g, 'o').replace(/Ò/g, 'O')
+      .replace(/ù/g, 'u').replace(/Ù/g, 'U');
+    
+    if (this.headshotErrorMap.has(name)) {
       return '';
     }
     return `/assets/playerHeadshots/${encodeURIComponent(name)}.jpg`;

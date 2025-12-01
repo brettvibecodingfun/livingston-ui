@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Zod schema for runtime validation
 export const QueryZ = z.object({
   task: z.enum(['rank', 'leaders', 'lookup', 'compare']),
-  metric: z.enum(['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm']),
+  metric: z.enum(['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'all']),
   season: z.number(),
   team: z.string().nullish(),
   position: z.enum(['guards', 'forwards', 'centers']).nullish(),
@@ -34,7 +34,7 @@ export const QuerySchema = {
     },
     metric: {
       type: 'string',
-      enum: ['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm']
+      enum: ['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'all']
     },
     season: {
       type: 'number'

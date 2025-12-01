@@ -121,6 +121,11 @@ College filters:
 - If the user mentions a college/university (e.g., "Duke players"), populate filters.colleges with an array of matching school names (e.g., ["Duke"]).
 - Recognize common abbreviations or nicknames (e.g., "UNC" for "North Carolina").
 
+Country filters:
+- If the user mentions a country (e.g., "players from Serbia", "best Serbian players", "who are the best players from France"), populate filters.countries with an array of country names (e.g., ["Serbia"], ["France"]).
+- Use the full country name as it appears in the database (e.g., "Serbia", "France", "Croatia", "Slovenia", "Germany", "Spain", "Greece", "Lithuania", "Latvia", "Canada", "Australia", etc.).
+- If the user says "Serbian players" or "Serbia", use "Serbia" as the country name.
+
 Metric rules:
 - Always set metric to one of the allowed values.
 - If the user asks about players in general without mentioning a specific stat (e.g., "show me all the raptors players", "find me the greatest duke players", "team best players", "who on the nuggets are playing the highest performing"), use metric = "all".

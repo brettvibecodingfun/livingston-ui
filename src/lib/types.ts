@@ -17,6 +17,7 @@ export const QueryZ = z.object({
       })
       .optional(),
     colleges: z.array(z.string()).optional(),
+    countries: z.array(z.string()).optional(),
   }).optional(),
   limit: z.number().optional()
 });
@@ -63,6 +64,10 @@ export const QuerySchema = {
           additionalProperties: false
         },
         colleges: {
+          type: 'array',
+          items: { type: 'string' }
+        },
+        countries: {
           type: 'array',
           items: { type: 'string' }
         }

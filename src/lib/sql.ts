@@ -28,6 +28,8 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   const hasDraftFilter = !!draftRange && (draftRange.gte != null || draftRange.lte != null);
   const collegeFilter = q.filters?.colleges?.map((c) => c.toLowerCase()) ?? [];
   const hasCollegeFilter = collegeFilter.length > 0;
+  const countryFilter = q.filters?.countries ?? [];
+  const hasCountryFilter = countryFilter.length > 0;
 
   // All queries use season_averages table for accurate stats
   // This includes: compare, rank, and leaders tasks
@@ -50,6 +52,11 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
         return `LOWER(p.full_name) LIKE $${paramIdx}`;
       });
       whereCompare.push(`(${nameConditions.join(' OR ')})`);
+    }
+
+    if (hasCountryFilter) {
+      params.push(countryFilter); i++;
+      whereCompare.push(`LOWER(p.country) = ANY($${i})`);
     }
 
     const sql = `
@@ -116,6 +123,12 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   if (draftRange?.lte != null) { params.push(draftRange.lte); i++; whereAgg.push(`p.draft_year <= $${i}`); }
 
   if (hasCollegeFilter) { params.push(collegeFilter); i++; whereAgg.push(`LOWER(p.college) = ANY($${i})`); }
+
+  if (hasCountryFilter) {
+    const normalizedCountries = countryFilter.map((c) => c.toLowerCase());
+    params.push(normalizedCountries); i++;
+    whereAgg.push(`LOWER(p.country) = ANY($${i})`);
+  }
 
   if (normalizedPlayerNames.length > 0) {
     // Use LIKE for case-insensitive partial matching to handle name variations

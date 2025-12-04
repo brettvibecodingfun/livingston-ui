@@ -477,14 +477,15 @@
   overflow-x: auto;
 }
 
-/* Table container - prevent horizontal scroll */
+/* Table container - allow horizontal scrolling on all devices */
 .card.overflow-hidden {
-  overflow-x: hidden;
+  overflow-x: visible;
 }
 
 .card.overflow-hidden > .overflow-x-auto {
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .text-center {

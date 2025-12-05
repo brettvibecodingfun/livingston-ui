@@ -1,5 +1,12 @@
 <div class="chat-container">
-    <h2 class="chat-subtitle">Ask a question about the 2025 season</h2>
+    <div class="chat-header">
+      <h2 class="chat-subtitle">Ask a question about the 2025 season</h2>
+      <button class="help-button" (click)="openHelpModal()" type="button" title="What questions can I ask?">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="help-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </button>
+    </div>
     
     <!-- Search Form -->
     <div class="card p-6 mb-8">
@@ -219,6 +226,38 @@
             <h3 class="text-sm font-medium text-red-800">Error</h3>
             <div class="mt-2 text-sm text-red-700">
               <p>{{ error() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Help Modal -->
+    @if (showHelpModal()) {
+      <div class="help-modal-background" (click)="closeHelpModal()">
+        <div class="help-modal-content" (click)="$event.stopPropagation()">
+          <div class="help-modal-header">
+            <h2 class="help-modal-title">What Questions to Ask:</h2>
+            <button class="help-modal-close" (click)="closeHelpModal()" type="button">&times;</button>
+          </div>
+          <div class="help-modal-body">
+            <div class="help-example">
+              <strong>Comparison:</strong> "Who is having a better season, Luka Doncic or Nikola Jokic?"
+            </div>
+            <div class="help-example">
+              <strong>Rankings:</strong> "Give me the top assist leaders in the NBA this year"
+            </div>
+            <div class="help-example">
+              <strong>Team Rankings:</strong> "Who are the top rebounders on the Pistons?"
+            </div>
+            <div class="help-example">
+              <strong>College Specific Rankings:</strong> "who are the best players from Duke?"
+            </div>
+            <div class="help-example">
+              <strong>Draft Class Rankings:</strong> "rank the top passers from the 2022 draft class."
+            </div>
+            <div class="help-example">
+              <strong>Country rankings:</strong> "Who are the best French Scorers in the NBA this year?"
             </div>
           </div>
         </div>

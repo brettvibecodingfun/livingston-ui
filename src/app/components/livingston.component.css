@@ -5,27 +5,75 @@
   gap: 1.5rem;
 }
 
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: relative;
+}
+
 .chat-subtitle {
   font-family: 'Inter', sans-serif;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #0B1F3B; /* Dark navy */
+  color: #0B1F3B;
   text-align: center;
   margin: 0;
 }
 
-/* Rest of existing styles remain the same */
+.help-button {
+  background: transparent;
+  border: 2px solid #0B1F3B;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.help-button:hover {
+  background: #0B1F3B;
+  transform: scale(1.1);
+}
+
+.help-button:hover .help-icon {
+  color: #FDB931;
+}
+
+.help-icon {
+  width: 20px;
+  height: 20px;
+  color: #0B1F3B;
+  transition: color 0.2s ease;
+}
+
+@media (max-width: 767px) {
+  .help-button {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .help-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
 .card {
-  background-color: #102244; /* Dark slate */
+  background: #102244;
   border-radius: 0.75rem;
   border: none;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  margin-bottom: 0;
+  margin: 0 auto;
   width: 100%;
   max-width: 1600px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .form-input {
@@ -33,10 +81,9 @@
   padding: 0.75rem 1rem;
   border: 1px solid rgba(11, 31, 59, 0.2);
   border-radius: 0.5rem;
-  font-size: 1rem;
-  font-family: 'Inter', sans-serif;
+  font: 1rem 'Inter', sans-serif;
   color: #0B1F3B;
-  background-color: #FFFFFF;
+  background: #fff;
   transition: all 0.2s ease;
 }
 
@@ -51,19 +98,17 @@
 }
 
 .form-input:disabled {
-  background-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.7);
   cursor: not-allowed;
 }
 
 .form-button {
   padding: 0.75rem 1.5rem;
-  background-color: #0B1F3B; /* Dark navy */
-  color: #FDB931; /* Gold text */
+  background: #0B1F3B;
+  color: #FDB931;
   border: none;
   border-radius: 0.5rem;
-  font-size: 1rem;
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
+  font: 500 1rem 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -73,7 +118,7 @@
 }
 
 .form-button:hover:not(:disabled) {
-  background-color: #0a1a33;
+  background: #0a1a33;
   transform: translateY(-1px);
 }
 
@@ -92,32 +137,28 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* Table Styling */
 .data-table {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
-  background-color: #102244;
+  background: #102244;
   table-layout: auto;
 }
 
-/* Ensure player column has enough width for names */
 .data-table th:nth-child(2),
 .data-table td:nth-child(2) {
   min-width: 160px;
 }
 
 .table-header {
-  background-color: #0b152b;
+  background: #0b152b;
 }
 
 .table-header-cell {
-  padding: 0.75rem 0.75rem;
+  padding: 0.75rem;
   text-align: center;
-  font-size: 0.75rem;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  color: #FFFFFF;
+  font: 600 0.75rem 'Inter', sans-serif;
+  color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -126,13 +167,13 @@
 
 @media (max-width: 767px) {
   .table-header-cell {
-    padding: 0.5rem 0.5rem;
+    padding: 0.5rem;
     font-size: 0.65rem;
   }
 }
 
 .table-body {
-  background-color: #102244;
+  background: #102244;
 }
 
 .table-row {
@@ -140,14 +181,13 @@
 }
 
 .table-row:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .table-cell {
   padding: 0.75rem 0.5rem;
   white-space: nowrap;
-  font-size: 0.85rem;
-  font-family: 'Roboto Mono', monospace;
+  font: 0.85rem 'Roboto Mono', monospace;
   color: #E5E7EB;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
@@ -163,10 +203,8 @@
 .table-cell-bold {
   padding: 0.75rem 0.5rem;
   white-space: nowrap;
-  font-size: 0.85rem;
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  color: #FFFFFF;
+  font: 400 0.85rem 'Inter', sans-serif;
+  color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
 }
@@ -178,20 +216,15 @@
   }
 }
 
-.headshot-header {
-  width: 50px;
-  min-width: 50px;
-  max-width: 50px;
-  padding-left: 0.75rem;
-  padding-right: 0.5rem;
-}
-
+.headshot-header,
 .headshot-cell {
   width: 50px;
   min-width: 50px;
   max-width: 50px;
-  padding-left: 0.75rem;
-  padding-right: 0.5rem;
+  padding: 0 0.5rem 0 0.75rem;
+}
+
+.headshot-cell {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,30 +250,25 @@
     width: 40px;
     min-width: 40px;
     max-width: 40px;
-    padding-left: 0.5rem;
-    padding-right: 0.3rem;
+    padding: 0 0.3rem 0 0.5rem;
   }
 }
 
-.alert-info {
-  background-color: #102244;
+.alert-info,
+.alert-error {
+  background: #102244;
   border: none;
   border-radius: 0.5rem;
   padding: 1rem;
-  margin-bottom: 1.5rem;
   color: #E5E7EB;
 }
 
-.alert-error {
-  background-color: #102244;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  color: #E5E7EB;
+.alert-info {
+  margin-bottom: 1.5rem;
 }
 
 .debug-box {
-  background-color: #102244;
+  background: #102244;
   border-radius: 0.5rem;
   padding: 1rem;
   margin-bottom: 1.5rem;
@@ -248,10 +276,9 @@
 }
 
 .debug-content {
-  font-size: 0.75rem;
-  font-family: 'Roboto Mono', monospace;
+  font: 0.75rem 'Roboto Mono', monospace;
   color: #E5E7EB;
-  background-color: #0b152b;
+  background: #0b152b;
   padding: 0.75rem;
   border-radius: 0.25rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -259,16 +286,13 @@
   white-space: pre-wrap;
 }
 
-/* Comparison View Styles */
 .comparison-container {
   margin-bottom: 2rem;
 }
 
 .comparison-title {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-  font-size: 1.75rem;
-  color: #FFFFFF;
+  font: 600 1.75rem 'Montserrat', sans-serif;
+  color: #fff;
   text-align: center;
   margin-bottom: 0.5rem;
   letter-spacing: 0.05em;
@@ -281,10 +305,8 @@
 }
 
 .comparison-subtitle {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 1.25rem;
-  color: #FFFFFF;
+  font: 400 1.25rem 'Inter', sans-serif;
+  color: #fff;
   text-align: center;
   margin-bottom: 2rem;
 }
@@ -310,7 +332,7 @@
 }
 
 .player-card {
-  background-color: #102244;
+  background: #102244;
   border-radius: 0.75rem;
   padding: 1.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -356,10 +378,8 @@
 }
 
 .player-name {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 600;
-  font-size: 1.5rem;
-  color: #FFFFFF;
+  font: 600 1.5rem 'Montserrat', sans-serif;
+  color: #fff;
   text-align: center;
   margin-bottom: 1rem;
   text-transform: uppercase;
@@ -388,22 +408,18 @@
 }
 
 .info-label {
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 0.875rem;
+  font: 600 0.875rem 'Inter', sans-serif;
   color: #E5E7EB;
   letter-spacing: 0.05em;
 }
 
 .info-value {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 0.875rem;
+  font: 400 0.875rem 'Inter', sans-serif;
   color: #E5E7EB;
 }
 
 .team-badge {
-  background-color: #0B1F3B;
+  background: #0B1F3B;
   color: #FDB931;
   padding: 0.25rem 0.75rem;
   border-radius: 0.25rem;
@@ -430,21 +446,16 @@
 }
 
 .stat-label {
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 0.875rem;
+  font: 600 0.875rem 'Inter', sans-serif;
   color: #E5E7EB;
   letter-spacing: 0.05em;
 }
 
 .stat-value {
-  font-family: 'Roboto Mono', monospace;
-  font-weight: 400;
-  font-size: 1rem;
-  color: #FFFFFF;
+  font: 400 1rem 'Roboto Mono', monospace;
+  color: #fff;
 }
 
-/* Utility classes */
 .flex {
   display: flex;
 }
@@ -477,7 +488,6 @@
   overflow-x: auto;
 }
 
-/* Table container - allow horizontal scrolling on all devices */
 .card.overflow-hidden {
   overflow-x: visible;
 }
@@ -485,7 +495,7 @@
 .card.overflow-hidden > .overflow-x-auto {
   width: 100%;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 .text-center {
@@ -603,4 +613,116 @@
 
 .mr-3 {
   margin-right: 0.75rem;
+}
+
+.help-modal-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.help-modal-content {
+  background: #102244;
+  color: #fff;
+  border: 3px solid #FDB931;
+  border-radius: 0.75rem;
+  padding: 0;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .help-modal-content {
+    max-width: 95vw;
+  }
+}
+
+.help-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.help-modal-title {
+  font: 600 1.5rem 'Montserrat', sans-serif;
+  color: #FDB931;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .help-modal-title {
+    font-size: 1.25rem;
+  }
+}
+
+.help-modal-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+  line-height: 1;
+}
+
+.help-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.help-modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (max-width: 767px) {
+  .help-modal-body {
+    padding: 1rem;
+    gap: 1rem;
+  }
+}
+
+.help-example {
+  font: 1rem 'Inter', sans-serif;
+  color: #E5E7EB;
+  line-height: 1.6;
+  padding: 1rem;
+  background: #0b152b;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.help-example strong {
+  color: #FDB931;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 767px) {
+  .help-example {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+  }
 }

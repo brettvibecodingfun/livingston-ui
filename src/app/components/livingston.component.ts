@@ -20,6 +20,7 @@ export class LivingstonComponent {
   queryDebug = signal<Query | null>(null);
   error = signal<string | null>(null);
   isDebugMode = environment.DEBUG;
+  showHelpModal = signal(false);
 
   constructor(private livingstonService: LivingstonService) {}
 
@@ -208,5 +209,13 @@ export class LivingstonComponent {
     }
     const img = event.target as HTMLImageElement;
     img.style.display = 'none';
+  }
+
+  openHelpModal() {
+    this.showHelpModal.set(true);
+  }
+
+  closeHelpModal() {
+    this.showHelpModal.set(false);
   }
 }

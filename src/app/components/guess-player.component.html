@@ -1,0 +1,177 @@
+<div class="guess-container">
+  <h2 class="guess-title">Guess This Player's Stats</h2>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <p>Loading player...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <p>{{ error() }}</p>
+      <button class="retry-button" (click)="loadRandomPlayer()">Retry</button>
+    </div>
+  } @else if (player()) {
+    <!-- Player Image -->
+    <div class="player-image-container">
+      <img
+        class="player-image"
+        [src]="getHeadshotSrc(player())"
+        [alt]="player()!.full_name + ' headshot'"
+        (error)="onHeadshotError(player(), $event)"
+      />
+    </div>
+
+    <!-- Player Name -->
+    <h3 class="player-name">{{ player()!.full_name }}</h3>
+
+    <!-- Input Form -->
+    <div class="guess-form">
+      <div class="input-row">
+        <div class="input-group">
+          <label for="ppg">PPG</label>
+          <input
+            id="ppg"
+            type="number"
+            step="0.1"
+            min="0"
+            [(ngModel)]="ppg"
+            placeholder="Points Per Game"
+            class="stat-input"
+          />
+        </div>
+        <div class="input-group">
+          <label for="rpg">RBG</label>
+          <input
+            id="rpg"
+            type="number"
+            step="0.1"
+            min="0"
+            [(ngModel)]="rpg"
+            placeholder="Rebounds Per Game"
+            class="stat-input"
+          />
+        </div>
+        <div class="input-group">
+          <label for="apg">APG</label>
+          <input
+            id="apg"
+            type="number"
+            step="0.1"
+            min="0"
+            [(ngModel)]="apg"
+            placeholder="Assists Per Game"
+            class="stat-input"
+          />
+        </div>
+        <div class="input-group">
+          <label for="spg">SPG</label>
+          <input
+            id="spg"
+            type="number"
+            step="0.1"
+            min="0"
+            [(ngModel)]="spg"
+            placeholder="Steals Per Game"
+            class="stat-input"
+          />
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="bpg">BPG</label>
+          <input
+            id="bpg"
+            type="number"
+            step="0.1"
+            min="0"
+            [(ngModel)]="bpg"
+            placeholder="Blocks Per Game"
+            class="stat-input"
+          />
+        </div>
+        <div class="input-group">
+          <label for="fg">FG%</label>
+          <input
+            id="fg"
+            type="number"
+            step="0.1"
+            min="0"
+            max="100"
+            [(ngModel)]="fg"
+            placeholder="Field Goal %"
+            class="stat-input"
+          />
+        </div>
+        <div class="input-group">
+          <label for="threeP">3P%</label>
+          <input
+            id="threeP"
+            type="number"
+            step="0.1"
+            min="0"
+            max="100"
+            [(ngModel)]="threeP"
+            placeholder="Three Point %"
+            class="stat-input"
+          />
+        </div>
+        <div class="input-group">
+          <label for="ft">FT%</label>
+          <input
+            id="ft"
+            type="number"
+            step="0.1"
+            min="0"
+            max="100"
+            [(ngModel)]="ft"
+            placeholder="Free Throw %"
+            class="stat-input"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="submit-button" (click)="onSubmit()">Submit</button>
+      <button class="new-player-button" (click)="loadRandomPlayer()">New Player</button>
+    </div>
+
+    <!-- Result Modal -->
+    @if (showResult() && score() !== null) {
+      <div class="modal-background" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <h2 class="modal-header">You scored {{ score()!.toFixed(1) }}% on {{ player()!.full_name }}!</h2>
+          
+          <!-- Desktop view - pre-formatted text -->
+          <pre class="modal-text desktop-comparison">{{ comparisonText() }}</pre>
+          
+          <!-- Mobile view - structured layout -->
+          <div class="mobile-comparison">
+            <h3 class="comparison-title">Stats Comparison for {{ player()!.full_name }}:</h3>
+            <div class="comparison-stats">
+              @for (stat of comparisonStats(); track stat.label) {
+                <div class="stat-comparison-row">
+                  <span class="stat-label">{{ stat.label }}:</span>
+                  <div class="stat-values">
+                    <span class="stat-value">
+                      <span class="value-label">Your Guess:</span>
+                      <span class="value-number">{{ stat.guess }}</span>
+                    </span>
+                    <span class="stat-value">
+                      <span class="value-label">Actual:</span>
+                      <span class="value-number">{{ stat.actual }}</span>
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+          
+          <button class="modal-close-button" (click)="closeModal()">Close</button>
+        </div>
+      </div>
+    }
+  }
+</div>
+

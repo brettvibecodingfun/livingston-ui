@@ -10,13 +10,6 @@
     <div class="tab-bar">
       <button
         class="tab-button"
-        [class.active]="activeTab() === 'standings'"
-        (click)="setActiveTab('standings')"
-      >
-        STANDINGS
-      </button>
-      <button
-        class="tab-button"
         [class.active]="activeTab() === 'chat'"
         (click)="setActiveTab('chat')"
           >
@@ -24,10 +17,24 @@
       </button>
       <button
         class="tab-button"
+        [class.active]="activeTab() === 'standings'"
+        (click)="setActiveTab('standings')"
+      >
+        STANDINGS
+      </button>
+      <button
+        class="tab-button"
         [class.active]="activeTab() === 'boxscores'"
         (click)="setActiveTab('boxscores')"
           >
         BOX SCORES
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab() === 'guess'"
+        (click)="setActiveTab('guess')"
+          >
+        GUESS THE PLAYER
       </button>
     </div>
   </div>
@@ -40,6 +47,8 @@
       <app-standings></app-standings>
     } @else if (activeTab() === 'boxscores') {
       <app-box-scores></app-box-scores>
+    } @else if (activeTab() === 'guess') {
+      <app-guess-player></app-guess-player>
     }
   </div>
 </div>

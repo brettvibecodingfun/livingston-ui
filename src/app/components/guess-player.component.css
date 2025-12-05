@@ -1,0 +1,356 @@
+.guess-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.guess-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #0B1F3B;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .guess-title {
+    font-size: 1.5rem;
+  }
+}
+
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 2rem;
+  color: #0B1F3B;
+  font-family: 'Inter', sans-serif;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #0B1F3B;
+  color: #FDB931;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+  background-color: #0a1a33;
+  transform: translateY(-1px);
+}
+
+.player-image-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.player-image {
+  width: 300px;
+  height: auto;
+  max-width: 100%;
+  border-radius: 0.75rem;
+  border: 3px solid #0B1F3B;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 767px) {
+  .player-image {
+    width: 200px;
+  }
+}
+
+.player-name {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #0B1F3B;
+  text-align: center;
+  margin: 0 0 1.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 767px) {
+  .player-name {
+    font-size: 1.25rem;
+  }
+}
+
+.guess-form {
+  width: 100%;
+  max-width: 800px;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 767px) {
+  .input-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #0B1F3B;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #0B1F3B;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  color: #0B1F3B;
+  background-color: #FFFFFF;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.stat-input:focus {
+  outline: none;
+  border-color: #FDB931;
+  box-shadow: 0 0 0 3px rgba(253, 185, 49, 0.2);
+}
+
+.stat-input::placeholder {
+  color: rgba(11, 31, 59, 0.5);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+@media (max-width: 767px) {
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+.submit-button,
+.new-player-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #0B1F3B;
+  color: #FDB931;
+  border: 2px solid #0B1F3B;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-button:hover,
+.new-player-button:hover {
+  background-color: #0a1a33;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.submit-button:active,
+.new-player-button:active {
+  transform: translateY(0);
+}
+
+/* Modal Styles */
+.modal-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background-color: #102244;
+  color: #FFFFFF;
+  border: 3px solid #FDB931;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 767px) {
+  .modal-content {
+    padding: 1.5rem;
+    max-width: 95vw;
+  }
+}
+
+.modal-header {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.75rem;
+  color: #FDB931;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 767px) {
+  .modal-header {
+    font-size: 1.5rem;
+  }
+}
+
+.modal-text {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.875rem;
+  color: #E5E7EB;
+  background-color: #0b152b;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: pre-wrap;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+/* Desktop comparison - show pre-formatted text */
+.desktop-comparison {
+  display: block;
+}
+
+/* Mobile comparison - show structured layout */
+.mobile-comparison {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .desktop-comparison {
+    display: none;
+  }
+  
+  .mobile-comparison {
+    display: block;
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+  
+  .comparison-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .comparison-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .stat-comparison-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background-color: #0b152b;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .stat-label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #FDB931;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .stat-values {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  
+  .stat-value {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+  }
+  
+  .value-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    color: #E5E7EB;
+    opacity: 0.8;
+  }
+  
+  .value-number {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+}
+
+.modal-close-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #FDB931;
+  color: #0B1F3B;
+  border: 2px solid #FDB931;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close-button:hover {
+  background-color: #f5c91a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+

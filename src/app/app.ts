@@ -5,12 +5,13 @@ import { CommonModule } from '@angular/common';
 import { LivingstonComponent } from './components/livingston.component';
 import { BoxScoresComponent } from './components/box-scores.component';
 import { StandingsComponent } from './components/standings.component';
+import { GuessPlayerComponent } from './components/guess-player.component';
 
-type TabType = 'chat' | 'standings' | 'boxscores';
+type TabType = 'chat' | 'standings' | 'boxscores' | 'guess';
 
 @Component({
   selector: 'app-root',
-  imports: [HttpClientModule, FormsModule, CommonModule, LivingstonComponent, BoxScoresComponent, StandingsComponent],
+  imports: [HttpClientModule, FormsModule, CommonModule, LivingstonComponent, BoxScoresComponent, StandingsComponent, GuessPlayerComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

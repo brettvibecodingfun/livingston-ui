@@ -193,8 +193,26 @@ Parse this question into the structured query format. Only include optional fiel
  */
 app.get('/api/box-scores/previous-night', async (req, res) => {
   try {
+    // Calculate yesterday's date in Central Time
+    const now = new Date();
+    // Get current date components in Central Time
+    const centralFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const parts = centralFormatter.formatToParts(now);
+    const year = parseInt(parts.find(p => p.type === 'year')!.value);
+    const month = parseInt(parts.find(p => p.type === 'month')!.value);
+    const day = parseInt(parts.find(p => p.type === 'day')!.value);
     
-    // Get all games from previous night
+    // Create date in Central Time and calculate yesterday
+    const centralDate = new Date(year, month - 1, day);
+    centralDate.setDate(centralDate.getDate() - 1);
+    const yesterdayDateStr = `${centralDate.getFullYear()}-${String(centralDate.getMonth() + 1).padStart(2, '0')}-${String(centralDate.getDate()).padStart(2, '0')}`;
+    
+    // Get all games from previous night (yesterday in Central Time)
     const gamesQuery = `
       SELECT DISTINCT
         g.id AS game_id,
@@ -208,11 +226,11 @@ app.get('/api/box-scores/previous-night', async (req, res) => {
       FROM games g
       INNER JOIN teams ht ON g.home_team_id = ht.id
       INNER JOIN teams at ON g.away_team_id = at.id
-      WHERE g.date = CURRENT_DATE - INTERVAL '1 day'
+      WHERE g.date = $1
       ORDER BY g.date DESC, g.id
     `;
     
-    const gamesResult = await pool.query(gamesQuery);
+    const gamesResult = await pool.query(gamesQuery, [yesterdayDateStr]);
     const games = gamesResult.rows;
     
     // For each game, get the box scores
@@ -260,6 +278,48 @@ app.get('/api/box-scores/previous-night', async (req, res) => {
     console.error('API Error:', error);
     return res.status(500).json({
       error: 'Failed to fetch previous night\'s games.',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * API endpoint for fetching a random player for the guess game
+ */
+app.get('/api/guess-player/random', async (req, res) => {
+  try {
+    // Get a random player with their stats from season_averages
+    const randomPlayerQuery = `
+      SELECT
+        p.full_name,
+        sa.points AS ppg,
+        sa.rebounds AS rpg,
+        sa.assists AS apg,
+        sa.steals AS spg,
+        sa.blocks AS bpg,
+        sa.fg_pct,
+        sa.three_pct,
+        sa.ft_pct
+      FROM season_averages sa
+      INNER JOIN players p ON sa.player_id = p.id
+      WHERE sa.season = $1
+        AND sa.points IS NOT NULL
+        AND sa.games_played > 0
+      ORDER BY RANDOM()
+      LIMIT 1
+    `;
+    
+    const result = await pool.query(randomPlayerQuery, [DEFAULT_SEASON]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No players found' });
+    }
+    
+    return res.json(result.rows[0]);
+  } catch (error) {
+    console.error('API Error:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch random player.',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }

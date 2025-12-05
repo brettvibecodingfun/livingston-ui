@@ -28,12 +28,14 @@ export class LivingstonComponent {
   onSubmit() {
     if (!this.question().trim() || this.isLoading()) return;
 
+    const questionText = this.question(); // Store the question before clearing
     this.isLoading.set(true);
     this.error.set(null);
     this.results.set(null);
     this.queryDebug.set(null);
+    this.question.set(''); // Clear the input field
 
-    this.livingstonService.askQuestion({ question: this.question(), narrate: this.narrate() })
+    this.livingstonService.askQuestion({ question: questionText, narrate: this.narrate() })
       .subscribe({
         next: (response) => {
           this.results.set(response);

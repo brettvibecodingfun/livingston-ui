@@ -103,14 +103,15 @@ export class GuessPlayerComponent implements OnInit {
 
     // Calculate score using the same algorithm as the original
     // Convert to string first to handle both string and number types from ngModel
-    const ppgGuess = parseFloat(String(this.ppg() || ''));
-    const rpgGuess = parseFloat(String(this.rpg() || ''));
-    const apgGuess = parseFloat(String(this.apg() || ''));
-    const spgGuess = parseFloat(String(this.spg() || ''));
-    const bpgGuess = parseFloat(String(this.bpg() || ''));
-    const fgGuess = parseFloat(String(this.fg() || ''));
-    const threePGuess = parseFloat(String(this.threeP() || ''));
-    const ftGuess = parseFloat(String(this.ft() || ''));
+    // Use nullish coalescing (??) instead of || to preserve 0 values
+    const ppgGuess = parseFloat(String(this.ppg() ?? ''));
+    const rpgGuess = parseFloat(String(this.rpg() ?? ''));
+    const apgGuess = parseFloat(String(this.apg() ?? ''));
+    const spgGuess = parseFloat(String(this.spg() ?? ''));
+    const bpgGuess = parseFloat(String(this.bpg() ?? ''));
+    const fgGuess = parseFloat(String(this.fg() ?? ''));
+    const threePGuess = parseFloat(String(this.threeP() ?? ''));
+    const ftGuess = parseFloat(String(this.ft() ?? ''));
 
     const actualPPG = playerData.ppg ?? 0;
     const actualRPG = playerData.rpg ?? 0;
@@ -177,10 +178,29 @@ FT%:    Your Guess: ${(ftGuess.toFixed(1) + '%').padEnd(8, ' ')}    Actual: ${ac
   }
 
   getStatPercentage(guess: number, real: number): number {
+    // Handle case where both are 0 - perfect match
+    if (real === 0 && guess === 0) {
+      return 0;
+    }
+    
+    // Handle case where real is 0 but guess is not
     if (real === 0) {
       return guess / 100.0;
+    }
+    
+    // Handle case where guess is 0 but real is not
+    if (guess === 0) {
+      // If the actual value is 0, we already handled that above
+      // So real must be non-zero, meaning the guess is completely wrong
+      return 1.0; // 100% error
+    }
+    
+    // Normal case: both are non-zero
+    // Use the larger value as denominator to avoid division by zero
+    if (guess >= real) {
+      return (guess - real) / guess;
     } else {
-      return (guess >= real) ? (guess - real) / guess : Math.abs(real - guess) / real;
+      return Math.abs(real - guess) / real;
     }
   }
 

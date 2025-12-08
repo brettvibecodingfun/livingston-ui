@@ -336,4 +336,14 @@
   padding-left: 1rem;
 }
 
+.box-score-table .player-name-clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.box-score-table .player-name-clickable:hover {
+  color: #FDB927;
+  text-decoration: underline;
+}
+
 

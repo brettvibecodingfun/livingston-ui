@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { LivingstonService, QueryResponse, PlayerStatsRow } from '../services/livingston.service';
 import { Query } from '../../lib/types';
 import { environment } from '../../environments/environment';
+import { PlayerInfoModalComponent } from './player-info-modal.component';
 
 @Component({
   selector: 'app-livingston',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PlayerInfoModalComponent],
   templateUrl: './livingston.component.html',
   styleUrl: './livingston.component.css'
 })
@@ -21,6 +22,8 @@ export class LivingstonComponent {
   error = signal<string | null>(null);
   isDebugMode = environment.DEBUG;
   showHelpModal = signal(false);
+  showPlayerModal = signal(false);
+  selectedPlayerName = signal<string>('');
 
   constructor(private livingstonService: LivingstonService) {}
 
@@ -217,5 +220,15 @@ export class LivingstonComponent {
 
   closeHelpModal() {
     this.showHelpModal.set(false);
+  }
+
+  openPlayerModal(playerName: string) {
+    this.selectedPlayerName.set(playerName);
+    this.showPlayerModal.set(true);
+  }
+
+  closePlayerModal() {
+    this.showPlayerModal.set(false);
+    this.selectedPlayerName.set('');
   }
 }

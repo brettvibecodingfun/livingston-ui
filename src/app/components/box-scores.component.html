@@ -75,7 +75,7 @@
                 <tbody>
                   @for (player of getBoxScoresByTeam(selectedGame()!, selectedGame()!.away_team_abbr); track player.id) {
                     <tr>
-                      <td class="player-name">{{ player.player_name }}</td>
+                      <td class="player-name player-name-clickable" (click)="openPlayerModal(player.player_name)">{{ player.player_name }}</td>
                       <td>{{ formatMinutes(player.minutes) }}</td>
                       <td>{{ player.points ?? '-' }}</td>
                       <td>{{ player.rebounds ?? '-' }}</td>
@@ -116,7 +116,7 @@
                 <tbody>
                   @for (player of getBoxScoresByTeam(selectedGame()!, selectedGame()!.home_team_abbr); track player.id) {
                     <tr>
-                      <td class="player-name">{{ player.player_name }}</td>
+                      <td class="player-name player-name-clickable" (click)="openPlayerModal(player.player_name)">{{ player.player_name }}</td>
                       <td>{{ formatMinutes(player.minutes) }}</td>
                       <td>{{ player.points ?? '-' }}</td>
                       <td>{{ player.rebounds ?? '-' }}</td>
@@ -137,5 +137,12 @@
       </div>
     </div>
   }
+
+  <!-- Player Info Modal -->
+  <app-player-info-modal
+    [playerName]="selectedPlayerName()"
+    [isOpen]="showPlayerModal()"
+    (closeModal)="closePlayerModal()"
+  />
 </div>
 

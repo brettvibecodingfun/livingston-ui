@@ -111,7 +111,7 @@
                 </div>
                 
                 <!-- Player Name -->
-                <h4 class="player-name">{{ player.full_name }}</h4>
+                <h4 class="player-name player-name-clickable" (click)="openPlayerModal(player.full_name || '')">{{ player.full_name }}</h4>
                 
                 <!-- Player Info -->
                 <div class="player-info">
@@ -186,7 +186,9 @@
                     </td>
                     @for (column of getVisibleColumns(); track column) {
                       @if (column === 'player') {
-                        <td class="table-cell-bold">{{ getColumnValue(player, column) }}</td>
+                        <td class="table-cell-bold player-name-clickable" (click)="openPlayerModal(player.full_name || '')">
+                          {{ getColumnValue(player, column) }}
+                        </td>
                       } @else {
                         <td class="table-cell">{{ getColumnValue(player, column) }}</td>
                       }
@@ -263,4 +265,11 @@
         </div>
       </div>
     }
+
+    <!-- Player Info Modal -->
+    <app-player-info-modal
+      [playerName]="selectedPlayerName()"
+      [isOpen]="showPlayerModal()"
+      (closeModal)="closePlayerModal()"
+    />
 </div>

@@ -1,0 +1,128 @@
+@if (isOpen()) {
+  <div class="player-modal-overlay" (click)="onClose()">
+    <div class="player-modal-content" (click)="$event.stopPropagation()">
+      <div class="player-modal-header">
+        <h2 class="player-modal-title">Player Information</h2>
+        <button class="player-modal-close" (click)="onClose()" type="button">&times;</button>
+      </div>
+
+      @if (isLoading()) {
+        <div class="player-modal-loading">
+          <p>Loading player information...</p>
+        </div>
+      } @else if (error()) {
+        <div class="player-modal-error">
+          <p>{{ error() }}</p>
+        </div>
+      } @else if (playerInfo()) {
+        @let player = playerInfo()!;
+        <div class="player-modal-body">
+          <!-- Player Header Section -->
+          <div class="player-header">
+            <div class="player-photo-section">
+              <img
+                class="player-photo-large"
+                [src]="getHeadshotSrc()"
+                [alt]="player.full_name + ' headshot'"
+                (error)="onHeadshotError($event)"
+              />
+            </div>
+            <div class="player-basic-info">
+              <h3 class="player-name-large">{{ player.full_name }}</h3>
+              <div class="player-details-grid">
+                @if (player.team) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">Team:</span>
+                    <span class="detail-value">{{ player.team_name || player.team }}</span>
+                  </div>
+                }
+                @if (player.position) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">Position:</span>
+                    <span class="detail-value">{{ player.position }}</span>
+                  </div>
+                }
+                @if (player.height) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">Height:</span>
+                    <span class="detail-value">{{ player.height }}</span>
+                  </div>
+                }
+                @if (player.weight) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">Weight:</span>
+                    <span class="detail-value">{{ player.weight }} lbs</span>
+                  </div>
+                }
+                @if (player.college) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">College:</span>
+                    <span class="detail-value">{{ player.college }}</span>
+                  </div>
+                }
+                @if (player.country) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">Country:</span>
+                    <span class="detail-value">{{ player.country }}</span>
+                  </div>
+                }
+                @if (player.draft_year) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">Draft Year:</span>
+                    <span class="detail-value">{{ player.draft_year }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Section -->
+          @if (player.games_played != null) {
+            <div class="player-stats-section">
+              <h4 class="stats-section-title">2025 Season Statistics</h4>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-label">Games Played</div>
+                  <div class="stat-value">{{ player.games_played }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Points Per Game</div>
+                  <div class="stat-value">{{ formatStat(player.ppg) }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Assists Per Game</div>
+                  <div class="stat-value">{{ formatStat(player.apg) }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Rebounds Per Game</div>
+                  <div class="stat-value">{{ formatStat(player.rpg) }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Steals Per Game</div>
+                  <div class="stat-value">{{ formatStat(player.spg) }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Blocks Per Game</div>
+                  <div class="stat-value">{{ formatStat(player.bpg) }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Field Goal %</div>
+                  <div class="stat-value">{{ formatPercentage(player.fg_pct) }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Three Point %</div>
+                  <div class="stat-value">{{ formatPercentage(player.three_pct) }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Free Throw %</div>
+                  <div class="stat-value">{{ formatPercentage(player.ft_pct) }}</div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+

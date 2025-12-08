@@ -209,6 +209,17 @@
   text-align: center;
 }
 
+.player-name-clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
+
+.player-name-clickable:hover {
+  color: #FDB931;
+  text-decoration: underline;
+}
+
 @media (max-width: 767px) {
   .table-cell-bold {
     padding: 0.6rem 0.4rem;
@@ -384,6 +395,15 @@
   margin-bottom: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.player-name.player-name-clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.player-name.player-name-clickable:hover {
+  color: #FDB931;
 }
 
 @media (max-width: 767px) {

@@ -481,6 +481,60 @@ app.post('/api/ask', async (req, res) => {
 });
 
 /**
+ * API endpoint for fetching player information
+ */
+app.get('/api/player/:playerName', async (req, res) => {
+  try {
+    const playerName = decodeURIComponent(req.params.playerName);
+    
+    // Query player information with current season stats
+    const playerQuery = `
+      SELECT
+        p.id,
+        p.full_name,
+        p.first_name,
+        p.last_name,
+        p.college,
+        p.country,
+        p.draft_year,
+        p.height,
+        p.weight,
+        p.position,
+        t.abbreviation AS team,
+        t.name AS team_name,
+        sa.games_played,
+        sa.points AS ppg,
+        sa.assists AS apg,
+        sa.rebounds AS rpg,
+        sa.steals AS spg,
+        sa.blocks AS bpg,
+        sa.fg_pct,
+        sa.three_pct,
+        sa.ft_pct
+      FROM players p
+      LEFT JOIN teams t ON p.team_id = t.id
+      LEFT JOIN season_averages sa ON sa.player_id = p.id AND sa.season = $2
+      WHERE LOWER(p.full_name) = LOWER($1)
+      LIMIT 1
+    `;
+    
+    const result = await pool.query(playerQuery, [playerName, DEFAULT_SEASON]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+    
+    return res.json(result.rows[0]);
+  } catch (error) {
+    console.error('API Error:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch player information.',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * Serve static files from /browser
  */
 app.use(

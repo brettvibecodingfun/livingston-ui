@@ -1,11 +1,12 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoxScoresService, Game, BoxScorePlayer } from '../services/box-scores.service';
+import { PlayerInfoModalComponent } from './player-info-modal.component';
 
 @Component({
   selector: 'app-box-scores',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PlayerInfoModalComponent],
   templateUrl: './box-scores.component.html',
   styleUrl: './box-scores.component.css'
 })
@@ -15,6 +16,8 @@ export class BoxScoresComponent implements OnInit {
   error = signal<string | null>(null);
   selectedGame = signal<Game | null>(null);
   isModalOpen = signal(false);
+  showPlayerModal = signal(false);
+  selectedPlayerName = signal<string>('');
 
   constructor(private boxScoresService: BoxScoresService) {}
 
@@ -78,6 +81,16 @@ export class BoxScoresComponent implements OnInit {
     const mins = Math.floor(minutes);
     const secs = Math.round((minutes - mins) * 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  openPlayerModal(playerName: string) {
+    this.selectedPlayerName.set(playerName);
+    this.showPlayerModal.set(true);
+  }
+
+  closePlayerModal() {
+    this.showPlayerModal.set(false);
+    this.selectedPlayerName.set('');
   }
 }
 

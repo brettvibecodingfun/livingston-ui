@@ -126,6 +126,19 @@ Country filters:
 - Use the full country name as it appears in the database (e.g., "Serbia", "France", "Croatia", "Slovenia", "Germany", "Spain", "Greece", "Lithuania", "Latvia", "Canada", "Australia", etc.).
 - If the user says "Serbian players" or "Serbia", use "Serbia" as the country name.
 
+Age filters:
+- If the user mentions "oldest" players, set filters.order_by_age = "desc" to order by age descending (oldest first).
+- If the user mentions "youngest" players, set filters.order_by_age = "asc" to order by age ascending (youngest first).
+- If the user specifies an age range (e.g., "players over 30", "players under 25", "players aged 25-30"), set filters.age_range with gte (greater than or equal) and/or lte (less than or equal) values.
+- For "players over X years old", set filters.age_range.gte = X.
+- For "players under X years old" or "players younger than X", set filters.age_range.lte = X.
+- For "players aged X to Y", set filters.age_range.gte = X and filters.age_range.lte = Y.
+
+Minimum metric value filters:
+- If the user asks for players "scoring over X points", "averaging more than X assists", "rebounding over X per game", etc., set filters.min_metric_value to the specified number.
+- Match the min_metric_value to the metric being queried (e.g., if metric is "ppg" and user says "scoring over 20", set min_metric_value = 20).
+- Examples: "scoring over 20 points" → min_metric_value = 20 (with metric = ppg), "averaging more than 10 assists" → min_metric_value = 10 (with metric = apg).
+
 Metric rules:
 - Always set metric to one of the allowed values.
 - If the user asks about players in general without mentioning a specific stat (e.g., "show me all the raptors players", "find me the greatest duke players", "team best players", "who on the nuggets are playing the highest performing"), use metric = "all".
@@ -497,6 +510,7 @@ app.get('/api/player/:playerName', async (req, res) => {
         p.college,
         p.country,
         p.draft_year,
+        p.age,
         p.height,
         p.weight,
         p.position,

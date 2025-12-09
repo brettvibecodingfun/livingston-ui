@@ -10,6 +10,7 @@ export interface PlayerInfo {
   college: string | null;
   country: string | null;
   draft_year: number | null;
+  age: number | null;
   height: string | null;
   weight: number | null;
   position: string | null;

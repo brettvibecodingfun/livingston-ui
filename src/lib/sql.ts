@@ -26,6 +26,8 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   const hasPlayerFilter = normalizedPlayerNames.length > 0;
   const draftRange = q.filters?.draft_year_range;
   const hasDraftFilter = !!draftRange && (draftRange.gte != null || draftRange.lte != null);
+  const ageRange = q.filters?.age_range;
+  const hasAgeFilter = !!ageRange && (ageRange.gte != null || ageRange.lte != null);
   const collegeFilter = q.filters?.colleges?.map((c) => c.toLowerCase()) ?? [];
   const hasCollegeFilter = collegeFilter.length > 0;
   const countryFilter = q.filters?.countries ?? [];
@@ -122,6 +124,9 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   if (draftRange?.gte != null) { params.push(draftRange.gte); i++; whereAgg.push(`p.draft_year >= $${i}`); }
   if (draftRange?.lte != null) { params.push(draftRange.lte); i++; whereAgg.push(`p.draft_year <= $${i}`); }
 
+  if (ageRange?.gte != null) { params.push(ageRange.gte); i++; whereAgg.push(`p.age >= $${i}`); }
+  if (ageRange?.lte != null) { params.push(ageRange.lte); i++; whereAgg.push(`p.age <= $${i}`); }
+
   if (hasCollegeFilter) { params.push(collegeFilter); i++; whereAgg.push(`LOWER(p.college) = ANY($${i})`); }
 
   if (hasCountryFilter) {
@@ -140,16 +145,36 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     whereAgg.push(`(${nameConditions.join(' OR ')})`);
   }
 
+  // Add minimum metric value filter (e.g., "scoring over 20 points per game")
+  if (q.filters?.min_metric_value != null) {
+    const metricCol = METRIC_COL_MAP[q.metric] || 'points_per_game';
+    const seasonAvgCol = metricCol === 'points_per_game' ? 'points' :
+                        metricCol === 'assists_per_game' ? 'assists' :
+                        metricCol === 'rebounds_per_game' ? 'rebounds' :
+                        metricCol === 'steals_per_game' ? 'steals' :
+                        metricCol === 'blocks_per_game' ? 'blocks' :
+                        metricCol === 'field_goal_percentage' ? 'fg_pct' :
+                        metricCol === 'three_point_percentage' ? 'three_pct' :
+                        metricCol === 'free_throw_percentage' ? 'ft_pct' : 'points';
+    params.push(q.filters.min_metric_value); i++;
+    whereAgg.push(`sa.${seasonAvgCol} >= $${i}`);
+  }
+
   // For compare tasks, don't order by metric - just return the requested players
-  // For other tasks, order by the metric
+  // For other tasks, order by the metric or by age if specified
   let orderByClause: string;
   let finalLimit: number;
+  const orderByAge = q.filters?.order_by_age;
   
   if (q.task === 'compare' && hasPlayerFilter) {
     // For comparisons, order by player name to ensure consistent ordering
     // Don't limit - we want all requested players
     orderByClause = `ORDER BY full_name ASC`;
     finalLimit = 100; // High limit to ensure we get all requested players
+  } else if (orderByAge) {
+    // Order by age (oldest first for desc, youngest first for asc)
+    orderByClause = `ORDER BY p.age ${orderByAge.toUpperCase()} NULLS LAST`;
+    finalLimit = limit;
   } else {
     // Order column mapping based on computed aliases below
     const orderColumnMap: Record<string, string> = {
@@ -164,6 +189,8 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
 
   // Query season_averages table for all rank/leaders/lookup tasks
   // This ensures accurate, up-to-date statistics from the player stats table
+  // Include age in SELECT if we're ordering by age
+  const selectAge = orderByAge ? ', p.age' : '';
   const sql = `
     SELECT
       p.full_name,
@@ -176,7 +203,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       sa.blocks AS bpg,
       sa.fg_pct,
       sa.three_pct,
-      sa.ft_pct
+      sa.ft_pct${selectAge}
     FROM season_averages sa
     INNER JOIN players p ON sa.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id

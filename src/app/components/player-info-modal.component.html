@@ -72,6 +72,12 @@
                     <span class="detail-value">{{ player.draft_year }}</span>
                   </div>
                 }
+                @if (player.age) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">Age:</span>
+                    <span class="detail-value">{{ player.age }}</span>
+                  </div>
+                }
               </div>
             </div>
           </div>

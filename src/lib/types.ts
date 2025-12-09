@@ -9,6 +9,7 @@ export const QueryZ = z.object({
   position: z.enum(['guards', 'forwards', 'centers']).nullish(),
   filters: z.object({
     min_games: z.number().optional(),
+    min_metric_value: z.number().optional(),
     players: z.array(z.string()).optional(),
     draft_year_range: z
       .object({
@@ -16,6 +17,13 @@ export const QueryZ = z.object({
         lte: z.number().optional(),
       })
       .optional(),
+    age_range: z
+      .object({
+        gte: z.number().optional(),
+        lte: z.number().optional(),
+      })
+      .optional(),
+    order_by_age: z.enum(['asc', 'desc']).optional(),
     colleges: z.array(z.string()).optional(),
     countries: z.array(z.string()).optional(),
   }).optional(),
@@ -51,6 +59,7 @@ export const QuerySchema = {
       type: 'object',
       properties: {
         min_games: { type: 'number' },
+        min_metric_value: { type: 'number' },
         players: {
           type: 'array',
           items: { type: 'string' }
@@ -62,6 +71,18 @@ export const QuerySchema = {
             lte: { type: 'number' }
           },
           additionalProperties: false
+        },
+        age_range: {
+          type: 'object',
+          properties: {
+            gte: { type: 'number' },
+            lte: { type: 'number' }
+          },
+          additionalProperties: false
+        },
+        order_by_age: {
+          type: 'string',
+          enum: ['asc', 'desc']
         },
         colleges: {
           type: 'array',

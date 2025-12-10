@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BoxScoresService, Game, BoxScorePlayer } from '../services/box-scores.service';
-import { PlayerInfoModalComponent } from './player-info-modal.component';
+import { BoxScoresService, Game, BoxScorePlayer } from '../../services/box-scores.service';
+import { PlayerInfoModalComponent } from '../player-info/player-info-modal.component';
 
 @Component({
   selector: 'app-box-scores',

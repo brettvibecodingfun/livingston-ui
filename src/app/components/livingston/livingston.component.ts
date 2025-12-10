@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LivingstonService, QueryResponse, PlayerStatsRow } from '../services/livingston.service';
-import { Query } from '../../lib/types';
-import { environment } from '../../environments/environment';
-import { PlayerInfoModalComponent } from './player-info-modal.component';
+import { LivingstonService, QueryResponse, PlayerStatsRow } from '../../services/livingston.service';
+import { Query } from '../../../lib/types';
+import { environment } from '../../../environments/environment';
+import { PlayerInfoModalComponent } from '../player-info/player-info-modal.component';
 
 @Component({
   selector: 'app-livingston',

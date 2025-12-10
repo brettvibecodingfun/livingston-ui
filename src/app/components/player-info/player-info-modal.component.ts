@@ -1,6 +1,6 @@
 import { Component, signal, input, output, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PlayerInfoService, PlayerInfo } from '../services/player-info.service';
+import { PlayerInfoService, PlayerInfo } from '../../services/player-info.service';
 
 @Component({
   selector: 'app-player-info-modal',

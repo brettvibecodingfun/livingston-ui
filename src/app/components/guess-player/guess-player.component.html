@@ -1,6 +1,140 @@
 <div class="guess-container">
   <h2 class="guess-title">Guess This Player's Stats</h2>
 
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <button class="filters-toggle-button" (click)="toggleFilters()">
+      {{ showFilters() ? 'Hide' : 'Show' }} Filters
+    </button>
+    
+    @if (showFilters()) {
+      <div class="filters-panel">
+        <div class="filters-header">
+          <h3 class="filters-title">Filter Players</h3>
+          <button class="clear-filters-button" (click)="clearFilters()">Clear All</button>
+        </div>
+        
+        <div class="filters-grid">
+          <!-- PPG Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Points Per Game (PPG)</label>
+            <div class="filter-range">
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                [(ngModel)]="filterPpgMin"
+                placeholder="Min"
+                class="filter-input"
+              />
+              <span class="filter-separator">-</span>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                [(ngModel)]="filterPpgMax"
+                placeholder="Max"
+                class="filter-input"
+              />
+            </div>
+          </div>
+
+          <!-- APG Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Assists Per Game (APG)</label>
+            <div class="filter-range">
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                [(ngModel)]="filterApgMin"
+                placeholder="Min"
+                class="filter-input"
+              />
+              <span class="filter-separator">-</span>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                [(ngModel)]="filterApgMax"
+                placeholder="Max"
+                class="filter-input"
+              />
+            </div>
+          </div>
+
+          <!-- RPG Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Rebounds Per Game (RPG)</label>
+            <div class="filter-range">
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                [(ngModel)]="filterRpgMin"
+                placeholder="Min"
+                class="filter-input"
+              />
+              <span class="filter-separator">-</span>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                [(ngModel)]="filterRpgMax"
+                placeholder="Max"
+                class="filter-input"
+              />
+            </div>
+          </div>
+
+          <!-- Age Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Age</label>
+            <div class="filter-range">
+              <input
+                type="number"
+                step="1"
+                min="18"
+                max="50"
+                [(ngModel)]="filterAgeMin"
+                placeholder="Min"
+                class="filter-input"
+              />
+              <span class="filter-separator">-</span>
+              <input
+                type="number"
+                step="1"
+                min="18"
+                max="50"
+                [(ngModel)]="filterAgeMax"
+                placeholder="Max"
+                class="filter-input"
+              />
+            </div>
+          </div>
+
+          <!-- Team Filter -->
+          <div class="filter-group filter-group-full">
+            <label class="filter-label">Team (Abbreviation)</label>
+            <input
+              type="text"
+              [(ngModel)]="filterTeam"
+              placeholder="e.g., LAL, GSW, BOS"
+              class="filter-input filter-input-full"
+              maxlength="3"
+            />
+          </div>
+        </div>
+        
+        <div class="filters-footer">
+          <button class="apply-filters-button" (click)="loadRandomPlayer()">
+            Apply Filters & Get New Player
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
   @if (isLoading()) {
     <div class="loading-state">
       <p>Loading player...</p>

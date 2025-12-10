@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GuessPlayerService, PlayerForGuess } from '../services/guess-player.service';
+import { GuessPlayerService, PlayerForGuess, PlayerFilters } from '../../services/guess-player.service';
 
 @Component({
   selector: 'app-guess-player',
@@ -18,6 +18,7 @@ export class GuessPlayerComponent implements OnInit {
   score = signal<number | null>(null);
   comparisonText = signal<string>('');
   comparisonStats = signal<Array<{label: string, guess: string, actual: string}>>([]);
+  showFilters = signal(false);
 
   // Input values
   ppg = signal<string>('');
@@ -28,6 +29,17 @@ export class GuessPlayerComponent implements OnInit {
   fg = signal<string>('');
   threeP = signal<string>('');
   ft = signal<string>('');
+
+  // Filter values
+  filterPpgMin = signal<string>('');
+  filterPpgMax = signal<string>('');
+  filterApgMin = signal<string>('');
+  filterApgMax = signal<string>('');
+  filterRpgMin = signal<string>('');
+  filterRpgMax = signal<string>('');
+  filterAgeMin = signal<string>('');
+  filterAgeMax = signal<string>('');
+  filterTeam = signal<string>('');
 
   headshotErrorMap = new Set<string>();
 
@@ -55,17 +67,100 @@ export class GuessPlayerComponent implements OnInit {
     this.threeP.set('');
     this.ft.set('');
 
-    this.guessPlayerService.getRandomPlayer().subscribe({
+    // Build filters object
+    const filters: PlayerFilters = {};
+    
+    const ppgMinStr = String(this.filterPpgMin() ?? '').trim();
+    if (ppgMinStr) {
+      const val = parseFloat(ppgMinStr);
+      if (!isNaN(val)) filters.ppgMin = val;
+    }
+    
+    const ppgMaxStr = String(this.filterPpgMax() ?? '').trim();
+    if (ppgMaxStr) {
+      const val = parseFloat(ppgMaxStr);
+      if (!isNaN(val)) filters.ppgMax = val;
+    }
+    
+    const apgMinStr = String(this.filterApgMin() ?? '').trim();
+    if (apgMinStr) {
+      const val = parseFloat(apgMinStr);
+      if (!isNaN(val)) filters.apgMin = val;
+    }
+    
+    const apgMaxStr = String(this.filterApgMax() ?? '').trim();
+    if (apgMaxStr) {
+      const val = parseFloat(apgMaxStr);
+      if (!isNaN(val)) filters.apgMax = val;
+    }
+    
+    const rpgMinStr = String(this.filterRpgMin() ?? '').trim();
+    if (rpgMinStr) {
+      const val = parseFloat(rpgMinStr);
+      if (!isNaN(val)) filters.rpgMin = val;
+    }
+    
+    const rpgMaxStr = String(this.filterRpgMax() ?? '').trim();
+    if (rpgMaxStr) {
+      const val = parseFloat(rpgMaxStr);
+      if (!isNaN(val)) filters.rpgMax = val;
+    }
+    
+    const ageMinStr = String(this.filterAgeMin() ?? '').trim();
+    if (ageMinStr) {
+      const val = parseInt(ageMinStr);
+      if (!isNaN(val)) filters.ageMin = val;
+    }
+    
+    const ageMaxStr = String(this.filterAgeMax() ?? '').trim();
+    if (ageMaxStr) {
+      const val = parseInt(ageMaxStr);
+      if (!isNaN(val)) filters.ageMax = val;
+    }
+    
+    const teamStr = String(this.filterTeam() ?? '').trim();
+    if (teamStr) {
+      filters.team = teamStr.toUpperCase();
+    }
+
+    const hasFilters = Object.keys(filters).length > 0;
+    this.guessPlayerService.getRandomPlayer(hasFilters ? filters : undefined).subscribe({
       next: (player) => {
         this.player.set(player);
         this.isLoading.set(false);
+        this.error.set(null); // Clear any previous errors
       },
       error: (err) => {
         console.error('Error loading player:', err);
-        this.error.set(err.message || 'Failed to load player');
+        // Check if the error is about no players matching filters
+        const errorMessage = err.error?.error || err.message || 'Failed to load player';
+        if (errorMessage.includes('No players found matching the filters') || 
+            errorMessage.includes('No players found')) {
+          this.error.set('No players exist with those filters, please readjust your filter selections.');
+        } else {
+          this.error.set(errorMessage);
+        }
         this.isLoading.set(false);
+        this.player.set(null); // Clear player on error
       }
     });
+  }
+
+  toggleFilters() {
+    this.showFilters.set(!this.showFilters());
+  }
+
+  clearFilters() {
+    this.filterPpgMin.set('');
+    this.filterPpgMax.set('');
+    this.filterApgMin.set('');
+    this.filterApgMax.set('');
+    this.filterRpgMin.set('');
+    this.filterRpgMax.set('');
+    this.filterAgeMin.set('');
+    this.filterAgeMax.set('');
+    this.filterTeam.set('');
+    this.error.set(null); // Clear any error when filters are cleared
   }
 
   onSubmit() {

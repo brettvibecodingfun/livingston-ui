@@ -301,6 +301,75 @@ app.get('/api/box-scores/previous-night', async (req, res) => {
  */
 app.get('/api/guess-player/random', async (req, res) => {
   try {
+    // Parse filter query parameters
+    const filters: {
+      ppgMin?: number;
+      ppgMax?: number;
+      apgMin?: number;
+      apgMax?: number;
+      rpgMin?: number;
+      rpgMax?: number;
+      ageMin?: number;
+      ageMax?: number;
+      team?: string;
+    } = {};
+    
+    if (req.query['ppgMin']) filters['ppgMin'] = parseFloat(req.query['ppgMin'] as string);
+    if (req.query['ppgMax']) filters['ppgMax'] = parseFloat(req.query['ppgMax'] as string);
+    if (req.query['apgMin']) filters['apgMin'] = parseFloat(req.query['apgMin'] as string);
+    if (req.query['apgMax']) filters['apgMax'] = parseFloat(req.query['apgMax'] as string);
+    if (req.query['rpgMin']) filters['rpgMin'] = parseFloat(req.query['rpgMin'] as string);
+    if (req.query['rpgMax']) filters['rpgMax'] = parseFloat(req.query['rpgMax'] as string);
+    if (req.query['ageMin']) filters['ageMin'] = parseInt(req.query['ageMin'] as string);
+    if (req.query['ageMax']) filters['ageMax'] = parseInt(req.query['ageMax'] as string);
+    if (req.query['team']) filters['team'] = req.query['team'] as string;
+
+    // Build WHERE conditions
+    const params: any[] = [DEFAULT_SEASON];
+    let paramIndex = 1;
+    const whereConditions: string[] = [
+      `sa.season = $${paramIndex++}`,
+      `sa.points IS NOT NULL`,
+      `sa.games_played > 0`
+    ];
+
+    if (filters['ppgMin'] != null) {
+      params.push(filters['ppgMin']);
+      whereConditions.push(`sa.points >= $${paramIndex++}`);
+    }
+    if (filters['ppgMax'] != null) {
+      params.push(filters['ppgMax']);
+      whereConditions.push(`sa.points <= $${paramIndex++}`);
+    }
+    if (filters['apgMin'] != null) {
+      params.push(filters['apgMin']);
+      whereConditions.push(`sa.assists >= $${paramIndex++}`);
+    }
+    if (filters['apgMax'] != null) {
+      params.push(filters['apgMax']);
+      whereConditions.push(`sa.assists <= $${paramIndex++}`);
+    }
+    if (filters['rpgMin'] != null) {
+      params.push(filters['rpgMin']);
+      whereConditions.push(`sa.rebounds >= $${paramIndex++}`);
+    }
+    if (filters['rpgMax'] != null) {
+      params.push(filters['rpgMax']);
+      whereConditions.push(`sa.rebounds <= $${paramIndex++}`);
+    }
+    if (filters['ageMin'] != null) {
+      params.push(filters['ageMin']);
+      whereConditions.push(`p.age >= $${paramIndex++}`);
+    }
+    if (filters['ageMax'] != null) {
+      params.push(filters['ageMax']);
+      whereConditions.push(`p.age <= $${paramIndex++}`);
+    }
+    if (filters['team']) {
+      params.push(filters['team'].toUpperCase());
+      whereConditions.push(`UPPER(t.abbreviation) = $${paramIndex++}`);
+    }
+
     // Get a random player with their stats from season_averages
     const randomPlayerQuery = `
       SELECT
@@ -315,17 +384,16 @@ app.get('/api/guess-player/random', async (req, res) => {
         sa.ft_pct
       FROM season_averages sa
       INNER JOIN players p ON sa.player_id = p.id
-      WHERE sa.season = $1
-        AND sa.points IS NOT NULL
-        AND sa.games_played > 0
+      LEFT JOIN teams t ON p.team_id = t.id
+      WHERE ${whereConditions.join(' AND ')}
       ORDER BY RANDOM()
       LIMIT 1
     `;
     
-    const result = await pool.query(randomPlayerQuery, [DEFAULT_SEASON]);
+    const result = await pool.query(randomPlayerQuery, params);
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'No players found' });
+      return res.status(404).json({ error: 'No players found matching the filters' });
     }
     
     return res.json(result.rows[0]);

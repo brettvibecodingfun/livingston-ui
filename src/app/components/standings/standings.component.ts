@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StandingsService, ConferenceStandings } from '../services/standings.service';
+import { StandingsService, ConferenceStandings } from '../../services/standings.service';
 
 @Component({
   selector: 'app-standings',

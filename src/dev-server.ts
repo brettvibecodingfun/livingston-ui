@@ -505,7 +505,15 @@ app.post('/api/ask', async (req, res) => {
 
     // Query the database
     const extractedNames = extractPlayerNames(question);
-    const playerNames = query.filters?.players?.length ? query.filters.players : extractedNames;
+    
+    // Filter out college names from extracted player names to avoid conflicts
+    const collegeNames = query.filters?.colleges?.map(c => c.toLowerCase()) ?? [];
+    const filteredPlayerNames = extractedNames.filter(name => {
+      const nameLower = name.toLowerCase();
+      return !collegeNames.some(college => college === nameLower || nameLower.includes(college) || college.includes(nameLower));
+    });
+    
+    const playerNames = query.filters?.players?.length ? query.filters.players : filteredPlayerNames;
 
     if (playerNames.length && (!query.filters || !query.filters.players)) {
       query = {

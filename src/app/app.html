@@ -36,6 +36,13 @@
           >
         GUESS THE PLAYER
       </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab() === 'bogle'"
+        (click)="setActiveTab('bogle')"
+          >
+        BOGLE
+      </button>
     </div>
   </div>
 
@@ -49,6 +56,8 @@
       <app-box-scores></app-box-scores>
     } @else if (activeTab() === 'guess') {
       <app-guess-player></app-guess-player>
+    } @else if (activeTab() === 'bogle') {
+      <app-bogle></app-bogle>
     }
   </div>
 </div>

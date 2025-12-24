@@ -219,3 +219,4 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   console.log(`Found ${result.rows.length} players in season_averages`);
   return result.rows;
 }
+

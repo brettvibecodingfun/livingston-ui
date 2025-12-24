@@ -555,6 +555,112 @@ app.post('/api/ask', async (req, res) => {
 });
 
 /**
+ * API endpoint for submitting Bogle game scores (proxies to backend service)
+ */
+app.post('/api/bogle/scores', async (req, res) => {
+  try {
+    const backendUrl = process.env['BACKEND_SERVICE'];
+    
+    if (!backendUrl) {
+      return res.status(500).json({
+        error: 'Backend service URL not configured',
+        details: 'BACKEND_SERVICE environment variable is not set'
+      });
+    }
+
+    const response = await fetch(`${backendUrl}/api/bogle/scores`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body)
+    });
+
+    const data = await response.json();
+    
+    return res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Error proxying score submission:', error);
+    return res.status(500).json({
+      error: 'Failed to submit score.',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * API endpoint for fetching daily Bogle game data
+ * Randomly selects between different game types
+ */
+app.get('/api/bogle/daily-game', async (req, res) => {
+  try {
+    // Randomly select a game type (0 or 1)
+    const gameType = Math.floor(Math.random() * 2);
+    
+    let query: Query;
+    let question: string;
+
+    if (gameType === 0) {
+      // Game 1: Top 10 rookie scorers
+      question = 'Name the top 10 scoring rookies in the NBA this year';
+      query = {
+        task: 'leaders',
+        metric: 'ppg',
+        season: DEFAULT_SEASON,
+        filters: {
+          draft_year_range: {
+            gte: DEFAULT_SEASON,
+            lte: DEFAULT_SEASON
+          }
+        },
+        limit: 10
+      };
+    } else {
+      // Game 2: Top 10 scorers from Duke
+      question = 'Name the top 10 scorers that went to Duke this season';
+      query = {
+        task: 'leaders',
+        metric: 'ppg',
+        season: DEFAULT_SEASON,
+        filters: {
+          colleges: ['Duke']
+        },
+        limit: 10
+      };
+    }
+
+    const rows = await runQuery(query);
+    
+    // Transform the results to match the expected format
+    const players = rows.map((row, index) => {
+      // Normalize name for photo path (replace spaces with underscores)
+      const photoName = row.full_name.replace(/\s+/g, '_');
+      
+      return {
+        rank: index + 1,
+        fullName: row.full_name,
+        team: row.team || '',
+        ppg: row.ppg || 0,
+        photoName: photoName
+      };
+    });
+
+    const response = {
+      question: question,
+      players: players
+    };
+
+    return res.json(response);
+  } catch (error) {
+    console.error('API Error:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch daily game data.',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * Start the server
  */
 const port = process.env['PORT'] || 4000;

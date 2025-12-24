@@ -1,0 +1,182 @@
+<div class="bogle-container">
+  @if (!gameStarted()) {
+    <!-- Player Name Input and Start Button -->
+    <div class="start-game-container">
+      <h2 class="start-game-title">Enter Your Player Name</h2>
+      <div class="player-name-input-container">
+        <input
+          type="text"
+          class="player-name-input"
+          [value]="playerName()"
+          (input)="onPlayerNameChange($any($event.target).value)"
+          (keydown.enter)="onStartGame()"
+          placeholder="Enter your player name..."
+          autocomplete="off"
+        />
+        <button
+          class="start-button"
+          (click)="onStartGame()"
+          [disabled]="!playerName().trim()"
+        >
+          Start Game
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="question-timer-container">
+      <h2 class="bogle-question">{{ question() }}</h2>
+      @if (!isLoading() && !error()) {
+        <div class="timer-display" [class.timer-warning]="timeRemaining() <= 30" [class.timer-danger]="timeRemaining() <= 10">
+          <span class="timer-label">Time:</span>
+          <span class="timer-value">{{ formatTime(timeRemaining()) }}</span>
+        </div>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <p>Loading game...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error-state">
+        <p>{{ error() }}</p>
+        <button class="retry-button" (click)="loadDailyGame()">Retry</button>
+      </div>
+    } @else {
+  <!-- Input Bar -->
+  <div class="input-container">
+    <input
+      type="text"
+      class="player-input"
+      [value]="playerInput()"
+      [disabled]="gameOver() || isLoading()"
+      (input)="onInputChange($any($event.target).value)"
+      (keydown)="onKeyPress($event)"
+      [placeholder]="gameOver() ? 'Game Over' : 'Type player name...'"
+      autocomplete="off"
+    />
+    <button 
+      class="give-up-button" 
+      (click)="onGiveUp()"
+      [disabled]="gameOver()"
+    >
+      {{ gameOver() ? 'Game Over' : 'Give Up' }}
+    </button>
+  </div>
+
+  <!-- Answers Table -->
+  <div class="answers-table-container">
+    <table class="answers-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Photo</th>
+          <th>Player Name</th>
+          <th>PPG</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (rank of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track rank) {
+          @let answer = getAnswerForRank(rank);
+          @let isCorrectAnswer = answer?.isCorrect === true;
+          @let isIncorrectAnswer = answer?.isCorrect === false;
+          <tr 
+            [class.correct-row]="isCorrectAnswer" 
+            [class.incorrect-row]="isIncorrectAnswer"
+            [class.empty-row]="!answer && !gameOver()"
+          >
+            <td class="rank-cell">{{ rank }}</td>
+            <td class="photo-cell">
+              @if (answer?.playerData) {
+                <img 
+                  [src]="getHeadshotSrc(answer?.playerData!)"
+                  [alt]="answer?.playerData?.fullName"
+                  class="player-photo"
+                  (error)="$any($event.target).style.display = 'none'"
+                />
+              } @else {
+                <div class="photo-placeholder">—</div>
+              }
+            </td>
+            <td class="player-cell">
+              @if (answer) {
+                <span [class.correct-text]="isCorrectAnswer" [class.incorrect-text]="isIncorrectAnswer">
+                  {{ answer.playerName }}
+                </span>
+              } @else {
+                <span class="empty-cell">—</span>
+              }
+            </td>
+            <td class="ppg-cell">
+              @if (answer?.playerData) {
+                <span class="ppg-value" [class.correct-text]="isCorrectAnswer" [class.incorrect-text]="isIncorrectAnswer">
+                  {{ answer?.playerData?.ppg }}
+                </span>
+              } @else {
+                <span class="empty-cell">—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+    }
+  }
+
+  <!-- Score Modal -->
+  @if (showScoreModal()) {
+    <div class="modal-background" (click)="closeScoreModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2 class="modal-title">Game Over!</h2>
+        <div class="score-display">
+          <div class="score-number">{{ getScore() }}/10</div>
+          <div class="score-percentage">{{ (getScore() / 10 * 100).toFixed(0) }}%</div>
+        </div>
+        <p class="score-message">
+          @if (getScore() === 10) {
+            Perfect score! You got all 10 players! 🎉
+          } @else if (getScore() >= 7) {
+            Great job! You got {{ getScore() }} out of 10!
+          } @else if (getScore() >= 4) {
+            Not bad! You got {{ getScore() }} out of 10.
+          } @else {
+            Keep practicing! You got {{ getScore() }} out of 10.
+          }
+        </p>
+
+        <!-- Leaderboard -->
+        @if (leaderboard().length > 0) {
+          <div class="leaderboard-container">
+            <h3 class="leaderboard-title">Today's Leaderboard</h3>
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Username</th>
+                  <th>Score</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (score of leaderboard(); track score.id; let i = $index) {
+                  <tr>
+                    <td class="rank-cell">{{ i + 1 }}</td>
+                    <td class="username-cell">{{ score.username }}</td>
+                    <td class="score-cell">{{ score.gameScore }}/10</td>
+                    <td class="time-cell">{{ formatTimeForLeaderboard(score.timeTaken) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else if (isLoadingLeaderboard()) {
+          <div class="leaderboard-loading">Loading leaderboard...</div>
+        }
+
+        <button class="modal-close-button" (click)="closeScoreModal()">Close</button>
+      </div>
+    </div>
+  }
+</div>
+

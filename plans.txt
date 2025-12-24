@@ -5,8 +5,23 @@ What we have right now:
 - Table returning players
 
 Things we want:
-- An info modal for each player
 - Add previous night box score summaries - done (need to add summaries)
 - Add team standings and ability to ask questions about team records - teams standings has been added
 - Add a daily tidbits part at the top of the page
 - Need to find a way to get users back to the page each day
+
+Bogle:
+- Need to add:
+- More questions and formats
+- Timer (2 minutes?)
+- Being able to save player stats each day (maybe save name in local storage?)
+
+
+
+
+Questions ideas:
+- Top ____ from this team
+- Top ____ that played college basketball in ____ conference (or _____ college)
+- Top ____ from Europe/Country
+- Highest paid players averaging lower than _____
+- Age questions

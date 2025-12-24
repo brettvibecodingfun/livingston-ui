@@ -6,12 +6,13 @@ import { LivingstonComponent } from './components/livingston/livingston.componen
 import { BoxScoresComponent } from './components/box-scores/box-scores.component';
 import { StandingsComponent } from './components/standings/standings.component';
 import { GuessPlayerComponent } from './components/guess-player/guess-player.component';
+import { BogleComponent } from './components/bogle/bogle.component';
 
-type TabType = 'chat' | 'standings' | 'boxscores' | 'guess';
+type TabType = 'chat' | 'standings' | 'boxscores' | 'guess' | 'bogle';
 
 @Component({
   selector: 'app-root',
-  imports: [HttpClientModule, FormsModule, CommonModule, LivingstonComponent, BoxScoresComponent, StandingsComponent, GuessPlayerComponent],
+  imports: [HttpClientModule, FormsModule, CommonModule, LivingstonComponent, BoxScoresComponent, StandingsComponent, GuessPlayerComponent, BogleComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

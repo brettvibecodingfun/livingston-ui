@@ -39,17 +39,33 @@ export class BogleComponent implements OnInit, OnDestroy {
   timeElapsed = signal(0); // Time taken in seconds
   leaderboard = signal<BogleScore[]>([]);
   isLoadingLeaderboard = signal(false);
+  hasPlayedToday = signal(false);
 
   // Correct answers loaded from database
   private correctAnswers: RookiePlayer[] = [];
   private timerInterval: any = null;
   private gameStartTime: number = 0;
   private gameId: number = 0;
+  private readonly STORAGE_KEY = 'bogle_last_played_date';
 
   constructor(private bogleService: BogleService) {}
 
   ngOnInit() {
-    // Don't load game until user starts
+    // Check if user has already played today
+    this.checkIfPlayedToday();
+  }
+
+  private checkIfPlayedToday() {
+    const lastPlayedDate = localStorage.getItem(this.STORAGE_KEY);
+    const today = this.getCentralTimeDate();
+    
+    if (lastPlayedDate === today) {
+      this.hasPlayedToday.set(true);
+      // Load leaderboard if they've already played today
+      this.loadLeaderboard();
+    } else {
+      this.hasPlayedToday.set(false);
+    }
   }
 
   ngOnDestroy() {
@@ -291,6 +307,12 @@ export class BogleComponent implements OnInit, OnDestroy {
         return answer;
       });
     });
+    
+    // Mark that user has played today in localStorage
+    const today = this.getCentralTimeDate();
+    localStorage.setItem(this.STORAGE_KEY, today);
+    this.hasPlayedToday.set(true);
+    
     // Show score modal
     this.showScoreModal.set(true);
     
@@ -373,6 +395,13 @@ export class BogleComponent implements OnInit, OnDestroy {
   }
 
   onStartGame() {
+    // Check if user has already played today
+    this.checkIfPlayedToday();
+    
+    if (this.hasPlayedToday()) {
+      return; // Don't allow starting if already played today
+    }
+    
     const name = this.playerName().trim();
     if (name.length > 0) {
       this.gameStarted.set(true);

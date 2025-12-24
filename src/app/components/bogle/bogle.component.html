@@ -2,25 +2,64 @@
   @if (!gameStarted()) {
     <!-- Player Name Input and Start Button -->
     <div class="start-game-container">
-      <h2 class="start-game-title">Enter Your Player Name</h2>
-      <div class="player-name-input-container">
-        <input
-          type="text"
-          class="player-name-input"
-          [value]="playerName()"
-          (input)="onPlayerNameChange($any($event.target).value)"
-          (keydown.enter)="onStartGame()"
-          placeholder="Enter your player name..."
-          autocomplete="off"
-        />
-        <button
-          class="start-button"
-          (click)="onStartGame()"
-          [disabled]="!playerName().trim()"
-        >
-          Start Game
-        </button>
-      </div>
+      @if (hasPlayedToday()) {
+        <div class="already-played-message">
+          <h2 class="already-played-title">You've Already Played Today!</h2>
+          <p class="already-played-text">
+            You've completed today's Bogle game. Come back tomorrow for a new challenge!
+          </p>
+
+          <!-- Leaderboard -->
+          @if (leaderboard().length > 0) {
+            <div class="leaderboard-container leaderboard-light">
+              <h3 class="leaderboard-title leaderboard-title-light">Today's Leaderboard</h3>
+              <table class="leaderboard-table leaderboard-table-light">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Username</th>
+                    <th>Score</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (score of leaderboard(); track score.id; let i = $index) {
+                    <tr>
+                      <td class="rank-cell">{{ i + 1 }}</td>
+                      <td class="username-cell">{{ score.username }}</td>
+                      <td class="score-cell">{{ score.gameScore }}/10</td>
+                      <td class="time-cell">{{ formatTimeForLeaderboard(score.timeTaken) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else if (isLoadingLeaderboard()) {
+            <div class="leaderboard-loading leaderboard-loading-light">Loading leaderboard...</div>
+          }
+        </div>
+      } @else {
+        <h2 class="start-game-title">Enter Your Player Name</h2>
+        <div class="player-name-input-container">
+          <input
+            type="text"
+            class="player-name-input"
+            [value]="playerName()"
+            [disabled]="hasPlayedToday()"
+            (input)="onPlayerNameChange($any($event.target).value)"
+            (keydown.enter)="onStartGame()"
+            placeholder="Enter your player name..."
+            autocomplete="off"
+          />
+          <button
+            class="start-button"
+            (click)="onStartGame()"
+            [disabled]="!playerName().trim() || hasPlayedToday()"
+          >
+            Start Game
+          </button>
+        </div>
+      }
     </div>
   } @else {
     <div class="question-timer-container">

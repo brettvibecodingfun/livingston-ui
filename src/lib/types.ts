@@ -23,6 +23,12 @@ export const QueryZ = z.object({
         lte: z.number().optional(),
       })
       .optional(),
+    minutes_range: z
+      .object({
+        gte: z.number().optional(),
+        lte: z.number().optional(),
+      })
+      .optional(),
     order_by_age: z.enum(['asc', 'desc']).optional(),
     colleges: z.array(z.string()).optional(),
     countries: z.array(z.string()).optional(),
@@ -73,6 +79,14 @@ export const QuerySchema = {
           additionalProperties: false
         },
         age_range: {
+          type: 'object',
+          properties: {
+            gte: { type: 'number' },
+            lte: { type: 'number' }
+          },
+          additionalProperties: false
+        },
+        minutes_range: {
           type: 'object',
           properties: {
             gte: { type: 'number' },

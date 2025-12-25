@@ -66,7 +66,7 @@ export class LivingstonComponent {
     const query = this.results()?.query;
     if (!query) return [];
 
-    const columns: string[] = ['player', 'team', 'gp'];
+    const columns: string[] = ['player', 'team', 'gp', 'minutes'];
 
     const hasPlayerFilter = Array.isArray(query.filters?.players) && query.filters!.players!.length > 0;
     if (hasPlayerFilter) {
@@ -78,20 +78,18 @@ export class LivingstonComponent {
 
     // If metric is "all", show all stats
     if (metric === 'all') {
-      columns.push('ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct');
+      columns.push('ppg', 'apg', 'rpg', 'fg_pct', 'three_pct', 'ft_pct');
       return columns;
     }
 
-    // For PPG, show PPG + shooting percentages + steals + blocks
+    // For PPG, show PPG + shooting percentages
     if (metric === 'ppg') {
       columns.push(metric);
       columns.push('fg_pct', 'three_pct', 'ft_pct');
-      columns.push('spg', 'bpg');
     }
-    // For APG or RPG, show the stat + steals + blocks (no shooting percentages)
+    // For APG or RPG, show the stat
     else if (metric === 'apg' || metric === 'rpg') {
       columns.push(metric);
-      columns.push('spg', 'bpg');
     }
     // For steals or blocks, show only that stat
     else if (metric === 'spg' || metric === 'bpg') {
@@ -101,11 +99,10 @@ export class LivingstonComponent {
     else if (metric === 'fg_pct' || metric === 'three_pct' || metric === 'ft_pct') {
       columns.push(metric);
     }
-    // For BPM, show PPG + shooting percentages + steals + blocks (since PPG is shown)
+    // For BPM, show PPG + shooting percentages (since PPG is shown)
     else if (metric === 'bpm') {
       columns.push('ppg'); // Show PPG as primary stat for BPM queries
       columns.push('fg_pct', 'three_pct', 'ft_pct');
-      columns.push('spg', 'bpg');
     }
 
     return columns;
@@ -122,6 +119,7 @@ export class LivingstonComponent {
       'player': 'Player',
       'team': 'Team',
       'gp': 'GP',
+      'minutes': 'Minutes',
       'ppg': 'PPG',
       'apg': 'APG',
       'rpg': 'RPG',
@@ -143,6 +141,8 @@ export class LivingstonComponent {
         return player.team || '';
       case 'gp':
         return (player.games_played || 0).toString();
+      case 'minutes':
+        return player.minutes != null ? player.minutes.toFixed(1) : '0.0';
       case 'ppg':
         return player.ppg != null ? player.ppg.toFixed(1) : '0.0';
       case 'apg':

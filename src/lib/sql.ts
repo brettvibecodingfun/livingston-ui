@@ -28,6 +28,8 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   const hasDraftFilter = !!draftRange && (draftRange.gte != null || draftRange.lte != null);
   const ageRange = q.filters?.age_range;
   const hasAgeFilter = !!ageRange && (ageRange.gte != null || ageRange.lte != null);
+  const minutesRange = q.filters?.minutes_range;
+  const hasMinutesFilter = !!minutesRange && (minutesRange.gte != null || minutesRange.lte != null);
   const collegeFilter = q.filters?.colleges?.map((c) => c.toLowerCase()) ?? [];
   const hasCollegeFilter = collegeFilter.length > 0;
   const countryFilter = q.filters?.countries ?? [];
@@ -66,6 +68,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
         p.full_name,
         t.abbreviation AS team,
         sa.games_played,
+        sa.minutes,
         sa.points AS ppg,
         sa.assists AS apg,
         sa.rebounds AS rpg,
@@ -126,6 +129,9 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
 
   if (ageRange?.gte != null) { params.push(ageRange.gte); i++; whereAgg.push(`p.age >= $${i}`); }
   if (ageRange?.lte != null) { params.push(ageRange.lte); i++; whereAgg.push(`p.age <= $${i}`); }
+
+  if (minutesRange?.gte != null) { params.push(minutesRange.gte); i++; whereAgg.push(`sa.minutes >= $${i}`); }
+  if (minutesRange?.lte != null) { params.push(minutesRange.lte); i++; whereAgg.push(`sa.minutes <= $${i}`); }
 
   if (hasCollegeFilter) { params.push(collegeFilter); i++; whereAgg.push(`LOWER(p.college) = ANY($${i})`); }
 
@@ -196,6 +202,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       p.full_name,
       t.abbreviation AS team,
       sa.games_played,
+      sa.minutes,
       sa.points AS ppg,
       sa.assists AS apg,
       sa.rebounds AS rpg,

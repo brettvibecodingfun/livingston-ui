@@ -85,11 +85,15 @@
           <!-- Stats Section -->
           @if (player.games_played != null) {
             <div class="player-stats-section">
-              <h4 class="stats-section-title">2025 Season Statistics</h4>
+              <h4 class="stats-section-title">2026 Season Statistics</h4>
               <div class="stats-grid">
                 <div class="stat-card">
                   <div class="stat-label">Games Played</div>
                   <div class="stat-value">{{ player.games_played }}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Minutes Per Game</div>
+                  <div class="stat-value">{{ formatStat(player.minutes) }}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-label">Points Per Game</div>

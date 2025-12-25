@@ -17,6 +17,7 @@ export interface PlayerInfo {
   team: string | null;
   team_name: string | null;
   games_played: number | null;
+  minutes: number | null;
   ppg: number | null;
   apg: number | null;
   rpg: number | null;

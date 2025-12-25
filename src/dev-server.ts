@@ -135,6 +135,13 @@ Age filters:
 - For "players under X years old" or "players younger than X", set filters.age_range.lte = X.
 - For "players aged X to Y", set filters.age_range.gte = X and filters.age_range.lte = Y.
 
+Minutes filters:
+- If the user mentions minutes played (e.g., "players averaging under 20 minutes per game", "players who play over 30 minutes", "players with less than 15 minutes"), set filters.minutes_range with gte (greater than or equal) and/or lte (less than or equal) values.
+- For "players averaging over X minutes" or "players who play more than X minutes", set filters.minutes_range.gte = X.
+- For "players averaging under X minutes" or "players who play less than X minutes", set filters.minutes_range.lte = X.
+- For "players averaging X to Y minutes", set filters.minutes_range.gte = X and filters.minutes_range.lte = Y.
+- Examples: "players averaging under 20 minutes" → minutes_range.lte = 20, "players who average over 30 minutes" → minutes_range.gte = 30.
+
 Minimum metric value filters:
 - If the user asks for players "scoring over X points", "averaging more than X assists", "rebounding over X per game", etc., set filters.min_metric_value to the specified number.
 - Match the min_metric_value to the metric being queried (e.g., if metric is "ppg" and user says "scoring over 20", set min_metric_value = 20).

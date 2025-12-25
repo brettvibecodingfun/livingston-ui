@@ -7,6 +7,7 @@ export interface PlayerStatsRow {
   full_name: string;
   team: string | null;
   games_played: number;
+  minutes: number | null;
   ppg: number | null;
   apg: number | null;
   rpg: number | null;

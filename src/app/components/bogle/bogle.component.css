@@ -105,7 +105,7 @@
 .already-played-message {
   text-align: center;
   padding: 2rem;
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 auto;
   width: 100%;
 }
@@ -127,12 +127,36 @@
 }
 
 @media (max-width: 767px) {
+  .bogle-container {
+    padding: 1.5rem 0;
+  }
+
+  .already-played-message {
+    padding: 0;
+    max-width: 100%;
+    margin: 0;
+  }
+
   .already-played-title {
     font-size: 1.5rem;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
   }
 
   .already-played-text {
     font-size: 0.875rem;
+    padding: 0 1rem;
+    margin-bottom: 0;
+  }
+
+  .leaderboard-container {
+    padding: 0;
+    margin: 2rem 0 1rem 0;
+    width: 100%;
+  }
+
+  .leaderboard-title {
+    padding: 0 1rem;
   }
 }
 
@@ -523,6 +547,7 @@
   margin: 0 auto;
   font-family: 'Inter', sans-serif;
   font-size: 0.875rem;
+  table-layout: fixed;
 }
 
 .leaderboard-table thead {
@@ -551,8 +576,8 @@
   /* Username - takes remaining space, no specific width needed */
   min-width: 100px;
   text-align: left;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .leaderboard-table th:nth-child(3),
@@ -593,8 +618,8 @@
 .leaderboard-table .username-cell {
   font-weight: 500;
   text-align: left;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .leaderboard-table .score-cell,
@@ -650,8 +675,8 @@
 }
 
 .leaderboard-table-light .username-cell {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .leaderboard-table-light .score-cell,
@@ -667,6 +692,80 @@
 
 .leaderboard-table-light tbody tr:hover {
   background-color: rgba(253, 185, 49, 0.05);
+}
+
+@media (max-width: 1000px) {
+  .leaderboard-light {
+    padding: 0;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .leaderboard-container.leaderboard-light {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .leaderboard-table-light {
+    width: 100%;
+    table-layout: fixed;
+    margin: 0;
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  .leaderboard-table-light th,
+  .leaderboard-table-light td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .leaderboard-table-light th:nth-child(1) {
+    width: 10%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .leaderboard-table-light th:nth-child(2) {
+    width: 50%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    text-align: left;
+  }
+
+  .leaderboard-table-light th:nth-child(3) {
+    width: 20%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .leaderboard-table-light th:nth-child(4) {
+    width: 20%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .leaderboard-table-light .rank-cell {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .leaderboard-table-light .username-cell {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .leaderboard-table-light .score-cell,
+  .leaderboard-table-light .time-cell {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
 }
 
 .leaderboard-loading-light {
@@ -695,13 +794,66 @@
     font-size: 1rem;
   }
 
+  .leaderboard-container {
+    margin: 1.5rem 0 0.5rem 0;
+    padding: 0;
+    width: 100%;
+  }
+
   .leaderboard-table {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
+    width: 100%;
+    table-layout: fixed;
+    margin: 0;
   }
 
   .leaderboard-table th,
   .leaderboard-table td {
-    padding: 0.5rem 0.25rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .leaderboard-table th:nth-child(1) {
+    width: 10%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .leaderboard-table th:nth-child(2) {
+    width: 50%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    text-align: left;
+  }
+
+  .leaderboard-table th:nth-child(3) {
+    width: 20%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .leaderboard-table th:nth-child(4) {
+    width: 20%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .leaderboard-table .rank-cell {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .leaderboard-table .username-cell {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .leaderboard-table .score-cell,
+  .leaderboard-table .time-cell {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   .leaderboard-title {

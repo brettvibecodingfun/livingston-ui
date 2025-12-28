@@ -7,6 +7,10 @@ export interface BoglePlayer {
   fullName: string;
   team: string;
   ppg: number;
+  apg?: number;
+  rpg?: number;
+  spg?: number;
+  bpg?: number;
   photoName: string;
 }
 
@@ -22,6 +26,7 @@ export interface BogleGameInfo {
     gameId: number;
     gameDate: string;
     gameQuestion: string;
+    rankType?: string;
   };
 }
 

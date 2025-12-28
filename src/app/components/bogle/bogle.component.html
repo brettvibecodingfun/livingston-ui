@@ -111,7 +111,7 @@
           <th>#</th>
           <th>Photo</th>
           <th>Player Name</th>
-          <th>PPG</th>
+          <th>{{ getStatHeaderName() }}</th>
         </tr>
       </thead>
       <tbody>
@@ -149,7 +149,7 @@
             <td class="ppg-cell">
               @if (answer?.playerData) {
                 <span class="ppg-value" [class.correct-text]="isCorrectAnswer" [class.incorrect-text]="isIncorrectAnswer">
-                  {{ answer?.playerData?.ppg }}
+                  {{ getStatValue(answer?.playerData) }}
                 </span>
               } @else {
                 <span class="empty-cell">—</span>

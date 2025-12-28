@@ -29,10 +29,17 @@ export const QueryZ = z.object({
         lte: z.number().optional(),
       })
       .optional(),
+    salary_range: z
+      .object({
+        gte: z.number().optional(),
+        lte: z.number().optional(),
+      })
+      .optional(),
     order_by_age: z.enum(['asc', 'desc']).optional(),
     colleges: z.array(z.string()).optional(),
     countries: z.array(z.string()).optional(),
   }).optional(),
+  order_direction: z.enum(['asc', 'desc']).optional(),
   limit: z.number().optional()
 });
 
@@ -94,6 +101,14 @@ export const QuerySchema = {
           },
           additionalProperties: false
         },
+        salary_range: {
+          type: 'object',
+          properties: {
+            gte: { type: 'number' },
+            lte: { type: 'number' }
+          },
+          additionalProperties: false
+        },
         order_by_age: {
           type: 'string',
           enum: ['asc', 'desc']
@@ -109,6 +124,10 @@ export const QuerySchema = {
       },
       required: [],
       additionalProperties: false
+    },
+    order_direction: {
+      type: 'string',
+      enum: ['asc', 'desc']
     },
     limit: {
       type: 'number'

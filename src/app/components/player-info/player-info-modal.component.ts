@@ -111,5 +111,12 @@ export class PlayerInfoModalComponent {
     if (value == null) return 'N/A';
     return value.toFixed(1);
   }
+
+  formatSalary(value: number | null): string {
+    if (value == null) return 'N/A';
+    // Format as currency in millions (e.g., 30000000 -> $30.0M)
+    const millions = value / 1000000;
+    return '$' + millions.toFixed(1) + 'M';
+  }
 }
 

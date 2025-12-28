@@ -461,8 +461,8 @@
   color: #FFFFFF;
   border: 3px solid #FDB931;
   border-radius: 0.75rem;
-  padding: 2.5rem;
-  max-width: 500px;
+  padding: 2rem;
+  max-width: 420px;
   width: 100%;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   display: flex;
@@ -474,18 +474,18 @@
 .modal-title {
   font-family: 'Montserrat', sans-serif;
   font-weight: 600;
-  font-size: 2rem;
+  font-size: 1.75rem;
   color: #FDB931;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1.25rem 0;
 }
 
 .score-display {
-  margin: 1.5rem 0;
+  margin: 1.25rem 0;
 }
 
 .score-number {
   font-family: 'Montserrat', sans-serif;
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 700;
   color: #FDB931;
   line-height: 1;
@@ -501,9 +501,9 @@
 
 .score-message {
   font-family: 'Inter', sans-serif;
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: #E5E7EB;
-  margin: 1.5rem 0;
+  margin: 1.25rem 0;
   line-height: 1.6;
 }
 
@@ -529,15 +529,15 @@
 
 .leaderboard-container {
   width: 100%;
-  margin: 2rem 0 1rem 0;
+  margin: 1.5rem 0 0.75rem 0;
 }
 
 .leaderboard-title {
   font-family: 'Montserrat', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   color: #FDB931;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.875rem 0;
   text-align: center;
 }
 

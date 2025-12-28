@@ -141,6 +141,14 @@ Minutes filters:
 - For "players averaging X to Y minutes", set filters.minutes_range.gte = X and filters.minutes_range.lte = Y.
 - Examples: "players averaging under 20 minutes" → minutes_range.lte = 20, "players who average over 30 minutes" → minutes_range.gte = 30.
 
+Salary filters:
+- If the user mentions salary or contract amount (e.g., "players making less than 30 million a year", "players earning over 20 million", "players making under $25M", "players who make more than 15 million"), set filters.salary_range with gte (greater than or equal) and/or lte (less than or equal) values.
+- IMPORTANT: Convert salary amounts to raw numbers (in dollars, not millions). For example, "30 million" or "$30M" or "30M" → 30000000, "20 million" → 20000000.
+- For "players making more than X million" or "players earning over X million" or "players making over $XM", set filters.salary_range.gte = X * 1000000.
+- For "players making less than X million" or "players earning under X million" or "players making under $XM", set filters.salary_range.lte = X * 1000000.
+- For "players making between X and Y million", set filters.salary_range.gte = X * 1000000 and filters.salary_range.lte = Y * 1000000.
+- Examples: "players making less than 30 million a year" → salary_range.lte = 30000000, "players earning over 20 million" → salary_range.gte = 20000000.
+
 Minimum metric value filters:
 - If the user asks for players "scoring over X points", "averaging more than X assists", "rebounding over X per game", etc., set filters.min_metric_value to the specified number.
 - Match the min_metric_value to the metric being queried (e.g., if metric is "ppg" and user says "scoring over 20", set min_metric_value = 20).
@@ -153,11 +161,42 @@ Metric rules:
 - If the user does not specify a metric but is asking who is better overall in a comparison context, default to "ppg".
 - Do NOT return an empty string for metric.
 
+Order direction (reverse sorting) - READ THIS CAREFULLY:
+- By default, results are ordered in descending order (highest values first). This means order_direction should NOT be set unless explicitly needed.
+- CRITICAL: If the user asks for "least", "lowest", "worst", "bottom", "fewest", "minimum", "who is averaging the least", "who is averaging the least amount", or ANY similar terms indicating they want the SMALLEST values first, you MUST set order_direction = "asc" (ascending order) at the TOP LEVEL of the query object.
+- Examples that REQUIRE order_direction = "asc" at the top level:
+  * Question: "who is averaging the least amount of points" → { ..., "order_direction": "asc" }
+  * Question: "of the players making more than 50 million a year, who is averaging the least amount of points" → { ..., "filters": { "salary_range": { "gte": 50000000 } }, "order_direction": "asc" }
+  * Question: "players with the lowest rebounds" → { ..., "order_direction": "asc" }
+  * Question: "worst free throw shooters" → { ..., "order_direction": "asc" }
+  * Question: "who is scoring the least" → { ..., "order_direction": "asc" }
+  * Question: "lowest scoring players" → { ..., "order_direction": "asc" }
+  * Question: "players averaging the fewest points" → { ..., "order_direction": "asc" }
+- IMPORTANT: order_direction is a TOP-LEVEL field, NOT inside filters. Place it at the same level as "task", "metric", "season", etc.
+- If the user asks for "most", "highest", "best", "top", "greatest", "maximum", or similar terms, do NOT set order_direction (use default descending).
+- Remember: "least" or "lowest" = ascending order (smallest first), "most" or "highest" = descending order (largest first, default).
+
 Default limit: 10 (max 25)
+
+Example query with order_direction:
+Question: "of the players making more than 50 million a year, who is averaging the least amount of points"
+Response:
+{
+  "task": "rank",
+  "metric": "ppg",
+  "season": 2025,
+  "filters": {
+    "salary_range": {
+      "gte": 50000000
+    }
+  },
+  "order_direction": "asc",
+  "limit": 10
+}
 
 User question: "${question}"
 
-Parse this question into the structured query format. Only include optional fields (team, position, filters, limit) if they are explicitly mentioned in the user's question. If the user mentions "this year", "this season", or "current season", use ${DEFAULT_SEASON} as the season.`;
+Parse this question into the structured query format. Only include optional fields (team, position, filters, limit, order_direction) if they are explicitly mentioned in the user's question or needed based on the rules above. If the user mentions "this year", "this season", or "current season", use ${DEFAULT_SEASON} as the season. Remember: If the user asks for "least", "lowest", or "worst", you MUST include "order_direction": "asc" at the top level.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -208,6 +247,7 @@ Parse this question into the structured query format. Only include optional fiel
     if (parsed.position === null || parsed.position === '') parsed.position = undefined;
     if (parsed.filters === null || parsed.filters === '') parsed.filters = undefined;
     if (parsed.limit === null || parsed.limit === '') parsed.limit = undefined;
+    if (parsed.order_direction === null || parsed.order_direction === '') parsed.order_direction = undefined;
     
     // Validate with Zod to ensure type safety
     return QueryZ.parse(parsed);
@@ -597,6 +637,7 @@ app.get('/api/player/:playerName', async (req, res) => {
         p.height,
         p.weight,
         p.position,
+        p.base_salary,
         t.abbreviation AS team,
         t.name AS team_name,
         sa.games_played,
@@ -827,6 +868,10 @@ app.get('/api/bogle/daily-game', async (req, res) => {
         fullName: row.full_name,
         team: row.team || '',
         ppg: row.ppg || 0,
+        apg: row.apg || 0,
+        rpg: row.rpg || 0,
+        spg: row.spg || 0,
+        bpg: row.bpg || 0,
         photoName: photoName
       };
     });

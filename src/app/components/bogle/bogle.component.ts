@@ -8,6 +8,10 @@ interface RookiePlayer {
   fullName: string;
   team: string;
   ppg: number;
+  apg?: number;
+  rpg?: number;
+  spg?: number;
+  bpg?: number;
   photoName: string; // For constructing image path
 }
 
@@ -46,6 +50,7 @@ export class BogleComponent implements OnInit, OnDestroy {
   private timerInterval: any = null;
   private gameStartTime: number = 0;
   private gameId: number = 0;
+  private rankType: string = 'ppg'; // Default to points per game
   private readonly STORAGE_KEY = 'bogle_last_played_date';
 
   constructor(private bogleService: BogleService) {}
@@ -86,6 +91,8 @@ export class BogleComponent implements OnInit, OnDestroy {
           this.gameId = gameInfo.data.gameId;
           // Use the gameQuestion from the API response
           const gameQuestion = gameInfo.data.gameQuestion;
+          // Get rankType or default to 'ppg'
+          this.rankType = gameInfo.data.rankType || 'ppg';
 
           // Then load the daily game data, passing the question to avoid duplicate API call
           this.bogleService.getDailyGame(gameQuestion).subscribe({
@@ -98,6 +105,10 @@ export class BogleComponent implements OnInit, OnDestroy {
                 fullName: player.fullName,
                 team: player.team,
                 ppg: player.ppg,
+                apg: player.apg,
+                rpg: player.rpg,
+                spg: player.spg,
+                bpg: player.bpg,
                 photoName: player.photoName
               }));
               this.isLoading.set(false);
@@ -478,6 +489,35 @@ export class BogleComponent implements OnInit, OnDestroy {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  getStatHeaderName(): string {
+    const statMap: { [key: string]: string } = {
+      'ppg': 'PPG',
+      'apg': 'APG',
+      'rpg': 'RPG',
+      'spg': 'SPG',
+      'bpg': 'BPG'
+    };
+    return statMap[this.rankType] || 'PPG';
+  }
+
+  getStatValue(player: RookiePlayer | null | undefined): string | null {
+    if (!player) return null;
+    
+    const statMap: { [key: string]: number | undefined } = {
+      'ppg': player.ppg,
+      'apg': player.apg,
+      'rpg': player.rpg,
+      'spg': player.spg,
+      'bpg': player.bpg
+    };
+    
+    const value = statMap[this.rankType];
+    if (value == null || value === undefined) return null;
+    
+    // Format to 1 decimal place
+    return value.toFixed(1);
   }
 }
 

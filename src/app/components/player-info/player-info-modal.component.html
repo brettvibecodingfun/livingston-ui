@@ -78,6 +78,12 @@
                     <span class="detail-value">{{ player.age }}</span>
                   </div>
                 }
+                @if (player.base_salary != null) {
+                  <div class="player-detail-item">
+                    <span class="detail-label">Salary:</span>
+                    <span class="detail-value">{{ formatSalary(player.base_salary) }}</span>
+                  </div>
+                }
               </div>
             </div>
           </div>

@@ -30,6 +30,8 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   const hasAgeFilter = !!ageRange && (ageRange.gte != null || ageRange.lte != null);
   const minutesRange = q.filters?.minutes_range;
   const hasMinutesFilter = !!minutesRange && (minutesRange.gte != null || minutesRange.lte != null);
+  const salaryRange = q.filters?.salary_range;
+  const hasSalaryFilter = !!salaryRange && (salaryRange.gte != null || salaryRange.lte != null);
   const collegeFilter = q.filters?.colleges?.map((c) => c.toLowerCase()) ?? [];
   const hasCollegeFilter = collegeFilter.length > 0;
   const countryFilter = q.filters?.countries ?? [];
@@ -133,6 +135,9 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   if (minutesRange?.gte != null) { params.push(minutesRange.gte); i++; whereAgg.push(`sa.minutes >= $${i}`); }
   if (minutesRange?.lte != null) { params.push(minutesRange.lte); i++; whereAgg.push(`sa.minutes <= $${i}`); }
 
+  if (salaryRange?.gte != null) { params.push(salaryRange.gte); i++; whereAgg.push(`p.base_salary >= $${i}`); }
+  if (salaryRange?.lte != null) { params.push(salaryRange.lte); i++; whereAgg.push(`p.base_salary <= $${i}`); }
+
   if (hasCollegeFilter) { params.push(collegeFilter); i++; whereAgg.push(`LOWER(p.college) = ANY($${i})`); }
 
   if (hasCountryFilter) {
@@ -189,7 +194,10 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       all: 'ppg' // For "all" metric, order by ppg as default
     };
     const orderBy = orderColumnMap[q.metric] || 'ppg';
-    orderByClause = `ORDER BY ${orderBy} DESC NULLS LAST`;
+    // Use order_direction if specified (for reverse sorting), otherwise default to DESC
+    const direction = q.order_direction?.toUpperCase() || 'DESC';
+    orderByClause = `ORDER BY ${orderBy} ${direction} NULLS LAST`;
+    console.log(`Ordering by ${orderBy} ${direction} (order_direction: ${q.order_direction})`);
     finalLimit = limit;
   }
 

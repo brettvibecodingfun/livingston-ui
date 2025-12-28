@@ -14,6 +14,7 @@ export interface PlayerInfo {
   height: string | null;
   weight: number | null;
   position: string | null;
+  base_salary: number | null;
   team: string | null;
   team_name: string | null;
   games_played: number | null;

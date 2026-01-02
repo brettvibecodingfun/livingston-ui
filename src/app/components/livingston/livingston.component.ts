@@ -15,6 +15,7 @@ import { PlayerInfoModalComponent } from '../player-info/player-info-modal.compo
 })
 export class LivingstonComponent {
   question = signal('');
+  submittedQuestion = signal<string | null>(null);
   narrate = signal(false);
   isLoading = signal(false);
   results = signal<QueryResponse | null>(null);
@@ -33,6 +34,7 @@ export class LivingstonComponent {
     if (!this.question().trim() || this.isLoading()) return;
 
     const questionText = this.question(); // Store the question before clearing
+    this.submittedQuestion.set(questionText); // Store the submitted question
     this.isLoading.set(true);
     this.error.set(null);
     this.results.set(null);

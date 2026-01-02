@@ -301,6 +301,36 @@
   margin-bottom: 2rem;
 }
 
+.submitted-question-container {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.submitted-question-label {
+  font: 600 0.875rem 'Inter', sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
+}
+
+.submitted-question-text {
+  font: 400 1.125rem 'Inter', sans-serif;
+  color: #fff;
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 767px) {
+  .submitted-question-container {
+    padding: 1rem 1rem 0.75rem 1rem;
+  }
+  
+  .submitted-question-text {
+    font-size: 1rem;
+  }
+}
+
 .comparison-title {
   font: 600 1.75rem 'Montserrat', sans-serif;
   color: #fff;

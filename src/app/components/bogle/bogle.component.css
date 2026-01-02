@@ -285,7 +285,7 @@
 
 @media (max-width: 767px) {
   .input-container {
-    flex-direction: column;
+    gap: 0;
   }
 }
 
@@ -346,9 +346,28 @@
   opacity: 0.6;
 }
 
+/* Desktop: show button next to input */
+.give-up-button-desktop {
+  display: flex;
+}
+
+.give-up-button-mobile {
+  display: none;
+}
+
 @media (max-width: 767px) {
-  .give-up-button {
+  /* Hide desktop button on mobile */
+  .give-up-button-desktop {
+    display: none;
+  }
+  
+  /* Show mobile button at bottom */
+  .give-up-button-mobile {
+    display: block;
     width: 100%;
+    max-width: 600px;
+    margin: 2rem auto 0 auto;
+    padding: 1rem 1.5rem;
   }
 }
 

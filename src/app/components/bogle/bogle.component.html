@@ -95,7 +95,7 @@
       autocomplete="off"
     />
     <button 
-      class="give-up-button" 
+      class="give-up-button give-up-button-desktop" 
       (click)="onGiveUp()"
       [disabled]="gameOver()"
     >
@@ -160,6 +160,15 @@
       </tbody>
     </table>
   </div>
+  
+  <!-- Give Up Button for Mobile (at bottom) -->
+  <button 
+    class="give-up-button give-up-button-mobile" 
+    (click)="onGiveUp()"
+    [disabled]="gameOver()"
+  >
+    {{ gameOver() ? 'Game Over' : 'Give Up' }}
+  </button>
     }
   }
 

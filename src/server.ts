@@ -856,6 +856,12 @@ app.get('/api/bogle/daily-game', async (req, res) => {
       query.limit = 10;
     }
 
+    // Add minimum games filter for Bogle (players must have played at least 15 games)
+    if (!query.filters) {
+      query.filters = {};
+    }
+    query.filters.min_games = 15;
+
     const rows = await runQuery(query);
     
     // Transform the results to match the expected format

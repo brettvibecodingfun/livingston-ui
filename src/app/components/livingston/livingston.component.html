@@ -163,6 +163,13 @@
       } @else if (results()!.rows.length > 0) {
         <!-- Table View -->
         <div class="card overflow-hidden">
+          <!-- Submitted Question Display -->
+          @if (submittedQuestion()) {
+            <div class="submitted-question-container">
+              <h3 class="submitted-question-label">Question:</h3>
+              <p class="submitted-question-text">{{ submittedQuestion() }}</p>
+            </div>
+          }
           <div class="overflow-x-auto">
             <table class="data-table">
               <thead class="table-header">

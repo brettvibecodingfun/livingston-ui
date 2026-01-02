@@ -660,7 +660,8 @@ app.get('/api/bogle/daily-game', async (req, res) => {
           draft_year_range: {
             gte: DEFAULT_SEASON,
             lte: DEFAULT_SEASON
-          }
+          },
+          min_games: 15
         },
         limit: 10
       };
@@ -672,7 +673,8 @@ app.get('/api/bogle/daily-game', async (req, res) => {
         metric: 'ppg',
         season: DEFAULT_SEASON,
         filters: {
-          colleges: ['Duke']
+          colleges: ['Duke'],
+          min_games: 15
         },
         limit: 10
       };

@@ -138,6 +138,12 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   if (salaryRange?.gte != null) { params.push(salaryRange.gte); i++; whereAgg.push(`p.base_salary >= $${i}`); }
   if (salaryRange?.lte != null) { params.push(salaryRange.lte); i++; whereAgg.push(`p.base_salary <= $${i}`); }
 
+  // Add minimum games filter
+  if (q.filters?.min_games != null) {
+    params.push(q.filters.min_games); i++;
+    whereAgg.push(`sa.games_played >= $${i}`);
+  }
+
   if (hasCollegeFilter) { params.push(collegeFilter); i++; whereAgg.push(`LOWER(p.college) = ANY($${i})`); }
 
   if (hasCountryFilter) {

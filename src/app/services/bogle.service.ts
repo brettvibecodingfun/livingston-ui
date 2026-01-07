@@ -27,6 +27,7 @@ export interface BogleGameInfo {
     gameDate: string;
     gameQuestion: string;
     rankType?: string;
+    querySchema?: any;
   };
 }
 
@@ -67,9 +68,16 @@ export class BogleService {
 
   constructor(private http: HttpClient) {}
 
-  getDailyGame(question?: string): Observable<BogleGameData> {
-    const url = question 
-      ? `${this.apiUrl}?question=${encodeURIComponent(question)}`
+  getDailyGame(question?: string, querySchema?: string): Observable<BogleGameData> {
+    const params = new URLSearchParams();
+    if (question) {
+      params.append('question', question);
+    }
+    if (querySchema) {
+      params.append('querySchema', querySchema);
+    }
+    const url = params.toString() 
+      ? `${this.apiUrl}?${params.toString()}`
       : this.apiUrl;
     return this.http.get<BogleGameData>(url);
   }

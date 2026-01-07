@@ -93,9 +93,22 @@ export class BogleComponent implements OnInit, OnDestroy {
           const gameQuestion = gameInfo.data.gameQuestion;
           // Get rankType or default to 'ppg'
           this.rankType = gameInfo.data.rankType || 'ppg';
+          
+          // Check if querySchema exists - if so, use it instead of the question
+          let querySchemaParam: string | undefined;
+          if (gameInfo.data.querySchema) {
+            // querySchema is sent as a string, parse it to validate it's valid JSON
+            try {
+              JSON.parse(gameInfo.data.querySchema);
+              querySchemaParam = gameInfo.data.querySchema;
+            } catch (e) {
+              console.error('Invalid querySchema JSON:', e);
+              // Fall back to using question if querySchema is invalid
+            }
+          }
 
-          // Then load the daily game data, passing the question to avoid duplicate API call
-          this.bogleService.getDailyGame(gameQuestion).subscribe({
+          // Then load the daily game data, passing either querySchema or question
+          this.bogleService.getDailyGame(querySchemaParam ? undefined : gameQuestion, querySchemaParam).subscribe({
             next: (data) => {
               // Use the question from the game info API
               this.question.set(gameQuestion);

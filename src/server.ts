@@ -797,59 +797,79 @@ app.get('/api/bogle/daily-game', async (req, res) => {
   try {
     const backendUrl = process.env['BACKEND_SERVICE'];
     let question: string;
+    let query: Query;
 
-    // Check if question is provided as query parameter
-    const questionParam = req.query['question'] as string;
+    // Check if querySchema is provided as query parameter
+    const querySchemaParam = req.query['querySchema'] as string;
     
-    if (questionParam) {
-      // Use the provided question
-      question = decodeURIComponent(questionParam);
-    } else {
-      // Fallback: Get question from games API if not provided
-      if (!backendUrl) {
-        return res.status(500).json({
-          error: 'Backend service URL not configured',
-          details: 'BACKEND_SERVICE environment variable is not set'
+    if (querySchemaParam) {
+      // Use the provided querySchema instead of parsing the question
+      try {
+        query = JSON.parse(querySchemaParam);
+        // Get question from query if available, or use a default
+        question = req.query['question'] as string || 'Daily game';
+      } catch (e) {
+        console.error('Error parsing querySchema:', e);
+        return res.status(400).json({
+          error: 'Invalid querySchema format',
+          details: 'querySchema must be valid JSON'
         });
       }
-
-      // Get today's date in Central Time (YYYY-MM-DD format)
-      const now = new Date();
-      const centralFormatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/Chicago',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      });
-      const parts = centralFormatter.formatToParts(now);
-      const year = parts.find(p => p.type === 'year')?.value;
-      const month = parts.find(p => p.type === 'month')?.value;
-      const day = parts.find(p => p.type === 'day')?.value;
-      const centralDate = `${year}-${month}-${day}`;
-
-      // Get game info from backend service
-      const gameInfoResponse = await fetch(`${backendUrl}/api/bogle/games?date=${encodeURIComponent(centralDate)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!gameInfoResponse.ok) {
-        throw new Error(`Failed to fetch game info: ${gameInfoResponse.statusText}`);
-      }
-
-      const gameInfo = await gameInfoResponse.json();
+    } else {
+      // Fallback: Parse question using toStructuredQuery
+      // Check if question is provided as query parameter
+      const questionParam = req.query['question'] as string;
       
-      if (!gameInfo.success || !gameInfo.data || !gameInfo.data.gameQuestion) {
-        throw new Error('Invalid game info response');
+      if (questionParam) {
+        // Use the provided question
+        question = decodeURIComponent(questionParam);
+      } else {
+        // Fallback: Get question from games API if not provided
+        if (!backendUrl) {
+          return res.status(500).json({
+            error: 'Backend service URL not configured',
+            details: 'BACKEND_SERVICE environment variable is not set'
+          });
+        }
+
+        // Get today's date in Central Time (YYYY-MM-DD format)
+        const now = new Date();
+        const centralFormatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/Chicago',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        });
+        const parts = centralFormatter.formatToParts(now);
+        const year = parts.find(p => p.type === 'year')?.value;
+        const month = parts.find(p => p.type === 'month')?.value;
+        const day = parts.find(p => p.type === 'day')?.value;
+        const centralDate = `${year}-${month}-${day}`;
+
+        // Get game info from backend service
+        const gameInfoResponse = await fetch(`${backendUrl}/api/bogle/games?date=${encodeURIComponent(centralDate)}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!gameInfoResponse.ok) {
+          throw new Error(`Failed to fetch game info: ${gameInfoResponse.statusText}`);
+        }
+
+        const gameInfo = await gameInfoResponse.json();
+        
+        if (!gameInfo.success || !gameInfo.data || !gameInfo.data.gameQuestion) {
+          throw new Error('Invalid game info response');
+        }
+
+        question = gameInfo.data.gameQuestion;
       }
 
-      question = gameInfo.data.gameQuestion;
+      // Parse the question into a structured query
+      query = await toStructuredQuery(question);
     }
-
-    // Parse the question into a structured query
-    const query = await toStructuredQuery(question);
     
     // Ensure limit is set to 10 for Bogle games
     if (!query.limit || query.limit > 10) {

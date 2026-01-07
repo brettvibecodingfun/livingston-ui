@@ -72,7 +72,10 @@ export async function summarizeAnswer(query: Query, rows: any[]): Promise<string
   const metricName = query.metric === 'all' ? 'overall stats' : query.metric.replace('_', ' ').toUpperCase();
   const season = query.season || 'current';
   const filters = [];
-  if (query.team) filters.push(`team: ${query.team}`);
+  if (query.team) {
+    const teamDisplay = Array.isArray(query.team) ? query.team.join(', ') : query.team;
+    filters.push(`team: ${teamDisplay}`);
+  }
   if (query.position) filters.push(`position: ${query.position}`);
   if (query.filters?.players?.length) filters.push(`players: ${query.filters.players.join(', ')}`);
   

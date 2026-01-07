@@ -116,8 +116,18 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     `sa.season = $1`,
   ];
 
-  // Add team filter if specified (e.g., "best scorers on the knicks")
-  if (q.team) { params.push(q.team); i++; whereAgg.push(`t.abbreviation = $${i}`); }
+  // Add team filter if specified (e.g., "best scorers on the knicks" or "Warriors and Lakers")
+  if (q.team) {
+    if (Array.isArray(q.team) && q.team.length > 0) {
+      // Multiple teams: use IN clause
+      params.push(q.team); i++;
+      whereAgg.push(`t.abbreviation = ANY($${i})`);
+    } else if (typeof q.team === 'string') {
+      // Single team: use equality
+      params.push(q.team); i++;
+      whereAgg.push(`t.abbreviation = $${i}`);
+    }
+  }
   if (q.position) {
     const position = mapPositionGroup(q.position);
     if (position) {

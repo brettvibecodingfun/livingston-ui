@@ -101,7 +101,11 @@ Team abbreviations mapping (use these exact abbreviations):
 
 Positions (OPTIONAL - only include if user explicitly mentions a position): Use "guards" (for point guards and shooting guards), "forwards" (for small forwards and power forwards), or "centers" (for centers). If the user doesn't mention a position, do NOT include the position field in your response.
 
-Team (OPTIONAL - only include if user explicitly mentions a team): Use the team abbreviation mapping provided above. If the user doesn't mention a team, do NOT include the team field in your response.
+Team (OPTIONAL - only include if user explicitly mentions a team): 
+- For a single team: Use the team abbreviation mapping provided above and set team as a string (e.g., "GSW" for Warriors).
+- For multiple teams: If the user mentions multiple teams (e.g., "Warriors and Lakers", "Celtics or Heat"), set team as an array of team abbreviations (e.g., ["GSW", "LAL"]).
+- Examples: "top scorers on the Warriors" → team = "GSW", "top scorers from the Warriors and Lakers" → team = ["GSW", "LAL"], "players from the Celtics, Heat, and Knicks" → team = ["BOS", "MIA", "NYK"].
+- If the user doesn't mention a team, do NOT include the team field in your response.
 
 Task selection rules (follow strictly):
 - If the user explicitly compares players (keywords such as "compare", "versus", "vs", "better than", "better season", "who is having the better year", etc.), set task = "compare".
@@ -242,8 +246,10 @@ Parse this question into the structured query format. Only include optional fiel
       parsed.season = DEFAULT_SEASON;
     }
     
-    // Transform null or empty string values to undefined for optional fields
-    if (parsed.team === null || parsed.team === '') parsed.team = undefined;
+    // Transform null or empty string/array values to undefined for optional fields
+    if (parsed.team === null || parsed.team === '' || (Array.isArray(parsed.team) && parsed.team.length === 0)) {
+      parsed.team = undefined;
+    }
     if (parsed.position === null || parsed.position === '') parsed.position = undefined;
     if (parsed.filters === null || parsed.filters === '') parsed.filters = undefined;
     if (parsed.limit === null || parsed.limit === '') parsed.limit = undefined;

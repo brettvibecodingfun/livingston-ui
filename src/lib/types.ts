@@ -5,7 +5,7 @@ export const QueryZ = z.object({
   task: z.enum(['rank', 'leaders', 'lookup', 'compare']),
   metric: z.enum(['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'all']),
   season: z.number(),
-  team: z.string().nullish(),
+  team: z.union([z.string(), z.array(z.string())]).nullish(),
   position: z.enum(['guards', 'forwards', 'centers']).nullish(),
   filters: z.object({
     min_games: z.number().optional(),
@@ -62,7 +62,10 @@ export const QuerySchema = {
       type: 'number'
     },
     team: {
-      type: 'string'
+      oneOf: [
+        { type: 'string' },
+        { type: 'array', items: { type: 'string' } }
+      ]
     },
     position: {
       type: 'string',

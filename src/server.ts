@@ -685,6 +685,7 @@ app.get('/api/player/:playerName', async (req, res) => {
 app.post('/api/bogle/scores', async (req, res) => {
   try {
     const backendUrl = process.env['BACKEND_SERVICE'];
+    const apiAuthKey = process.env['API_AUTH_KEY'];
     
     if (!backendUrl) {
       return res.status(500).json({
@@ -693,11 +694,18 @@ app.post('/api/bogle/scores', async (req, res) => {
       });
     }
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add authentication header from .env file (backend checks x-api-key or authorization header)
+    if (apiAuthKey) {
+      headers['x-api-key'] = apiAuthKey;
+    }
+
     const response = await fetch(`${backendUrl}/api/bogle/scores`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: JSON.stringify(req.body)
     });
 

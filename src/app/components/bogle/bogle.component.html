@@ -37,6 +37,29 @@
           } @else if (isLoadingLeaderboard()) {
             <div class="leaderboard-loading leaderboard-loading-light">Loading leaderboard...</div>
           }
+
+          <!-- Game Answers List -->
+          @if (storedGameAnswers().length > 0) {
+            <div class="game-answers-container game-answers-light">
+              <h3 class="game-answers-title game-answers-title-light">Today's Answers</h3>
+              <div class="answers-list">
+                @for (player of storedGameAnswers(); track player.rank) {
+                  @let wasCorrect = wasPlayerCorrect(player.rank);
+                  <div class="answer-item" [class.answer-correct]="wasCorrect" [class.answer-incorrect]="!wasCorrect">
+                    <span class="answer-rank">{{ player.rank }}.</span>
+                    <img 
+                      [src]="getHeadshotSrc(player)"
+                      [alt]="player.fullName"
+                      class="answer-photo"
+                      (error)="$any($event.target).style.display = 'none'"
+                    />
+                    <span class="answer-name">{{ player.fullName }}</span>
+                    <span class="answer-stat">{{ getStatValue(player) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
         </div>
       } @else {
         <h2 class="start-game-title">Enter Your Name</h2>
@@ -220,6 +243,29 @@
           </div>
         } @else if (isLoadingLeaderboard()) {
           <div class="leaderboard-loading">Loading leaderboard...</div>
+        }
+
+        <!-- Game Answers List -->
+        @if (storedGameAnswers().length > 0) {
+          <div class="game-answers-container">
+            <h3 class="game-answers-title">Today's Answers</h3>
+            <div class="answers-list">
+              @for (player of storedGameAnswers(); track player.rank) {
+                @let wasCorrect = wasPlayerCorrect(player.rank);
+                <div class="answer-item" [class.answer-correct]="wasCorrect" [class.answer-incorrect]="!wasCorrect">
+                  <span class="answer-rank">{{ player.rank }}.</span>
+                  <img 
+                    [src]="getHeadshotSrc(player)"
+                    [alt]="player.fullName"
+                    class="answer-photo"
+                    (error)="$any($event.target).style.display = 'none'"
+                  />
+                  <span class="answer-name">{{ player.fullName }}</span>
+                  <span class="answer-stat">{{ getStatValue(player) }}</span>
+                </div>
+              }
+            </div>
+          </div>
         }
 
         <button class="modal-close-button" (click)="closeScoreModal()">Close</button>

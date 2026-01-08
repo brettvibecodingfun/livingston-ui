@@ -19,13 +19,38 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, API-Auth-Key, X-API-Auth-Key');
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
     return;
   }
   next();
 });
+
+// Authentication middleware for POST routes
+const authenticatePost = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+  const apiAuthKey = process.env['API_AUTH_KEY'];
+  const providedKey = req.headers['api-auth-key'] || req.headers['x-api-auth-key'];
+  
+  if (!apiAuthKey) {
+    console.warn('API_AUTH_KEY not configured in environment variables');
+    res.status(500).json({
+      error: 'Server configuration error',
+      details: 'API authentication not properly configured'
+    });
+    return;
+  }
+  
+  if (!providedKey || providedKey !== apiAuthKey) {
+    res.status(401).json({
+      error: 'Unauthorized',
+      details: 'Invalid or missing API authentication key'
+    });
+    return;
+  }
+  
+  next();
+};
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -612,7 +637,7 @@ app.post('/api/ask', async (req, res) => {
 /**
  * API endpoint for submitting Bogle game scores (proxies to backend service)
  */
-app.post('/api/bogle/scores', async (req, res) => {
+app.post('/api/bogle/scores', authenticatePost, async (req, res) => {
   try {
     const backendUrl = process.env['BACKEND_SERVICE'];
     

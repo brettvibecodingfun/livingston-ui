@@ -52,6 +52,7 @@ export class BogleComponent implements OnInit, OnDestroy {
   private gameId: number = 0;
   private rankType: string = 'ppg'; // Default to points per game
   private readonly STORAGE_KEY = 'bogle_last_played_date';
+  private readonly ANSWERS_STORAGE_KEY = 'bogle_game_answers'; // Store game answers by date
 
   constructor(private bogleService: BogleService) {}
 
@@ -66,11 +67,97 @@ export class BogleComponent implements OnInit, OnDestroy {
     
     if (lastPlayedDate === today) {
       this.hasPlayedToday.set(true);
+      // Load game answers from localStorage
+      this.loadGameAnswersForDisplay(today);
       // Load leaderboard if they've already played today
       this.loadLeaderboard();
     } else {
       this.hasPlayedToday.set(false);
     }
+  }
+
+  // Store loaded game answers for display
+  storedGameAnswers = signal<RookiePlayer[]>([]);
+  storedUserCorrectRanks = signal<number[]>([]);
+
+  private loadGameAnswersForDisplay(date: string) {
+    const gameData = this.loadGameAnswers(date);
+    if (gameData) {
+      // Sort answers by rank for display
+      const sortedAnswers = [...gameData.correctAnswers].sort((a, b) => a.rank - b.rank);
+      this.storedGameAnswers.set(sortedAnswers);
+      this.storedUserCorrectRanks.set(gameData.userCorrectRanks);
+    } else {
+      // If no stored data but we have current game data, use it
+      if (this.correctAnswers.length > 0) {
+        // Sort answers by rank for display
+        const sortedAnswers = [...this.correctAnswers].sort((a, b) => a.rank - b.rank);
+        this.storedGameAnswers.set(sortedAnswers);
+        const correctRanks = this.answers()
+          .filter(answer => answer.isCorrect === true && answer.rank !== null)
+          .map(answer => answer.rank!);
+        this.storedUserCorrectRanks.set(correctRanks);
+      } else {
+        // Try to load from API if we don't have the data
+        this.loadGameDataForDisplay(date);
+      }
+    }
+  }
+
+  private loadGameDataForDisplay(date: string) {
+    // Load game data from API to show answers even if not stored in localStorage
+    this.bogleService.getGameInfo(date).subscribe({
+      next: (gameInfo) => {
+        if (gameInfo.success && gameInfo.data) {
+          const gameQuestion = gameInfo.data.gameQuestion;
+          this.rankType = gameInfo.data.rankType || 'ppg';
+          
+          // Load the game data
+          let querySchemaParam: string | undefined;
+          if (gameInfo.data.querySchema) {
+            try {
+              JSON.parse(gameInfo.data.querySchema);
+              querySchemaParam = gameInfo.data.querySchema;
+            } catch (e) {
+              console.error('Invalid querySchema JSON:', e);
+            }
+          }
+
+          this.bogleService.getDailyGame(querySchemaParam ? undefined : gameQuestion, querySchemaParam).subscribe({
+            next: (data) => {
+              const players = data.players.map(player => ({
+                rank: player.rank,
+                fullName: player.fullName,
+                team: player.team,
+                ppg: player.ppg,
+                apg: player.apg,
+                rpg: player.rpg,
+                spg: player.spg,
+                bpg: player.bpg,
+                photoName: player.photoName
+              }));
+              // Sort answers by rank for display
+              const sortedPlayers = [...players].sort((a, b) => a.rank - b.rank);
+              this.storedGameAnswers.set(sortedPlayers);
+              
+              // Load user's correct answers from localStorage if available
+              const gameData = this.loadGameAnswers(date);
+              if (gameData && gameData.userCorrectRanks) {
+                this.storedUserCorrectRanks.set(gameData.userCorrectRanks);
+              } else {
+                this.storedUserCorrectRanks.set([]);
+              }
+            },
+            error: (err) => {
+              console.error('Error loading game data for display:', err);
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Error loading game info for display:', err);
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -124,6 +211,18 @@ export class BogleComponent implements OnInit, OnDestroy {
                 bpg: player.bpg,
                 photoName: player.photoName
               }));
+              
+              // Also store in storedGameAnswers for display (if user has already played today)
+              // If user has played, try loading from localStorage first
+              if (this.hasPlayedToday()) {
+                this.loadGameAnswersForDisplay(centralDate);
+              } else {
+                // If not played yet, store current answers (will be saved when game ends)
+                // Sort answers by rank for display
+                const sortedAnswers = [...this.correctAnswers].sort((a, b) => a.rank - b.rank);
+                this.storedGameAnswers.set(sortedAnswers);
+              }
+              
               this.isLoading.set(false);
               // Start timer after game loads
               this.startTimer();
@@ -337,11 +436,63 @@ export class BogleComponent implements OnInit, OnDestroy {
     localStorage.setItem(this.STORAGE_KEY, today);
     this.hasPlayedToday.set(true);
     
+    // Store game answers in localStorage
+    this.saveGameAnswers(today);
+    
+    // Set stored answers for display (will be used in the modal)
+    // Sort answers by rank for display
+    const sortedAnswers = [...this.correctAnswers].sort((a, b) => a.rank - b.rank);
+    this.storedGameAnswers.set(sortedAnswers);
+    const correctRanks = this.answers()
+      .filter(answer => answer.isCorrect === true && answer.rank !== null)
+      .map(answer => answer.rank!);
+    this.storedUserCorrectRanks.set(correctRanks);
+    
     // Show score modal
     this.showScoreModal.set(true);
     
     // Submit score to database, then load leaderboard after success
     this.submitScore();
+  }
+
+  private saveGameAnswers(date: string) {
+    // Store all correct answers and which ones the user got correct
+    const gameData = {
+      date: date,
+      correctAnswers: this.correctAnswers.map(player => ({
+        rank: player.rank,
+        fullName: player.fullName,
+        team: player.team,
+        ppg: player.ppg,
+        apg: player.apg,
+        rpg: player.rpg,
+        spg: player.spg,
+        bpg: player.bpg,
+        photoName: player.photoName
+      })),
+      userCorrectAnswers: this.answers()
+        .filter(answer => answer.isCorrect === true && answer.rank !== null)
+        .map(answer => answer.rank) // Store ranks that were correct
+    };
+    
+    // Store answers by date key
+    localStorage.setItem(`${this.ANSWERS_STORAGE_KEY}_${date}`, JSON.stringify(gameData));
+  }
+
+  private loadGameAnswers(date: string): { correctAnswers: RookiePlayer[], userCorrectRanks: number[] } | null {
+    try {
+      const stored = localStorage.getItem(`${this.ANSWERS_STORAGE_KEY}_${date}`);
+      if (stored) {
+        const gameData = JSON.parse(stored);
+        return {
+          correctAnswers: gameData.correctAnswers,
+          userCorrectRanks: gameData.userCorrectAnswers || []
+        };
+      }
+    } catch (e) {
+      console.error('Error loading game answers:', e);
+    }
+    return null;
   }
 
   private submitScore() {
@@ -407,6 +558,11 @@ export class BogleComponent implements OnInit, OnDestroy {
 
   closeScoreModal() {
     this.showScoreModal.set(false);
+    // When closing modal, ensure game answers are loaded if available
+    if (this.hasPlayedToday() && this.storedGameAnswers().length === 0) {
+      const today = this.getCentralTimeDate();
+      this.loadGameAnswersForDisplay(today);
+    }
   }
 
   getHeadshotSrc(playerData: RookiePlayer): string {
@@ -488,6 +644,12 @@ export class BogleComponent implements OnInit, OnDestroy {
           // Take top 10
           this.leaderboard.set(sorted.slice(0, 10));
         }
+        
+        // Also load game answers for display if not already loaded
+        if (this.storedGameAnswers().length === 0) {
+          this.loadGameAnswersForDisplay(centralDate);
+        }
+        
         this.isLoadingLeaderboard.set(false);
       },
       error: (err) => {
@@ -496,6 +658,11 @@ export class BogleComponent implements OnInit, OnDestroy {
         // Don't show error to user, just leave leaderboard empty
       }
     });
+  }
+
+  // Check if a player was answered correctly
+  wasPlayerCorrect(playerRank: number): boolean {
+    return this.storedUserCorrectRanks().includes(playerRank);
   }
 
   formatTimeForLeaderboard(seconds: number): string {

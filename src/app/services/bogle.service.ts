@@ -38,6 +38,8 @@ export interface BogleScoreSubmission {
   gameQuestion: string;
   gameId: number;
   timeTaken?: number | null;
+  answersCorrect: string[];
+  answersMissed: string[];
 }
 
 export interface BogleScore {
@@ -49,6 +51,8 @@ export interface BogleScore {
   gameQuestion: string;
   timeTaken: number;
   createdAt: string;
+  answersCorrect?: string[];
+  answersMissed?: string[];
 }
 
 export interface BogleScoresResponse {

@@ -34,6 +34,32 @@
                 </tbody>
               </table>
             </div>
+
+            <!-- Answer Statistics -->
+            @if (mostCorrectAnswers().length > 0 || mostMissedAnswers().length > 0) {
+              <div class="answer-statistics-container answer-statistics-light">
+                @if (mostCorrectAnswers().length > 0) {
+                  <div class="statistics-section">
+                    <h4 class="statistics-title statistics-title-light">Most Correct Answers</h4>
+                    <ul class="statistics-list">
+                      @for (player of mostCorrectAnswers(); track player) {
+                        <li class="statistics-item statistics-item-correct">{{ player }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+                @if (mostMissedAnswers().length > 0) {
+                  <div class="statistics-section">
+                    <h4 class="statistics-title statistics-title-light">Most Missed Answers</h4>
+                    <ul class="statistics-list">
+                      @for (player of mostMissedAnswers(); track player) {
+                        <li class="statistics-item statistics-item-missed">{{ player }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            }
           } @else if (isLoadingLeaderboard()) {
             <div class="leaderboard-loading leaderboard-loading-light">Loading leaderboard...</div>
           }
@@ -241,6 +267,32 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Answer Statistics -->
+          @if (mostCorrectAnswers().length > 0 || mostMissedAnswers().length > 0) {
+            <div class="answer-statistics-container">
+              @if (mostCorrectAnswers().length > 0) {
+                <div class="statistics-section">
+                  <h4 class="statistics-title">Most Correct Answers</h4>
+                  <ul class="statistics-list">
+                    @for (player of mostCorrectAnswers(); track player) {
+                      <li class="statistics-item statistics-item-correct">{{ player }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+              @if (mostMissedAnswers().length > 0) {
+                <div class="statistics-section">
+                  <h4 class="statistics-title">Most Missed Answers</h4>
+                  <ul class="statistics-list">
+                    @for (player of mostMissedAnswers(); track player) {
+                      <li class="statistics-item statistics-item-missed">{{ player }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          }
         } @else if (isLoadingLeaderboard()) {
           <div class="leaderboard-loading">Loading leaderboard...</div>
         }

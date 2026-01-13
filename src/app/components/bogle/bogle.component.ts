@@ -44,6 +44,8 @@ export class BogleComponent implements OnInit, OnDestroy {
   leaderboard = signal<BogleScore[]>([]);
   isLoadingLeaderboard = signal(false);
   hasPlayedToday = signal(false);
+  mostCorrectAnswers = signal<string[]>([]);
+  mostMissedAnswers = signal<string[]>([]);
 
   // Correct answers loaded from database
   private correctAnswers: RookiePlayer[] = [];
@@ -502,13 +504,28 @@ export class BogleComponent implements OnInit, OnDestroy {
     // Get today's date in Central Time (YYYY-MM-DD format)
     const centralDate = this.getCentralTimeDate();
     
+    // Calculate correct answers (player names that were correctly identified)
+    const answersCorrect = this.answers()
+      .filter(answer => answer.isCorrect === true)
+      .map(answer => answer.playerName);
+    
+    // Calculate missed answers (player names from correctAnswers that were not found)
+    const correctRanks = this.answers()
+      .filter(answer => answer.isCorrect === true && answer.rank !== null)
+      .map(answer => answer.rank!);
+    const answersMissed = this.correctAnswers
+      .filter(player => !correctRanks.includes(player.rank))
+      .map(player => player.fullName);
+    
     const scoreData : BogleScoreSubmission = {
       username: this.playerName(),
       gameScore: score,
       gameDate: centralDate,
       gameQuestion: currentQuestion,
       gameId: this.gameId,
-      timeTaken: this.timeElapsed()
+      timeTaken: this.timeElapsed(),
+      answersCorrect: answersCorrect,
+      answersMissed: answersMissed
     };
 
     this.bogleService.submitScore(scoreData).subscribe({
@@ -641,8 +658,15 @@ export class BogleComponent implements OnInit, OnDestroy {
             return a.timeTaken - b.timeTaken; // Lower time first for ties
           });
           
-          // Take top 10
+          // Take top 10 for leaderboard display
           this.leaderboard.set(sorted.slice(0, 10));
+          
+          // Calculate most correct and most missed answers from all scores
+          this.calculateAnswerStatistics(response.data);
+        } else {
+          // Reset statistics if no data
+          this.mostCorrectAnswers.set([]);
+          this.mostMissedAnswers.set([]);
         }
         
         // Also load game answers for display if not already loaded
@@ -658,6 +682,55 @@ export class BogleComponent implements OnInit, OnDestroy {
         // Don't show error to user, just leave leaderboard empty
       }
     });
+  }
+
+  private calculateAnswerStatistics(scores: BogleScore[]) {
+    // Count occurrences of each answer in answersCorrect and answersMissed arrays
+    const correctCounts: { [playerName: string]: number } = {};
+    const missedCounts: { [playerName: string]: number } = {};
+
+    scores.forEach(score => {
+      // Count correct answers (only if field exists)
+      if (score.answersCorrect && Array.isArray(score.answersCorrect)) {
+        score.answersCorrect.forEach(playerName => {
+          correctCounts[playerName] = (correctCounts[playerName] || 0) + 1;
+        });
+      }
+
+      // Count missed answers (only if field exists)
+      if (score.answersMissed && Array.isArray(score.answersMissed)) {
+        score.answersMissed.forEach(playerName => {
+          missedCounts[playerName] = (missedCounts[playerName] || 0) + 1;
+        });
+      }
+    });
+
+    // Get top 3 most correct answers
+    const topCorrect = Object.entries(correctCounts)
+      .sort((a, b) => {
+        // Sort by count (descending), then alphabetically (ascending) for ties
+        if (b[1] !== a[1]) {
+          return b[1] - a[1];
+        }
+        return a[0].localeCompare(b[0]);
+      })
+      .slice(0, 3)
+      .map(([playerName]) => playerName);
+
+    // Get top 3 most missed answers
+    const topMissed = Object.entries(missedCounts)
+      .sort((a, b) => {
+        // Sort by count (descending), then alphabetically (ascending) for ties
+        if (b[1] !== a[1]) {
+          return b[1] - a[1];
+        }
+        return a[0].localeCompare(b[0]);
+      })
+      .slice(0, 3)
+      .map(([playerName]) => playerName);
+
+    this.mostCorrectAnswers.set(topCorrect);
+    this.mostMissedAnswers.set(topMissed);
   }
 
   // Check if a player was answered correctly

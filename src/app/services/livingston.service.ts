@@ -16,6 +16,23 @@ export interface PlayerStatsRow {
   fg_pct: number | null;
   three_pct: number | null;
   ft_pct: number | null;
+  off_rating: number | null;
+  def_rating: number | null;
+  net_rating: number | null;
+  pie: number | null;
+  e_pace: number | null;
+  fga_pg: number | null;
+  fgm_pg: number | null;
+  ts_pct: number | null;
+  ast_pct: number | null;
+  efg_pct: number | null;
+  reb_pct: number | null;
+  usg_pct: number | null;
+  dreb_pct: number | null;
+  oreb_pct: number | null;
+  ast_ratio: number | null;
+  e_tov_pct: number | null;
+  e_usg_pct: number | null;
 }
 
 export interface QueryResponse {

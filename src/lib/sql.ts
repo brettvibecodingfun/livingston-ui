@@ -36,6 +36,12 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   const hasCollegeFilter = collegeFilter.length > 0;
   const countryFilter = q.filters?.countries ?? [];
   const hasCountryFilter = countryFilter.length > 0;
+  
+  // Define advanced stats that require minimum 10 minutes per game and 15 games played
+  const advancedStats = ['off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 
+                         'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 
+                         'ast_ratio', 'e_tov_pct', 'e_usg_pct'];
+  const isAdvancedStat = advancedStats.includes(q.metric);
 
   // All queries use season_averages table for accurate stats
   // This includes: compare, rank, and leaders tasks
@@ -49,6 +55,14 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     const whereCompare: string[] = [
       `sa.season = $1`,
     ];
+    
+    // For advanced stats in compare queries, require minimum 10 minutes per game and 15 games played
+    if (isAdvancedStat) {
+      params.push(15); i++;
+      whereCompare.push(`sa.games_played >= $${i}`);
+      params.push(10); i++;
+      whereCompare.push(`sa.minutes >= $${i}`);
+    }
 
     if (normalizedPlayerNames.length > 0) {
       // Use LIKE for case-insensitive partial matching to handle name variations
@@ -64,6 +78,17 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       params.push(countryFilter); i++;
       whereCompare.push(`LOWER(p.country) = ANY($${i})`);
     }
+    
+    // For advanced stats in compare queries, require minimum 10 minutes per game and 15 games played
+    const advancedStats = ['off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 
+                           'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 
+                           'ast_ratio', 'e_tov_pct', 'e_usg_pct'];
+    if (advancedStats.includes(q.metric)) {
+      params.push(15); i++;
+      whereCompare.push(`sa.games_played >= $${i}`);
+      params.push(10); i++;
+      whereCompare.push(`sa.minutes >= $${i}`);
+    }
 
     const sql = `
       SELECT
@@ -78,7 +103,24 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
         sa.blocks AS bpg,
         sa.fg_pct,
         sa.three_pct,
-        sa.ft_pct
+        sa.ft_pct,
+        sa.off_rating,
+        sa.def_rating,
+        sa.net_rating,
+        sa.pie,
+        sa.e_pace,
+        sa.fga_pg,
+        sa.fgm_pg,
+        sa.ts_pct,
+        sa.ast_pct,
+        sa.efg_pct,
+        sa.reb_pct,
+        sa.usg_pct,
+        sa.dreb_pct,
+        sa.oreb_pct,
+        sa.ast_ratio,
+        sa.e_tov_pct,
+        sa.e_usg_pct
       FROM season_averages sa
       INNER JOIN players p ON sa.player_id = p.id
       LEFT JOIN teams t ON p.team_id = t.id
@@ -153,6 +195,20 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     params.push(q.filters.min_games); i++;
     whereAgg.push(`sa.games_played >= $${i}`);
   }
+  
+  // For advanced stats, require minimum 10 minutes per game and 15 games played
+  if (isAdvancedStat) {
+    // Add minimum games filter if not already set
+    if (q.filters?.min_games == null) {
+      params.push(15); i++;
+      whereAgg.push(`sa.games_played >= $${i}`);
+    }
+    // Add minimum minutes per game filter (only if not already set by minutesRange filter)
+    if (minutesRange?.gte == null) {
+      params.push(10); i++;
+      whereAgg.push(`sa.minutes >= $${i}`);
+    }
+  }
 
   if (hasCollegeFilter) { params.push(collegeFilter); i++; whereAgg.push(`LOWER(p.college) = ANY($${i})`); }
 
@@ -182,7 +238,24 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
                         metricCol === 'blocks_per_game' ? 'blocks' :
                         metricCol === 'field_goal_percentage' ? 'fg_pct' :
                         metricCol === 'three_point_percentage' ? 'three_pct' :
-                        metricCol === 'free_throw_percentage' ? 'ft_pct' : 'points';
+                        metricCol === 'free_throw_percentage' ? 'ft_pct' :
+                        metricCol === 'offensive_rating' ? 'off_rating' :
+                        metricCol === 'defensive_rating' ? 'def_rating' :
+                        metricCol === 'net_rating' ? 'net_rating' :
+                        metricCol === 'player_impact_estimate' ? 'pie' :
+                        metricCol === 'estimated_pace' ? 'e_pace' :
+                        metricCol === 'field_goals_attempted_per_game' ? 'fga_pg' :
+                        metricCol === 'field_goals_made_per_game' ? 'fgm_pg' :
+                        metricCol === 'true_shooting_percentage' ? 'ts_pct' :
+                        metricCol === 'assist_percentage' ? 'ast_pct' :
+                        metricCol === 'effective_field_goal_percentage' ? 'efg_pct' :
+                        metricCol === 'rebound_percentage' ? 'reb_pct' :
+                        metricCol === 'usage_percentage' ? 'usg_pct' :
+                        metricCol === 'defensive_rebound_percentage' ? 'dreb_pct' :
+                        metricCol === 'offensive_rebound_percentage' ? 'oreb_pct' :
+                        metricCol === 'assist_ratio' ? 'ast_ratio' :
+                        metricCol === 'estimated_turnover_percentage' ? 'e_tov_pct' :
+                        metricCol === 'estimated_usage_percentage' ? 'e_usg_pct' : 'points';
     params.push(q.filters.min_metric_value); i++;
     whereAgg.push(`sa.${seasonAvgCol} >= $${i}`);
   }
@@ -207,6 +280,11 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     const orderColumnMap: Record<string, string> = {
       ppg: 'ppg', apg: 'apg', rpg: 'rpg', spg: 'spg', bpg: 'bpg',
       fg_pct: 'fg_pct', three_pct: 'three_pct', ft_pct: 'ft_pct', bpm: 'ppg', // fallback
+      off_rating: 'off_rating', def_rating: 'def_rating', net_rating: 'net_rating', pie: 'pie',
+      e_pace: 'e_pace', fga_pg: 'fga_pg', fgm_pg: 'fgm_pg', ts_pct: 'ts_pct',
+      ast_pct: 'ast_pct', efg_pct: 'efg_pct', reb_pct: 'reb_pct', usg_pct: 'usg_pct',
+      dreb_pct: 'dreb_pct', oreb_pct: 'oreb_pct', ast_ratio: 'ast_ratio',
+      e_tov_pct: 'e_tov_pct', e_usg_pct: 'e_usg_pct',
       all: 'ppg' // For "all" metric, order by ppg as default
     };
     const orderBy = orderColumnMap[q.metric] || 'ppg';
@@ -234,7 +312,24 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       sa.blocks AS bpg,
       sa.fg_pct,
       sa.three_pct,
-      sa.ft_pct${selectAge}
+      sa.ft_pct,
+      sa.off_rating,
+      sa.def_rating,
+      sa.net_rating,
+      sa.pie,
+      sa.e_pace,
+      sa.fga_pg,
+      sa.fgm_pg,
+      sa.ts_pct,
+      sa.ast_pct,
+      sa.efg_pct,
+      sa.reb_pct,
+      sa.usg_pct,
+      sa.dreb_pct,
+      sa.oreb_pct,
+      sa.ast_ratio,
+      sa.e_tov_pct,
+      sa.e_usg_pct${selectAge}
     FROM season_averages sa
     INNER JOIN players p ON sa.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id

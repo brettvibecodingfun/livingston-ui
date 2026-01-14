@@ -86,6 +86,23 @@ Available metrics:
 - three_pct: three-point percentage
 - ft_pct: free throw percentage
 - bpm: box plus/minus
+- off_rating: offensive rating
+- def_rating: defensive rating
+- net_rating: net rating
+- pie: player impact estimate
+- e_pace: estimated pace
+- fga_pg: field goals attempted per game
+- fgm_pg: field goals made per game
+- ts_pct: true shooting percentage
+- ast_pct: assist percentage
+- efg_pct: effective field goal percentage
+- reb_pct: rebound percentage
+- usg_pct: usage percentage
+- dreb_pct: defensive rebound percentage
+- oreb_pct: offensive rebound percentage
+- ast_ratio: assist ratio
+- e_tov_pct: estimated turnover percentage
+- e_usg_pct: estimated usage percentage
 
 Available tasks:
 - rank: rank players by a metric
@@ -461,7 +478,24 @@ app.get('/api/guess-player/random', async (req, res) => {
         sa.blocks AS bpg,
         sa.fg_pct,
         sa.three_pct,
-        sa.ft_pct
+        sa.ft_pct,
+        sa.off_rating,
+        sa.def_rating,
+        sa.net_rating,
+        sa.pie,
+        sa.e_pace,
+        sa.fga_pg,
+        sa.fgm_pg,
+        sa.ts_pct,
+        sa.ast_pct,
+        sa.efg_pct,
+        sa.reb_pct,
+        sa.usg_pct,
+        sa.dreb_pct,
+        sa.oreb_pct,
+        sa.ast_ratio,
+        sa.e_tov_pct,
+        sa.e_usg_pct
       FROM season_averages sa
       INNER JOIN players p ON sa.player_id = p.id
       LEFT JOIN teams t ON p.team_id = t.id

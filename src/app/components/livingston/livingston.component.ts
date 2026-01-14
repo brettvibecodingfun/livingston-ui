@@ -106,6 +106,18 @@ export class LivingstonComponent {
       columns.push('ppg'); // Show PPG as primary stat for BPM queries
       columns.push('fg_pct', 'three_pct', 'ft_pct');
     }
+    // For offensive rating, defensive rating, net rating, or PIE, show only that stat
+    else if (metric === 'off_rating' || metric === 'def_rating' || metric === 'net_rating' || metric === 'pie') {
+      columns.push(metric);
+    }
+    // For advanced stats, show only that stat
+    else if (metric === 'e_pace' || metric === 'fga_pg' || metric === 'fgm_pg' || 
+             metric === 'ts_pct' || metric === 'ast_pct' || metric === 'efg_pct' || 
+             metric === 'reb_pct' || metric === 'usg_pct' || metric === 'dreb_pct' || 
+             metric === 'oreb_pct' || metric === 'ast_ratio' || metric === 'e_tov_pct' || 
+             metric === 'e_usg_pct') {
+      columns.push(metric);
+    }
 
     return columns;
   }
@@ -129,7 +141,24 @@ export class LivingstonComponent {
       'bpg': 'BPG',
       'fg_pct': 'FG%',
       'three_pct': '3P%',
-      'ft_pct': 'FT%'
+      'ft_pct': 'FT%',
+      'off_rating': 'Off Rtg',
+      'def_rating': 'Def Rtg',
+      'net_rating': 'Net Rtg',
+      'pie': 'PIE',
+      'e_pace': 'E Pace',
+      'fga_pg': 'FGA/G',
+      'fgm_pg': 'FGM/G',
+      'ts_pct': 'TS%',
+      'ast_pct': 'AST%',
+      'efg_pct': 'eFG%',
+      'reb_pct': 'REB%',
+      'usg_pct': 'USG%',
+      'dreb_pct': 'DREB%',
+      'oreb_pct': 'OREB%',
+      'ast_ratio': 'AST Ratio',
+      'e_tov_pct': 'E TOV%',
+      'e_usg_pct': 'E USG%'
     };
     return displayNames[column] || column.toUpperCase();
   }
@@ -161,6 +190,40 @@ export class LivingstonComponent {
         return player.three_pct != null ? ((player.three_pct * 100).toFixed(1) + '%') : '0.0%';
       case 'ft_pct':
         return player.ft_pct != null ? ((player.ft_pct * 100).toFixed(1) + '%') : '0.0%';
+      case 'off_rating':
+        return player.off_rating != null ? player.off_rating.toFixed(1) : '';
+      case 'def_rating':
+        return player.def_rating != null ? player.def_rating.toFixed(1) : '';
+      case 'net_rating':
+        return player.net_rating != null ? player.net_rating.toFixed(1) : '';
+      case 'pie':
+        return player.pie != null ? player.pie.toFixed(3) : '';
+      case 'e_pace':
+        return player.e_pace != null ? player.e_pace.toFixed(1) : '';
+      case 'fga_pg':
+        return player.fga_pg != null ? player.fga_pg.toFixed(1) : '';
+      case 'fgm_pg':
+        return player.fgm_pg != null ? player.fgm_pg.toFixed(1) : '';
+      case 'ts_pct':
+        return player.ts_pct != null ? (player.ts_pct * 100).toFixed(1) + '%' : '';
+      case 'ast_pct':
+        return player.ast_pct != null ? (player.ast_pct * 100).toFixed(1) + '%' : '';
+      case 'efg_pct':
+        return player.efg_pct != null ? (player.efg_pct * 100).toFixed(1) + '%' : '';
+      case 'reb_pct':
+        return player.reb_pct != null ? (player.reb_pct * 100).toFixed(1) + '%' : '';
+      case 'usg_pct':
+        return player.usg_pct != null ? (player.usg_pct * 100).toFixed(1) + '%' : '';
+      case 'dreb_pct':
+        return player.dreb_pct != null ? (player.dreb_pct * 100).toFixed(1) + '%' : '';
+      case 'oreb_pct':
+        return player.oreb_pct != null ? (player.oreb_pct * 100).toFixed(1) + '%' : '';
+      case 'ast_ratio':
+        return player.ast_ratio != null ? player.ast_ratio.toFixed(2) : '';
+      case 'e_tov_pct':
+        return player.e_tov_pct != null ? (player.e_tov_pct * 100).toFixed(1) + '%' : '';
+      case 'e_usg_pct':
+        return player.e_usg_pct != null ? (player.e_usg_pct * 100).toFixed(1) + '%' : '';
       default:
         return '';
     }

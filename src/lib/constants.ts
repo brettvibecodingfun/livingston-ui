@@ -12,6 +12,23 @@ export const METRIC_COL_MAP = {
   three_pct: 'three_point_percentage',
   ft_pct: 'free_throw_percentage',
   bpm: 'box_plus_minus',
+  off_rating: 'offensive_rating',
+  def_rating: 'defensive_rating',
+  net_rating: 'net_rating',
+  pie: 'player_impact_estimate',
+  e_pace: 'estimated_pace',
+  fga_pg: 'field_goals_attempted_per_game',
+  fgm_pg: 'field_goals_made_per_game',
+  ts_pct: 'true_shooting_percentage',
+  ast_pct: 'assist_percentage',
+  efg_pct: 'effective_field_goal_percentage',
+  reb_pct: 'rebound_percentage',
+  usg_pct: 'usage_percentage',
+  dreb_pct: 'defensive_rebound_percentage',
+  oreb_pct: 'offensive_rebound_percentage',
+  ast_ratio: 'assist_ratio',
+  e_tov_pct: 'estimated_turnover_percentage',
+  e_usg_pct: 'estimated_usage_percentage',
   all: 'points_per_game' // For 'all' metric, default to ppg for ordering/display purposes
 } as const;
 

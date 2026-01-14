@@ -44,8 +44,8 @@ export class BogleComponent implements OnInit, OnDestroy {
   leaderboard = signal<BogleScore[]>([]);
   isLoadingLeaderboard = signal(false);
   hasPlayedToday = signal(false);
-  mostCorrectAnswers = signal<string[]>([]);
-  mostMissedAnswers = signal<string[]>([]);
+  mostCorrectAnswers = signal<{ playerName: string; percentage: number }[]>([]);
+  mostMissedAnswers = signal<{ playerName: string; percentage: number }[]>([]);
 
   // Correct answers loaded from database
   private correctAnswers: RookiePlayer[] = [];
@@ -688,10 +688,21 @@ export class BogleComponent implements OnInit, OnDestroy {
     // Count occurrences of each answer in answersCorrect and answersMissed arrays
     const correctCounts: { [playerName: string]: number } = {};
     const missedCounts: { [playerName: string]: number } = {};
+    
+    // Count total scores with answersCorrect and answersMissed fields
+    let totalScoresWithCorrect = 0;
+    let totalScoresWithMissed = 0;
+    
+    // Total games played (scores that have either answersCorrect or answersMissed)
+    const totalGamesPlayed = scores.filter(score => 
+      (score.answersCorrect && Array.isArray(score.answersCorrect)) || 
+      (score.answersMissed && Array.isArray(score.answersMissed))
+    ).length;
 
     scores.forEach(score => {
       // Count correct answers (only if field exists)
       if (score.answersCorrect && Array.isArray(score.answersCorrect)) {
+        totalScoresWithCorrect++;
         score.answersCorrect.forEach(playerName => {
           correctCounts[playerName] = (correctCounts[playerName] || 0) + 1;
         });
@@ -699,13 +710,14 @@ export class BogleComponent implements OnInit, OnDestroy {
 
       // Count missed answers (only if field exists)
       if (score.answersMissed && Array.isArray(score.answersMissed)) {
+        totalScoresWithMissed++;
         score.answersMissed.forEach(playerName => {
           missedCounts[playerName] = (missedCounts[playerName] || 0) + 1;
         });
       }
     });
 
-    // Get top 3 most correct answers
+    // Get top 3 most correct answers with percentages
     const topCorrect = Object.entries(correctCounts)
       .sort((a, b) => {
         // Sort by count (descending), then alphabetically (ascending) for ties
@@ -715,9 +727,13 @@ export class BogleComponent implements OnInit, OnDestroy {
         return a[0].localeCompare(b[0]);
       })
       .slice(0, 3)
-      .map(([playerName]) => playerName);
+      .map(([playerName, count]) => ({
+        playerName,
+        percentage: totalScoresWithCorrect > 0 ? Math.round((count / totalScoresWithCorrect) * 100) : 0
+      }));
 
-    // Get top 3 most missed answers
+    // Get top 3 most missed answers with percentages
+    // For missed answers, show the percentage of users who got it CORRECT
     const topMissed = Object.entries(missedCounts)
       .sort((a, b) => {
         // Sort by count (descending), then alphabetically (ascending) for ties
@@ -727,7 +743,10 @@ export class BogleComponent implements OnInit, OnDestroy {
         return a[0].localeCompare(b[0]);
       })
       .slice(0, 3)
-      .map(([playerName]) => playerName);
+      .map(([playerName, usersWhoGotItWrong]) => ({
+        playerName,
+        percentage: totalGamesPlayed > 0 ? Math.round(((totalGamesPlayed - usersWhoGotItWrong) / totalGamesPlayed) * 100) : 0
+      }));
 
     this.mostCorrectAnswers.set(topCorrect);
     this.mostMissedAnswers.set(topMissed);

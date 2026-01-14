@@ -866,6 +866,20 @@
   padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
   background-color: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statistics-player-name {
+  flex: 1;
+}
+
+.statistics-percentage {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  opacity: 0.9;
 }
 
 .statistics-item-correct {

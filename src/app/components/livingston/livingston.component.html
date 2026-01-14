@@ -89,12 +89,88 @@
 
     <!-- Results -->
     @if (results()) {
+      <!-- Team Query View -->
+      @if (isTeamQuery()) {
+        @if (isSingleTeam()) {
+          <!-- Single Team Detail View -->
+          @let team = getTeamData()[0];
+          <div class="team-detail-container">
+            <div class="team-header">
+              <h2 class="team-name">{{ team.teamName }}</h2>
+              <div class="team-record">
+                <span class="team-record-label">Record:</span>
+                <span class="team-record-value">{{ team.wins }}-{{ team.losses }}</span>
+                <span class="team-win-pct">({{ (team.winPct * 100).toFixed(1) }}%)</span>
+              </div>
+              <div class="team-conference">{{ team.conference === 'east' ? 'Eastern' : 'Western' }} Conference</div>
+              @if (team.seed) {
+                <div class="team-seed">#{{ team.seed }} Seed</div>
+              }
+            </div>
+            
+            @if (team.topScorers && team.topScorers.length > 0) {
+              <div class="team-scorers-section">
+                <h3 class="team-scorers-title">Top 5 Scorers</h3>
+                <div class="team-scorers-list">
+                  @for (player of team.topScorers; track player.fullName) {
+                    <div class="team-scorer-item">
+                      <div class="scorer-name">{{ player.fullName }}</div>
+                      <div class="scorer-stats">
+                        <span class="scorer-stat">PPG: {{ player.ppg.toFixed(1) }}</span>
+                        @if (player.apg != null) {
+                          <span class="scorer-stat">APG: {{ player.apg.toFixed(1) }}</span>
+                        }
+                        @if (player.rpg != null) {
+                          <span class="scorer-stat">RPG: {{ player.rpg.toFixed(1) }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <!-- Multiple Teams List View -->
+          <div class="card overflow-hidden">
+            @if (submittedQuestion()) {
+              <div class="submitted-question-container">
+                <h3 class="submitted-question-label">Question:</h3>
+                <p class="submitted-question-text">{{ submittedQuestion() }}</p>
+              </div>
+            }
+            <div class="overflow-x-auto">
+              <table class="data-table">
+                <thead class="table-header">
+                  <tr>
+                    <th class="table-header-cell">Rank</th>
+                    <th class="table-header-cell">Team</th>
+                    <th class="table-header-cell">Record</th>
+                    <th class="table-header-cell">Win %</th>
+                    <th class="table-header-cell">Conference</th>
+                  </tr>
+                </thead>
+                <tbody class="table-body">
+                  @for (team of getTeamData(); track team.teamId; let i = $index) {
+                    <tr class="table-row">
+                      <td class="table-cell">{{ i + 1 }}</td>
+                      <td class="table-cell-bold">{{ team.teamName }}</td>
+                      <td class="table-cell">{{ team.wins }}-{{ team.losses }}</td>
+                      <td class="table-cell">{{ (team.winPct * 100).toFixed(1) }}%</td>
+                      <td class="table-cell">{{ team.conference === 'east' ? 'East' : 'West' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      } @else if (isComparison()) {
       <!-- Comparison View -->
-      @if (isComparison()) {
         <div class="comparison-container">
           <h2 class="comparison-title">PLAYER COMPARISON</h2>
           <h3 class="comparison-subtitle">
-            {{ results()!.rows[0].full_name }} vs {{ results()!.rows[1].full_name }}
+            {{ results()!.rows?.[0]?.full_name }} vs {{ results()!.rows?.[1]?.full_name }}
           </h3>
           
           <div class="comparison-cards">
@@ -160,7 +236,7 @@
             }
           </div>
         </div>
-      } @else if (results()!.rows.length > 0) {
+      } @else if (results()!.rows && results()!.rows!.length > 0) {
         <!-- Table View -->
         <div class="card overflow-hidden">
           <!-- Submitted Question Display -->

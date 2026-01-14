@@ -46,6 +46,7 @@ export class BogleComponent implements OnInit, OnDestroy {
   hasPlayedToday = signal(false);
   mostCorrectAnswers = signal<{ playerName: string; percentage: number }[]>([]);
   mostMissedAnswers = signal<{ playerName: string; percentage: number }[]>([]);
+  gamesPlayedCount = signal<number>(0);
 
   // Correct answers loaded from database
   private correctAnswers: RookiePlayer[] = [];
@@ -649,6 +650,11 @@ export class BogleComponent implements OnInit, OnDestroy {
 
     this.bogleService.getScores(centralDate).subscribe({
       next: (response) => {
+        // Store the count of games played
+        if (response.count != null) {
+          this.gamesPlayedCount.set(response.count);
+        }
+        
         if (response.success && response.data) {
           // Sort by gameScore (descending), then by timeTaken (ascending) for ties
           const sorted = [...response.data].sort((a, b) => {
@@ -667,6 +673,7 @@ export class BogleComponent implements OnInit, OnDestroy {
           // Reset statistics if no data
           this.mostCorrectAnswers.set([]);
           this.mostMissedAnswers.set([]);
+          this.gamesPlayedCount.set(0);
         }
         
         // Also load game answers for display if not already loaded

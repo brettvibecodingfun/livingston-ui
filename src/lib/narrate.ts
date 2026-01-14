@@ -13,6 +13,11 @@ export async function summarizeAnswer(query: Query, rows: any[]): Promise<string
     return "No qualified players matched your filters.";
   }
 
+  // Team queries shouldn't use this function
+  if (query.task === 'team' || !query.metric) {
+    return "";
+  }
+
   // Take top 5 rows for summarization
   const topRows = rows.slice(0, 5);
   
@@ -54,6 +59,11 @@ export async function summarizeAnswer(query: Query, rows: any[]): Promise<string
         )}, BPG: ${formatNumber(row.bpg)}, FG%: ${formatPct(row.fg_pct)}, 3P%: ${formatPct(
           row.three_pct,
         )}, FT%: ${formatPct(row.ft_pct)}`;
+      }
+      
+      // query.metric is guaranteed to be defined at this point due to early return check
+      if (!query.metric) {
+        return `${index + 1}. ${row.full_name} (${row.team || 'N/A'})`;
       }
       
       const metricValue = row[query.metric] || (metricColumn ? row[metricColumn] : null);
@@ -120,6 +130,11 @@ export async function summarizeAnswer(query: Query, rows: any[]): Promise<string
 }
 
 function generateSimpleSummary(query: Query, topRows: any[], formattedRows: string): string {
+  // Should not be called for team queries
+  if (!query.metric || query.task === 'team') {
+    return "";
+  }
+
   const topPlayer = topRows[0];
   
   // Handle 'all' metric specially

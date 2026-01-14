@@ -579,6 +579,15 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: #FDB931;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.games-played-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #FDB931;
   margin: 0 0 0.875rem 0;
   text-align: center;
 }
@@ -688,6 +697,11 @@
 
 .leaderboard-title-light {
   color: #0B1F3B !important;
+}
+
+.games-played-count-light {
+  color: #0B1F3B !important;
+  font-weight: 600;
 }
 
 .leaderboard-table-light {
@@ -1192,6 +1206,10 @@
 
   .leaderboard-title {
     font-size: 1.125rem;
+  }
+  
+  .games-played-count {
+    font-size: 0.9375rem;
   }
 }
 

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import OpenAI from 'openai';
 import { runQuery } from './lib/sql';
 import { summarizeAnswer } from './lib/narrate';
+import { runTeamQuery } from './lib/teams';
 import { DEFAULT_SEASON } from './lib/constants';
 import { Query, QueryZ, QuerySchema } from './lib/types';
 import { pool } from './lib/db';
@@ -109,6 +110,7 @@ Available tasks:
 - leaders: get top leaders for a metric
 - lookup: find specific players
 - compare: compare players
+- team: query about teams (e.g., "best team", "worst team", "top teams", "who's the best team"). When task is "team", do NOT include metric in the response.
 
 Team abbreviations mapping (use these exact abbreviations):
 - Brooklyn Nets, Nets, Brooklyn → BKN
@@ -151,8 +153,10 @@ Team (OPTIONAL - only include if user explicitly mentions a team):
 - If the user doesn't mention a team, do NOT include the team field in your response.
 
 Task selection rules (follow strictly):
+- If the user asks about teams (keywords such as "best team", "worst team", "top teams", "who's the best team", "what team has the best record", "summary of the thunder", "tell me about the lakers", etc.), set task = "team". DO NOT include metric when task is "team".
+- When task = "team" and the user mentions a specific team name (e.g., "thunder", "lakers", "celtics"), include the team field with the team abbreviation (e.g., "OKC", "LAL", "BOS"). This will return detailed information about that specific team including top scorers.
 - If the user explicitly compares players (keywords such as "compare", "versus", "vs", "better than", "better season", "who is having the better year", etc.), set task = "compare".
-- If the user asks for "top", "best", "leaders", "highest", "lowest", etc. without naming specific players, use task = "leaders".
+- If the user asks for "top", "best", "leaders", "highest", "lowest", etc. without naming specific players and NOT asking about teams, use task = "leaders".
 - Use task = "rank" when the request implies ordering/ranking but not necessarily top-N leaders wording.
 - Use task = "lookup" when the user searches for specific stats about one player or a constrained list without comparing.
 
@@ -639,22 +643,37 @@ app.post('/api/ask', async (req, res) => {
       };
     }
 
-    const rows = await runQuery(query, playerNames);
-    console.log(`Query returned ${rows.length} rows`);
+    // Handle team queries differently
+    let rows: any[] = [];
+    let teams: any[] = [];
+    
+    if (query.task === 'team') {
+      teams = await runTeamQuery(query);
+      console.log(`Team query returned ${teams.length} teams`);
+    } else {
+      rows = await runQuery(query, playerNames);
+      console.log(`Query returned ${rows.length} rows`);
+    }
 
     // Prepare response
     const response: {
       query: Query;
-      rows: any[];
+      rows?: any[];
+      teams?: any[];
       summary?: string;
     } = {
       query: query,
-      rows: rows
     };
 
-    // Add summary if narrate is requested
-    if (narrate) {
-      response.summary = await summarizeAnswer(query, rows);
+    if (query.task === 'team') {
+      response.teams = teams;
+    } else {
+      response.rows = rows;
+      
+      // Add summary if narrate is requested (only for player queries)
+      if (narrate) {
+        response.summary = await summarizeAnswer(query, rows);
+      }
     }
 
     return res.json(response);

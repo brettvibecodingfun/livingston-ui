@@ -35,9 +35,31 @@ export interface PlayerStatsRow {
   e_usg_pct: number | null;
 }
 
+export interface TeamPlayer {
+  fullName: string;
+  team: string;
+  ppg: number;
+  apg?: number;
+  rpg?: number;
+  gamesPlayed: number;
+}
+
+export interface TeamData {
+  teamId: number;
+  team: string;
+  teamName: string;
+  wins: number;
+  losses: number;
+  winPct: number;
+  conference: string;
+  seed?: number;
+  topScorers?: TeamPlayer[];
+}
+
 export interface QueryResponse {
   query: Query;
-  rows: PlayerStatsRow[];
+  rows?: PlayerStatsRow[];
+  teams?: TeamData[];
   summary?: string;
 }
 

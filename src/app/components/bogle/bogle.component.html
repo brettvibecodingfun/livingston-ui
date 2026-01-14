@@ -13,6 +13,9 @@
           @if (leaderboard().length > 0) {
             <div class="leaderboard-container leaderboard-light">
               <h3 class="leaderboard-title leaderboard-title-light">Today's Leaderboard</h3>
+              @if (gamesPlayedCount() > 0) {
+                <p class="games-played-count games-played-count-light">{{ gamesPlayedCount() }} {{ gamesPlayedCount() === 1 ? 'game' : 'games' }} played today</p>
+              }
               <table class="leaderboard-table leaderboard-table-light">
                 <thead>
                   <tr>
@@ -252,6 +255,9 @@
         @if (leaderboard().length > 0) {
           <div class="leaderboard-container">
             <h3 class="leaderboard-title">Today's Leaderboard</h3>
+            @if (gamesPlayedCount() > 0) {
+              <p class="games-played-count">{{ gamesPlayedCount() }} {{ gamesPlayedCount() === 1 ? 'game' : 'games' }} played today</p>
+            }
             <table class="leaderboard-table">
               <thead>
                 <tr>

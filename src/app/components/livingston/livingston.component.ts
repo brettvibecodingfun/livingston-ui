@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LivingstonService, QueryResponse, PlayerStatsRow } from '../../services/livingston.service';
+import { LivingstonService, QueryResponse, PlayerStatsRow, TeamData } from '../../services/livingston.service';
 import { Query } from '../../../lib/types';
 import { environment } from '../../../environments/environment';
 import { PlayerInfoModalComponent } from '../player-info/player-info-modal.component';
@@ -61,6 +61,19 @@ export class LivingstonComponent {
     const query = this.results()?.query;
     return query?.task === 'compare' && 
            this.results()?.rows?.length === 2;
+  }
+
+  isTeamQuery(): boolean {
+    const query = this.results()?.query;
+    return query?.task === 'team';
+  }
+
+  getTeamData(): TeamData[] {
+    return this.results()?.teams || [];
+  }
+
+  isSingleTeam(): boolean {
+    return this.getTeamData().length === 1;
   }
 
   // Determine which columns to show based on the query metric

@@ -17,6 +17,11 @@ function mapPositionGroup(positionGroup: string): string {
 }
 
 export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]> {
+  // Team queries shouldn't use this function
+  if (q.task === 'team' || !q.metric) {
+    return [];
+  }
+
   const limit = Math.min(q.limit ?? 10, 25);
   const params: any[] = [];
   let i = 0;
@@ -80,14 +85,16 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     }
     
     // For advanced stats in compare queries, require minimum 10 minutes per game and 15 games played
-    const advancedStats = ['off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 
-                           'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 
-                           'ast_ratio', 'e_tov_pct', 'e_usg_pct'];
-    if (advancedStats.includes(q.metric)) {
-      params.push(15); i++;
-      whereCompare.push(`sa.games_played >= $${i}`);
-      params.push(10); i++;
-      whereCompare.push(`sa.minutes >= $${i}`);
+    if (q.metric) {
+      const advancedStats = ['off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 
+                             'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 
+                             'ast_ratio', 'e_tov_pct', 'e_usg_pct'];
+      if (advancedStats.includes(q.metric)) {
+        params.push(15); i++;
+        whereCompare.push(`sa.games_played >= $${i}`);
+        params.push(10); i++;
+        whereCompare.push(`sa.minutes >= $${i}`);
+      }
     }
 
     const sql = `
@@ -229,7 +236,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   }
 
   // Add minimum metric value filter (e.g., "scoring over 20 points per game")
-  if (q.filters?.min_metric_value != null) {
+  if (q.filters?.min_metric_value != null && q.metric) {
     const metricCol = METRIC_COL_MAP[q.metric] || 'points_per_game';
     const seasonAvgCol = metricCol === 'points_per_game' ? 'points' :
                         metricCol === 'assists_per_game' ? 'assists' :
@@ -287,7 +294,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       e_tov_pct: 'e_tov_pct', e_usg_pct: 'e_usg_pct',
       all: 'ppg' // For "all" metric, order by ppg as default
     };
-    const orderBy = orderColumnMap[q.metric] || 'ppg';
+    const orderBy = (q.metric && orderColumnMap[q.metric]) || 'ppg';
     // Use order_direction if specified (for reverse sorting), otherwise default to DESC
     const direction = q.order_direction?.toUpperCase() || 'DESC';
     orderByClause = `ORDER BY ${orderBy} ${direction} NULLS LAST`;

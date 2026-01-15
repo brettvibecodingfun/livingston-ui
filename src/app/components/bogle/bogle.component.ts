@@ -84,27 +84,48 @@ export class BogleComponent implements OnInit, OnDestroy {
   storedUserCorrectRanks = signal<number[]>([]);
 
   private loadGameAnswersForDisplay(date: string) {
-    const gameData = this.loadGameAnswers(date);
-    if (gameData) {
-      // Sort answers by rank for display
-      const sortedAnswers = [...gameData.correctAnswers].sort((a, b) => a.rank - b.rank);
-      this.storedGameAnswers.set(sortedAnswers);
-      this.storedUserCorrectRanks.set(gameData.userCorrectRanks);
-    } else {
-      // If no stored data but we have current game data, use it
-      if (this.correctAnswers.length > 0) {
-        // Sort answers by rank for display
-        const sortedAnswers = [...this.correctAnswers].sort((a, b) => a.rank - b.rank);
-        this.storedGameAnswers.set(sortedAnswers);
-        const correctRanks = this.answers()
-          .filter(answer => answer.isCorrect === true && answer.rank !== null)
-          .map(answer => answer.rank!);
-        this.storedUserCorrectRanks.set(correctRanks);
-      } else {
-        // Try to load from API if we don't have the data
-        this.loadGameDataForDisplay(date);
+    // Always load game info first to get the correct rankType
+    this.bogleService.getGameInfo(date).subscribe({
+      next: (gameInfo) => {
+        if (gameInfo.success && gameInfo.data) {
+          // Set rankType from API response
+          this.rankType = gameInfo.data.rankType || 'ppg';
+          
+          // Now load the stored answers or game data
+          const gameData = this.loadGameAnswers(date);
+          if (gameData) {
+            // Sort answers by rank for display
+            const sortedAnswers = [...gameData.correctAnswers].sort((a, b) => a.rank - b.rank);
+            this.storedGameAnswers.set(sortedAnswers);
+            this.storedUserCorrectRanks.set(gameData.userCorrectRanks);
+          } else {
+            // If no stored data but we have current game data, use it
+            if (this.correctAnswers.length > 0) {
+              // Sort answers by rank for display
+              const sortedAnswers = [...this.correctAnswers].sort((a, b) => a.rank - b.rank);
+              this.storedGameAnswers.set(sortedAnswers);
+              const correctRanks = this.answers()
+                .filter(answer => answer.isCorrect === true && answer.rank !== null)
+                .map(answer => answer.rank!);
+              this.storedUserCorrectRanks.set(correctRanks);
+            } else {
+              // Try to load from API if we don't have the data
+              this.loadGameDataForDisplay(date);
+            }
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error loading game info for display:', err);
+        // Fall back to loading from localStorage without rankType
+        const gameData = this.loadGameAnswers(date);
+        if (gameData) {
+          const sortedAnswers = [...gameData.correctAnswers].sort((a, b) => a.rank - b.rank);
+          this.storedGameAnswers.set(sortedAnswers);
+          this.storedUserCorrectRanks.set(gameData.userCorrectRanks);
+        }
       }
-    }
+    });
   }
 
   private loadGameDataForDisplay(date: string) {

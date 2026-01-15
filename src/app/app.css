@@ -128,3 +128,29 @@
   }
 }
 
+/* Footer Styles */
+.app-footer {
+  margin-top: 3rem;
+  padding: 2rem 0;
+  text-align: center;
+  width: 100%;
+}
+
+.footer-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #E5E7EB;
+  margin: 0;
+}
+
+.footer-link {
+  color: white;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #FDB931;
+  text-decoration: underline;
+}

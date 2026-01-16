@@ -84,6 +84,9 @@
   padding: 0.5rem 0;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  touch-action: pan-x; /* Enable horizontal panning on touch devices */
+  will-change: scroll-position; /* Optimize for scrolling */
 }
 
 .sample-questions-container::-webkit-scrollbar {
@@ -124,14 +127,29 @@
 }
 
 @media (max-width: 767px) {
+  .sample-questions-wrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+  
   .sample-questions-wrapper::before,
   .sample-questions-wrapper::after {
     width: 20px;
   }
   
+  .sample-questions-container {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    /* Ensure container can scroll on mobile */
+    min-width: 100%;
+  }
+  
   .sample-question-chip {
     padding: 0.5rem 1rem;
     font-size: 0.8125rem;
+    /* Prevent text selection on touch */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
   }
 }
 

@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LivingstonService, QueryResponse, PlayerStatsRow, TeamData } from '../../services/livingston.service';
@@ -13,7 +13,7 @@ import { PlayerInfoModalComponent } from '../player-info/player-info-modal.compo
   templateUrl: './livingston.component.html',
   styleUrl: './livingston.component.css'
 })
-export class LivingstonComponent implements OnInit, OnDestroy {
+export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('sampleQuestionsContainer', { static: false }) sampleQuestionsContainer!: ElementRef<HTMLDivElement>;
   
   question = signal('');
@@ -43,7 +43,14 @@ export class LivingstonComponent implements OnInit, OnDestroy {
   constructor(private livingstonService: LivingstonService) {}
   
   ngOnInit() {
-    this.startAutoScroll();
+    // Component initialization
+  }
+  
+  ngAfterViewInit() {
+    // Start auto-scroll after view is initialized (ViewChild is available)
+    setTimeout(() => {
+      this.startAutoScroll();
+    }, 100);
   }
   
   ngOnDestroy() {

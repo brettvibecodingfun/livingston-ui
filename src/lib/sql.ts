@@ -48,9 +48,12 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
                          'ast_ratio', 'e_tov_pct', 'e_usg_pct'];
   const isAdvancedStat = advancedStats.includes(q.metric);
 
-  // All queries use season_averages table for accurate stats
+  // Determine which table to use - clutch_season_averages for clutch queries, season_averages otherwise
+  const tableName = q.clutch ? 'clutch_season_averages' : 'season_averages';
+  
+  // All queries use season_averages table (or clutch_season_averages for clutch queries) for accurate stats
   // This includes: compare, rank, and leaders tasks
-  // Never use the leaders table - always query season_averages directly
+  // Never use the leaders table - always query season_averages/clutch_season_averages directly
   
   // Special handling for compare tasks with specific players
   if (q.task === 'compare' && hasPlayerFilter) {
@@ -97,6 +100,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       }
     }
 
+    const compareTableName = q.clutch ? 'clutch_season_averages' : 'season_averages';
     const sql = `
       SELECT
         p.full_name,
@@ -132,18 +136,18 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
         sa.ast_ratio,
         sa.e_tov_pct,
         sa.e_usg_pct
-      FROM season_averages sa
+      FROM ${compareTableName} sa
       INNER JOIN players p ON sa.player_id = p.id
       LEFT JOIN teams t ON p.team_id = t.id
       WHERE ${whereCompare.join(' AND ')}
       ORDER BY p.full_name ASC
     `;
 
-    console.log('Compare SQL (season_averages):', sql);
+    console.log(`Compare SQL (${compareTableName}):`, sql);
     console.log('Compare params:', params);
     console.log('Searching for players:', normalizedPlayerNames);
     const result = await pool.query(sql, params);
-    console.log(`Found ${result.rows.length} players in season_averages`);
+    console.log(`Found ${result.rows.length} players in ${compareTableName}`);
     if (result.rows.length === 0 && normalizedPlayerNames.length > 0) {
       // Try to see if players exist in the database at all
       const checkSql = `
@@ -355,7 +359,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       sa.ast_ratio,
       sa.e_tov_pct,
       sa.e_usg_pct${selectAge}
-    FROM season_averages sa
+    FROM ${tableName} sa
     INNER JOIN players p ON sa.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id
     WHERE ${whereAgg.join(' AND ')}
@@ -363,7 +367,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     LIMIT ${finalLimit}
   `;
 
-  console.log('Query SQL (season_averages):', sql);
+  console.log(`Query SQL (${tableName}):`, sql);
   console.log('Query params:', params);
   console.log('Task:', q.task, 'Metric:', q.metric);
   const result = await pool.query(sql, params);

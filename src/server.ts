@@ -138,6 +138,16 @@ Task selection rules (follow strictly):
 - Use task = "rank" when the request implies ordering/ranking but not necessarily top-N leaders wording.
 - Use task = "lookup" when the user searches for specific stats about one player or a constrained list without comparing.
 
+Clutch queries:
+- If the user mentions "clutch", "clutch players", "clutch stats", "clutch performance", "clutch scoring", or any variation indicating they want clutch statistics (stats in clutch situations - typically last 5 minutes of close games), set clutch = true at the TOP LEVEL of the query object.
+- Examples:
+  * "Who are the best clutch scorers?" → { ..., "clutch": true }
+  * "Show me clutch players with the most points" → { ..., "clutch": true }
+  * "Who has the best clutch field goal percentage?" → { ..., "clutch": true, "metric": "fg_pct" }
+  * "Compare clutch stats for Curry and Durant" → { ..., "clutch": true, "task": "compare" }
+- IMPORTANT: clutch is a TOP-LEVEL field, NOT inside filters. Place it at the same level as "task", "metric", "season", etc.
+- When clutch = true, the query will use clutch_season_averages table instead of season_averages table.
+
 Player filters:
 - When the user mentions specific player names, populate filters.players as an array of the exact full names in the question (e.g., ["Kevin Durant", "Cade Cunningham"]). Do NOT include team names in this list.
 

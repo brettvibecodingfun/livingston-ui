@@ -41,7 +41,8 @@ export const QueryZ = z.object({
     countries: z.array(z.string()).optional(),
   }).optional(),
   order_direction: z.enum(['asc', 'desc']).optional(),
-  limit: z.number().optional()
+  limit: z.number().optional(),
+  clutch: z.boolean().optional()
 });
 
 // Export the inferred TypeScript type
@@ -139,6 +140,9 @@ export const QuerySchema = {
     },
     limit: {
       type: 'number'
+    },
+    clutch: {
+      type: 'boolean'
     }
   },
   required: ['task', 'season'],

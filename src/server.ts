@@ -192,7 +192,11 @@ Combined stat filtering (filtering by one metric while ranking by another):
   * "Of players averaging over 20 points per game, who has the highest field goal percentage?" → { metric: "fg_pct", filters: { filter_by_metric: "ppg", min_metric_value: 20 } }
   * "Among players averaging more than 10 rebounds per game, who has the most assists?" → { metric: "apg", filters: { filter_by_metric: "rpg", min_metric_value: 10 } }
   * "Players scoring over 25 points per game, ranked by three-point percentage" → { metric: "three_pct", filters: { filter_by_metric: "ppg", min_metric_value: 25 } }
+  * "Of players who shoot more than 7 threes per game, who has the best percentage?" → { metric: "three_pct", filters: { filter_by_metric: "tpa", min_metric_value: 7 } }
+  * "Players attempting more than 5 threes per game, ranked by three-point percentage" → { metric: "three_pct", filters: { filter_by_metric: "tpa", min_metric_value: 5 } }
+  * "Of players who take more than 8 free throws per game, who makes the highest percentage?" → { metric: "ft_pct", filters: { filter_by_metric: "fta", min_metric_value: 8 } }
 - IMPORTANT: Only use filter_by_metric when filtering by a DIFFERENT metric than the one being ranked. If filtering and ranking by the same metric (e.g., "players scoring over 20 points per game"), just use min_metric_value without filter_by_metric (current behavior).
+- IMPORTANT: When the user says "shoot more than X threes per game" or "attempt more than X threes per game", they are referring to three point attempts (tpa), not three pointers made (tpm). Use "tpa" as the filter_by_metric.
 
 Metric rules:
 - Always set metric to one of the allowed values.

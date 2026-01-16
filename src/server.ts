@@ -59,6 +59,10 @@ Available metrics:
 - fg_pct: field goal percentage
 - three_pct: three-point percentage
 - ft_pct: free throw percentage
+- tpm: three pointers made per game
+- tpa: three point attempts per game
+- ftm: free throws made per game
+- fta: free throw attempts per game
 - bpm: box plus/minus
 - off_rating: offensive rating
 - def_rating: defensive rating
@@ -178,6 +182,17 @@ Minimum metric value filters:
 - If the user asks for players "scoring over X points", "averaging more than X assists", "rebounding over X per game", etc., set filters.min_metric_value to the specified number.
 - Match the min_metric_value to the metric being queried (e.g., if metric is "ppg" and user says "scoring over 20", set min_metric_value = 20).
 - Examples: "scoring over 20 points" → min_metric_value = 20 (with metric = ppg), "averaging more than 10 assists" → min_metric_value = 10 (with metric = apg).
+
+Combined stat filtering (filtering by one metric while ranking by another):
+- If the user asks to filter by one metric while ranking by a different metric (e.g., "Of players averaging over 20 points per game, who has the highest field goal percentage?"), you need to:
+  1. Set metric to the metric being ranked/sorted by (e.g., "fg_pct" for field goal percentage).
+  2. Set filters.filter_by_metric to the metric being used for filtering (e.g., "ppg" for points per game).
+  3. Set filters.min_metric_value to the threshold value (e.g., 20 for "over 20 points per game").
+- Examples:
+  * "Of players averaging over 20 points per game, who has the highest field goal percentage?" → { metric: "fg_pct", filters: { filter_by_metric: "ppg", min_metric_value: 20 } }
+  * "Among players averaging more than 10 rebounds per game, who has the most assists?" → { metric: "apg", filters: { filter_by_metric: "rpg", min_metric_value: 10 } }
+  * "Players scoring over 25 points per game, ranked by three-point percentage" → { metric: "three_pct", filters: { filter_by_metric: "ppg", min_metric_value: 25 } }
+- IMPORTANT: Only use filter_by_metric when filtering by a DIFFERENT metric than the one being ranked. If filtering and ranking by the same metric (e.g., "players scoring over 20 points per game"), just use min_metric_value without filter_by_metric (current behavior).
 
 Metric rules:
 - Always set metric to one of the allowed values.
@@ -471,6 +486,10 @@ app.get('/api/guess-player/random', async (req, res) => {
         sa.fg_pct,
         sa.three_pct,
         sa.ft_pct,
+        sa.tpm,
+        sa.tpa,
+        sa.ftm,
+        sa.fta,
         sa.off_rating,
         sa.def_rating,
         sa.net_rating,
@@ -709,6 +728,10 @@ app.get('/api/player/:playerName', async (req, res) => {
         sa.fg_pct,
         sa.three_pct,
         sa.ft_pct,
+        sa.tpm,
+        sa.tpa,
+        sa.ftm,
+        sa.fta,
         sa.off_rating,
         sa.def_rating,
         sa.net_rating,

@@ -111,6 +111,10 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
         sa.fg_pct,
         sa.three_pct,
         sa.ft_pct,
+        sa.tpm,
+        sa.tpa,
+        sa.ftm,
+        sa.fta,
         sa.off_rating,
         sa.def_rating,
         sa.net_rating,
@@ -236,8 +240,13 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   }
 
   // Add minimum metric value filter (e.g., "scoring over 20 points per game")
-  if (q.filters?.min_metric_value != null && q.metric) {
-    const metricCol = METRIC_COL_MAP[q.metric] || 'points_per_game';
+  // If filter_by_metric is specified, filter by that metric instead of the ranking metric
+  if (q.filters?.min_metric_value != null) {
+    // Use filter_by_metric if specified, otherwise use the ranking metric
+    const filterMetric = q.filters?.filter_by_metric || q.metric;
+    if (!filterMetric) return []; // Need at least one metric to filter by
+    
+    const metricCol = METRIC_COL_MAP[filterMetric] || 'points_per_game';
     const seasonAvgCol = metricCol === 'points_per_game' ? 'points' :
                         metricCol === 'assists_per_game' ? 'assists' :
                         metricCol === 'rebounds_per_game' ? 'rebounds' :
@@ -246,6 +255,10 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
                         metricCol === 'field_goal_percentage' ? 'fg_pct' :
                         metricCol === 'three_point_percentage' ? 'three_pct' :
                         metricCol === 'free_throw_percentage' ? 'ft_pct' :
+                        metricCol === 'tpm' ? 'tpm' :
+                        metricCol === 'tpa' ? 'tpa' :
+                        metricCol === 'ftm' ? 'ftm' :
+                        metricCol === 'fta' ? 'fta' :
                         metricCol === 'offensive_rating' ? 'off_rating' :
                         metricCol === 'defensive_rating' ? 'def_rating' :
                         metricCol === 'net_rating' ? 'net_rating' :
@@ -287,6 +300,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     const orderColumnMap: Record<string, string> = {
       ppg: 'ppg', apg: 'apg', rpg: 'rpg', spg: 'spg', bpg: 'bpg',
       fg_pct: 'fg_pct', three_pct: 'three_pct', ft_pct: 'ft_pct', bpm: 'ppg', // fallback
+      tpm: 'tpm', tpa: 'tpa', ftm: 'ftm', fta: 'fta',
       off_rating: 'off_rating', def_rating: 'def_rating', net_rating: 'net_rating', pie: 'pie',
       e_pace: 'e_pace', fga_pg: 'fga_pg', fgm_pg: 'fgm_pg', ts_pct: 'ts_pct',
       ast_pct: 'ast_pct', efg_pct: 'efg_pct', reb_pct: 'reb_pct', usg_pct: 'usg_pct',
@@ -320,6 +334,10 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       sa.fg_pct,
       sa.three_pct,
       sa.ft_pct,
+      sa.tpm,
+      sa.tpa,
+      sa.ftm,
+      sa.fta,
       sa.off_rating,
       sa.def_rating,
       sa.net_rating,

@@ -29,6 +29,10 @@ export const METRIC_COL_MAP = {
   ast_ratio: 'assist_ratio',
   e_tov_pct: 'estimated_turnover_percentage',
   e_usg_pct: 'estimated_usage_percentage',
+  tpm: 'tpm', // Three pointers made
+  tpa: 'tpa', // Three point attempts
+  ftm: 'ftm', // Free throws made
+  fta: 'fta', // Free throw attempts
   all: 'points_per_game' // For 'all' metric, default to ppg for ordering/display purposes
 } as const;
 

@@ -16,6 +16,10 @@ export interface PlayerStatsRow {
   fg_pct: number | null;
   three_pct: number | null;
   ft_pct: number | null;
+  tpm: number | null;
+  tpa: number | null;
+  ftm: number | null;
+  fta: number | null;
   off_rating: number | null;
   def_rating: number | null;
   net_rating: number | null;

@@ -3,13 +3,14 @@ import { z } from 'zod';
 // Zod schema for runtime validation
 export const QueryZ = z.object({
   task: z.enum(['rank', 'leaders', 'lookup', 'compare', 'team']),
-  metric: z.enum(['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 'ast_ratio', 'e_tov_pct', 'e_usg_pct', 'all']).optional(),
+  metric: z.enum(['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 'ast_ratio', 'e_tov_pct', 'e_usg_pct', 'tpm', 'tpa', 'ftm', 'fta', 'all']).optional(),
   season: z.number(),
   team: z.union([z.string(), z.array(z.string())]).nullish(),
   position: z.enum(['guards', 'forwards', 'centers']).nullish(),
   filters: z.object({
     min_games: z.number().optional(),
     min_metric_value: z.number().optional(),
+    filter_by_metric: z.enum(['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 'ast_ratio', 'e_tov_pct', 'e_usg_pct', 'tpm', 'tpa', 'ftm', 'fta']).optional(),
     players: z.array(z.string()).optional(),
     draft_year_range: z
       .object({
@@ -56,7 +57,7 @@ export const QuerySchema = {
     },
     metric: {
       type: 'string',
-      enum: ['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 'ast_ratio', 'e_tov_pct', 'e_usg_pct', 'all']
+      enum: ['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 'ast_ratio', 'e_tov_pct', 'e_usg_pct', 'tpm', 'tpa', 'ftm', 'fta', 'all']
     },
     season: {
       type: 'number'
@@ -76,6 +77,10 @@ export const QuerySchema = {
       properties: {
         min_games: { type: 'number' },
         min_metric_value: { type: 'number' },
+        filter_by_metric: {
+          type: 'string',
+          enum: ['ppg', 'apg', 'rpg', 'spg', 'bpg', 'fg_pct', 'three_pct', 'ft_pct', 'bpm', 'off_rating', 'def_rating', 'net_rating', 'pie', 'e_pace', 'fga_pg', 'fgm_pg', 'ts_pct', 'ast_pct', 'efg_pct', 'reb_pct', 'usg_pct', 'dreb_pct', 'oreb_pct', 'ast_ratio', 'e_tov_pct', 'e_usg_pct', 'tpm', 'tpa', 'ftm', 'fta']
+        },
         players: {
           type: 'array',
           items: { type: 'string' }

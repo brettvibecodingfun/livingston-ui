@@ -114,6 +114,10 @@ export class LivingstonComponent {
     else if (metric === 'fg_pct' || metric === 'three_pct' || metric === 'ft_pct') {
       columns.push(metric);
     }
+    // For three pointers made/attempts and free throws made/attempts, show only that stat
+    else if (metric === 'tpm' || metric === 'tpa' || metric === 'ftm' || metric === 'fta') {
+      columns.push(metric);
+    }
     // For BPM, show PPG + shooting percentages (since PPG is shown)
     else if (metric === 'bpm') {
       columns.push('ppg'); // Show PPG as primary stat for BPM queries
@@ -130,6 +134,18 @@ export class LivingstonComponent {
              metric === 'oreb_pct' || metric === 'ast_ratio' || metric === 'e_tov_pct' || 
              metric === 'e_usg_pct') {
       columns.push(metric);
+    }
+
+    // If filtering by a different metric than the one being ranked, add the filter metric to the table
+    const filterByMetric = query.filters?.filter_by_metric;
+    if (filterByMetric && metric && filterByMetric !== metric && !columns.includes(filterByMetric)) {
+      // Insert the filter metric right before the ranking metric, or at the end if not found
+      const metricIndex = columns.indexOf(metric);
+      if (metricIndex !== -1) {
+        columns.splice(metricIndex, 0, filterByMetric);
+      } else {
+        columns.push(filterByMetric);
+      }
     }
 
     return columns;
@@ -155,6 +171,10 @@ export class LivingstonComponent {
       'fg_pct': 'FG%',
       'three_pct': '3P%',
       'ft_pct': 'FT%',
+      'tpm': '3PM',
+      'tpa': '3PA',
+      'ftm': 'FTM',
+      'fta': 'FTA',
       'off_rating': 'Off Rtg',
       'def_rating': 'Def Rtg',
       'net_rating': 'Net Rtg',
@@ -203,6 +223,14 @@ export class LivingstonComponent {
         return player.three_pct != null ? ((player.three_pct * 100).toFixed(1) + '%') : '0.0%';
       case 'ft_pct':
         return player.ft_pct != null ? ((player.ft_pct * 100).toFixed(1) + '%') : '0.0%';
+      case 'tpm':
+        return player.tpm != null ? player.tpm.toFixed(1) : '0.0';
+      case 'tpa':
+        return player.tpa != null ? player.tpa.toFixed(1) : '0.0';
+      case 'ftm':
+        return player.ftm != null ? player.ftm.toFixed(1) : '0.0';
+      case 'fta':
+        return player.fta != null ? player.fta.toFixed(1) : '0.0';
       case 'off_rating':
         return player.off_rating != null ? player.off_rating.toFixed(1) : '';
       case 'def_rating':

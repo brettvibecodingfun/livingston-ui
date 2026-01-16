@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LivingstonService, QueryResponse, PlayerStatsRow, TeamData } from '../../services/livingston.service';
@@ -13,7 +13,9 @@ import { PlayerInfoModalComponent } from '../player-info/player-info-modal.compo
   templateUrl: './livingston.component.html',
   styleUrl: './livingston.component.css'
 })
-export class LivingstonComponent {
+export class LivingstonComponent implements OnInit, OnDestroy {
+  @ViewChild('sampleQuestionsContainer', { static: false }) sampleQuestionsContainer!: ElementRef<HTMLDivElement>;
+  
   question = signal('');
   submittedQuestion = signal<string | null>(null);
   narrate = signal(false);
@@ -25,8 +27,70 @@ export class LivingstonComponent {
   showHelpModal = signal(false);
   showPlayerModal = signal(false);
   selectedPlayerName = signal<string>('');
+  
+  sampleQuestions = [
+    "Who are the top scoring rookies in the NBA this year?",
+    "Who leads the NBA in NET Rating this year?",
+    "Give me the best Duke players in the NBA",
+    "Of players who shoot more than 7 threes per game, who has the best percentage?",
+    "Compare Stephen Curry and Cade Cunningham"
+  ];
+  
+  private autoScrollInterval: any = null;
+  private isAutoScrolling = true;
+  private hasUserClicked = false; // Track if user has clicked a chip
 
   constructor(private livingstonService: LivingstonService) {}
+  
+  ngOnInit() {
+    this.startAutoScroll();
+  }
+  
+  ngOnDestroy() {
+    this.stopAutoScroll();
+  }
+  
+  startAutoScroll() {
+    if (this.autoScrollInterval || this.hasUserClicked) return;
+    
+    this.isAutoScrolling = true;
+    this.autoScrollInterval = setInterval(() => {
+      if (!this.isAutoScrolling || this.hasUserClicked) return;
+      
+      const container = this.sampleQuestionsContainer?.nativeElement;
+      if (!container) return;
+      
+      const scrollAmount = 1; // Slow scroll speed
+      const containerWidth = container.clientWidth;
+      const scrollWidth = container.scrollWidth;
+      const maxScroll = scrollWidth - containerWidth;
+      
+      // Calculate the width of one set of questions (half of total since we duplicate)
+      const singleSetWidth = scrollWidth / 2;
+      
+      if (container.scrollLeft >= singleSetWidth) {
+        // When we've scrolled past the first set, reset to beginning seamlessly
+        container.scrollLeft = container.scrollLeft - singleSetWidth;
+      } else {
+        container.scrollBy({ left: scrollAmount, behavior: 'auto' });
+      }
+    }, 30); // Update every 30ms for smooth scrolling
+  }
+  
+  stopAutoScroll() {
+    this.isAutoScrolling = false;
+    if (this.autoScrollInterval) {
+      clearInterval(this.autoScrollInterval);
+      this.autoScrollInterval = null;
+    }
+  }
+  
+  onSampleQuestionClick(questionText: string) {
+    this.hasUserClicked = true; // Permanently stop auto-scroll
+    this.stopAutoScroll();
+    this.question.set(questionText);
+    this.onSubmit();
+  }
 
   headshotErrorMap = new Set<string>();
 

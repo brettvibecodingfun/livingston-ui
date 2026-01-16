@@ -8,6 +8,37 @@
       </button>
     </div>
     
+    <!-- Sample Questions Chips -->
+    <div class="sample-questions-wrapper">
+      <div 
+        #sampleQuestionsContainer
+        class="sample-questions-container"
+      >
+        <!-- First set of questions -->
+        @for (sampleQuestion of sampleQuestions; track $index) {
+          <button
+            type="button"
+            class="sample-question-chip"
+            (click)="onSampleQuestionClick(sampleQuestion)"
+            [disabled]="isLoading()"
+          >
+            {{ sampleQuestion }}
+          </button>
+        }
+        <!-- Duplicate set for infinite scroll -->
+        @for (sampleQuestion of sampleQuestions; track $index) {
+          <button
+            type="button"
+            class="sample-question-chip"
+            (click)="onSampleQuestionClick(sampleQuestion)"
+            [disabled]="isLoading()"
+          >
+            {{ sampleQuestion }}
+          </button>
+        }
+      </div>
+    </div>
+    
     <!-- Search Form -->
     <div class="card p-6 mb-8">
       <form (ngSubmit)="onSubmit()" class="space-y-4">

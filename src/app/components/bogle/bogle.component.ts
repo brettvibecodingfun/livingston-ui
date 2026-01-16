@@ -12,6 +12,15 @@ interface RookiePlayer {
   rpg?: number;
   spg?: number;
   bpg?: number;
+  fgm?: number;
+  fga?: number;
+  fg_pct?: number;
+  ftm?: number;
+  fta?: number;
+  ft_pct?: number;
+  tpm?: number;
+  tpa?: number;
+  three_pct?: number;
   photoName: string; // For constructing image path
 }
 
@@ -89,7 +98,10 @@ export class BogleComponent implements OnInit, OnDestroy {
       next: (gameInfo) => {
         if (gameInfo.success && gameInfo.data) {
           // Set rankType from API response
-          this.rankType = gameInfo.data.rankType || 'ppg';
+          // Normalize rankType to handle variations
+          let rankType = gameInfo.data.rankType || 'ppg';
+          rankType = this.normalizeRankType(rankType);
+          this.rankType = rankType;
           
           // Now load the stored answers or game data
           const gameData = this.loadGameAnswers(date);
@@ -203,7 +215,10 @@ export class BogleComponent implements OnInit, OnDestroy {
           // Use the gameQuestion from the API response
           const gameQuestion = gameInfo.data.gameQuestion;
           // Get rankType or default to 'ppg'
-          this.rankType = gameInfo.data.rankType || 'ppg';
+          // Normalize rankType to handle variations (e.g., "3pm" -> "tpm", "3pa" -> "tpa", "3p%" -> "three_pct")
+          let rankType = gameInfo.data.rankType || 'ppg';
+          rankType = this.normalizeRankType(rankType);
+          this.rankType = rankType;
           
           // Check if querySchema exists - if so, use it instead of the question
           let querySchemaParam: string | undefined;
@@ -791,13 +806,45 @@ export class BogleComponent implements OnInit, OnDestroy {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
+  // Normalize rankType to handle variations in naming
+  private normalizeRankType(rankType: string): string {
+    const normalized = rankType.toLowerCase().trim();
+    const mapping: { [key: string]: string } = {
+      '3pm': 'tpm',
+      '3pa': 'tpa',
+      '3p%': 'three_pct',
+      '3p': 'three_pct',
+      'tp%': 'three_pct',
+      'tpm': 'tpm',
+      'tpa': 'tpa',
+      'fgm': 'fgm',
+      'fga': 'fga',
+      'fg%': 'fg_pct',
+      'fg': 'fg_pct',
+      'ftm': 'ftm',
+      'fta': 'fta',
+      'ft%': 'ft_pct',
+      'ft': 'ft_pct'
+    };
+    return mapping[normalized] || normalized;
+  }
+
   getStatHeaderName(): string {
     const statMap: { [key: string]: string } = {
       'ppg': 'PPG',
       'apg': 'APG',
       'rpg': 'RPG',
       'spg': 'SPG',
-      'bpg': 'BPG'
+      'bpg': 'BPG',
+      'fgm': 'FGM',
+      'fga': 'FGA',
+      'fg_pct': 'FG%',
+      'ftm': 'FTM',
+      'fta': 'FTA',
+      'ft_pct': 'FT%',
+      'tpm': '3PM',
+      'tpa': '3PA',
+      'three_pct': '3P%'
     };
     return statMap[this.rankType] || 'PPG';
   }
@@ -810,13 +857,27 @@ export class BogleComponent implements OnInit, OnDestroy {
       'apg': player.apg,
       'rpg': player.rpg,
       'spg': player.spg,
-      'bpg': player.bpg
+      'bpg': player.bpg,
+      'fgm': player.fgm,
+      'fga': player.fga,
+      'fg_pct': player.fg_pct,
+      'ftm': player.ftm,
+      'fta': player.fta,
+      'ft_pct': player.ft_pct,
+      'tpm': player.tpm,
+      'tpa': player.tpa,
+      'three_pct': player.three_pct
     };
     
     const value = statMap[this.rankType];
     if (value == null || value === undefined) return null;
     
-    // Format to 1 decimal place
+    // Format percentages differently (multiply by 100 and add %)
+    if (this.rankType === 'fg_pct' || this.rankType === 'ft_pct' || this.rankType === 'three_pct') {
+      return (value * 100).toFixed(1) + '%';
+    }
+    
+    // Format to 1 decimal place for other stats
     return value.toFixed(1);
   }
 }

@@ -996,6 +996,15 @@ app.get('/api/bogle/daily-game', async (req, res) => {
         rpg: row.rpg || 0,
         spg: row.spg || 0,
         bpg: row.bpg || 0,
+        fgm: row.fgm_pg || 0, // Field goals made per game
+        fga: row.fga_pg || 0, // Field goals attempted per game
+        fg_pct: row.fg_pct || 0,
+        ftm: row.ftm || 0,
+        fta: row.fta || 0,
+        ft_pct: row.ft_pct || 0,
+        tpm: row.tpm || 0,
+        tpa: row.tpa || 0,
+        three_pct: row.three_pct || 0,
         photoName: photoName
       };
     });

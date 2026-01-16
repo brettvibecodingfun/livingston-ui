@@ -11,6 +11,15 @@ export interface BoglePlayer {
   rpg?: number;
   spg?: number;
   bpg?: number;
+  fgm?: number;
+  fga?: number;
+  fg_pct?: number;
+  ftm?: number;
+  fta?: number;
+  ft_pct?: number;
+  tpm?: number;
+  tpa?: number;
+  three_pct?: number;
   photoName: string;
 }
 

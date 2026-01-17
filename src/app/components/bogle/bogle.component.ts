@@ -170,6 +170,15 @@ export class BogleComponent implements OnInit, OnDestroy {
                 rpg: player.rpg,
                 spg: player.spg,
                 bpg: player.bpg,
+                fgm: player.fgm,
+                fga: player.fga,
+                fg_pct: player.fg_pct,
+                ftm: player.ftm,
+                fta: player.fta,
+                ft_pct: player.ft_pct,
+                tpm: player.tpm,
+                tpa: player.tpa,
+                three_pct: player.three_pct,
                 photoName: player.photoName
               }));
               // Sort answers by rank for display
@@ -248,6 +257,15 @@ export class BogleComponent implements OnInit, OnDestroy {
                 rpg: player.rpg,
                 spg: player.spg,
                 bpg: player.bpg,
+                fgm: player.fgm,
+                fga: player.fga,
+                fg_pct: player.fg_pct,
+                ftm: player.ftm,
+                fta: player.fta,
+                ft_pct: player.ft_pct,
+                tpm: player.tpm,
+                tpa: player.tpa,
+                three_pct: player.three_pct,
                 photoName: player.photoName
               }));
               
@@ -507,6 +525,15 @@ export class BogleComponent implements OnInit, OnDestroy {
         rpg: player.rpg,
         spg: player.spg,
         bpg: player.bpg,
+        fgm: player.fgm,
+        fga: player.fga,
+        fg_pct: player.fg_pct,
+        ftm: player.ftm,
+        fta: player.fta,
+        ft_pct: player.ft_pct,
+        tpm: player.tpm,
+        tpa: player.tpa,
+        three_pct: player.three_pct,
         photoName: player.photoName
       })),
       userCorrectAnswers: this.answers()

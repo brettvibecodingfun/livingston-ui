@@ -1,6 +1,38 @@
 <div class="guess-container">
   <h2 class="guess-title">Guess This Player's Stats</h2>
 
+  <!-- Username Input Section -->
+  @if (!hasUsername()) {
+    <div class="username-section">
+      <h3 class="username-title">Enter Your Username</h3>
+      <div class="username-input-container">
+        <input
+          type="text"
+          class="username-input"
+          [ngModel]="username()"
+          (ngModelChange)="username.set($event)"
+          (keydown.enter)="onUsernameSubmit()"
+          placeholder="Enter your username..."
+          autocomplete="off"
+        />
+        <button
+          class="username-submit-button"
+          (click)="onUsernameSubmit()"
+          [disabled]="!username().trim()"
+        >
+          Submit
+        </button>
+      </div>
+      @if (error() && !player()) {
+        <p class="error-message">{{ error() }}</p>
+      }
+    </div>
+  } @else {
+    <div class="username-welcome">
+      <h3 class="username-welcome-text">Time to Guess your Player, {{ username() }}!</h3>
+    </div>
+  }
+
   <!-- Filters Section -->
   <div class="filters-section">
     <button class="filters-toggle-button" (click)="toggleFilters()">
@@ -304,6 +336,39 @@
           
           <button class="modal-close-button" (click)="closeModal()">Close</button>
         </div>
+      </div>
+    }
+
+    <!-- Leaderboard Section -->
+    @if (player() && player()!.player_id) {
+      <div class="leaderboard-section">
+        <h3 class="leaderboard-title">Leaderboard for {{ player()!.full_name }}</h3>
+        @if (isLoadingLeaderboard()) {
+          <p class="leaderboard-loading">Loading leaderboard...</p>
+        } @else if (leaderboard().length === 0) {
+          <p class="leaderboard-empty">No scores yet. Be the first to submit a guess!</p>
+        } @else {
+          <div class="leaderboard-table-container">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th class="leaderboard-header">Username</th>
+                  <th class="leaderboard-header">Score</th>
+                  <th class="leaderboard-header">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of leaderboard(); track entry.id) {
+                  <tr class="leaderboard-row">
+                    <td class="leaderboard-cell leaderboard-username">{{ entry.userName }}</td>
+                    <td class="leaderboard-cell leaderboard-score">{{ entry.score }}</td>
+                    <td class="leaderboard-cell leaderboard-date">{{ entry.gameDate }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       </div>
     }
   }

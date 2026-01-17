@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface PlayerForGuess {
+  player_id?: number;
+  season?: number;
   full_name: string;
   ppg: number | null;
   rpg: number | null;
@@ -12,6 +14,29 @@ export interface PlayerForGuess {
   fg_pct: number | null;
   three_pct: number | null;
   ft_pct: number | null;
+}
+
+export interface GuessLeaderboardSubmission {
+  userName: string;
+  score: number;
+  gameDate: string; // YYYY-MM-DD format
+  playerIdSeason: string; // Format: "playerId-season"
+}
+
+export interface GuessLeaderboardEntry {
+  id: number;
+  userName: string;
+  score: number;
+  gameDate: string;
+  playerIdSeason: string;
+  createdAt: string;
+}
+
+export interface GuessLeaderboardResponse {
+  success: boolean;
+  playerIdSeason: string;
+  count: number;
+  data: GuessLeaderboardEntry[];
 }
 
 export interface PlayerFilters {
@@ -31,6 +56,8 @@ export interface PlayerFilters {
 })
 export class GuessPlayerService {
   private apiUrl = '/api/guess-player/random';
+  private leaderboardUrl = '/api/guess-player-leaderboard';
+  private leaderboardPlayerUrl = '/api/guess-player-leaderboard/player';
 
   constructor(private http: HttpClient) {}
 
@@ -50,6 +77,15 @@ export class GuessPlayerService {
     }
     
     return this.http.get<PlayerForGuess>(this.apiUrl, { params });
+  }
+
+  submitGuess(guessData: GuessLeaderboardSubmission): Observable<any> {
+    return this.http.post(this.leaderboardUrl, guessData);
+  }
+
+  getPlayerLeaderboard(playerIdSeason: string): Observable<GuessLeaderboardResponse> {
+    const params = new HttpParams().set('playerIdSeason', playerIdSeason);
+    return this.http.get<GuessLeaderboardResponse>(this.leaderboardPlayerUrl, { params });
   }
 }
 

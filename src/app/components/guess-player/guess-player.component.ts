@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GuessPlayerService, PlayerForGuess, PlayerFilters } from '../../services/guess-player.service';
+import { GuessPlayerService, PlayerForGuess, PlayerFilters, GuessLeaderboardEntry } from '../../services/guess-player.service';
 
 @Component({
   selector: 'app-guess-player',
@@ -11,6 +11,10 @@ import { GuessPlayerService, PlayerForGuess, PlayerFilters } from '../../service
   styleUrl: './guess-player.component.css'
 })
 export class GuessPlayerComponent implements OnInit {
+  private readonly USERNAME_STORAGE_KEY = 'guess_player_username';
+  
+  username = signal<string>('');
+  hasUsername = signal(false);
   player = signal<PlayerForGuess | null>(null);
   isLoading = signal(false);
   error = signal<string | null>(null);
@@ -19,6 +23,8 @@ export class GuessPlayerComponent implements OnInit {
   comparisonText = signal<string>('');
   comparisonStats = signal<Array<{label: string, guess: string, actual: string}>>([]);
   showFilters = signal(false);
+  leaderboard = signal<GuessLeaderboardEntry[]>([]);
+  isLoadingLeaderboard = signal(false);
 
   // Input values
   ppg = signal<string>('');
@@ -46,7 +52,75 @@ export class GuessPlayerComponent implements OnInit {
   constructor(private guessPlayerService: GuessPlayerService) {}
 
   ngOnInit() {
+    // Load username from localStorage
+    const storedUsername = localStorage.getItem(this.USERNAME_STORAGE_KEY);
+    if (storedUsername) {
+      this.username.set(storedUsername);
+      this.hasUsername.set(true);
+    }
+    
+    // Only load player if username is set
+    if (this.hasUsername()) {
+      this.loadRandomPlayer();
+    }
+  }
+
+  onUsernameSubmit() {
+    const usernameValue = this.username().trim();
+    if (!usernameValue) {
+      this.error.set('Please enter a username');
+      return;
+    }
+    
+    // Save to localStorage
+    localStorage.setItem(this.USERNAME_STORAGE_KEY, usernameValue);
+    this.hasUsername.set(true);
+    this.error.set(null);
+    
+    // Load a random player after username is set
     this.loadRandomPlayer();
+  }
+
+  getCentralTimeDate(): string {
+    const now = new Date();
+    const centralFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    const parts = centralFormatter.formatToParts(now);
+    const year = parts.find(p => p.type === 'year')?.value;
+    const month = parts.find(p => p.type === 'month')?.value;
+    const day = parts.find(p => p.type === 'day')?.value;
+    return `${year}-${month}-${day}`;
+  }
+
+  loadLeaderboard(playerId: number) {
+    const playerIdSeason = `${playerId}-2026`;
+    this.isLoadingLeaderboard.set(true);
+    
+    this.guessPlayerService.getPlayerLeaderboard(playerIdSeason).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          // Ensure all scores are numbers (convert string to number if needed)
+          // Don't round - preserve the exact decimal value from the API
+          const processedData: GuessLeaderboardEntry[] = response.data.map(entry => ({
+            ...entry,
+            score: typeof entry.score === 'string' ? parseFloat(entry.score) : (entry.score as number)
+          }));
+          this.leaderboard.set(processedData);
+        } else {
+          this.leaderboard.set([]);
+        }
+        this.isLoadingLeaderboard.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading leaderboard:', err);
+        this.leaderboard.set([]);
+        this.isLoadingLeaderboard.set(false);
+      }
+    });
   }
 
   loadRandomPlayer() {
@@ -129,6 +203,11 @@ export class GuessPlayerComponent implements OnInit {
         this.player.set(player);
         this.isLoading.set(false);
         this.error.set(null); // Clear any previous errors
+        
+        // Load leaderboard for this player
+        if (player.player_id) {
+          this.loadLeaderboard(player.player_id);
+        }
       },
       error: (err) => {
         console.error('Error loading player:', err);
@@ -228,8 +307,14 @@ export class GuessPlayerComponent implements OnInit {
       this.getStatPercentage(ftGuess, actualFT) * 15
     );
 
-    const finalScore = 100 - (Math.round(percentage * 10) / 10);
-    this.score.set(finalScore);
+    // Calculate final score with 1 decimal place precision
+    // Round percentage to 1 decimal place first
+    const roundedPercentage = Math.round(percentage * 10) / 10;
+    const finalScore = 100 - roundedPercentage;
+    // Round final score to 1 decimal place to avoid floating point precision issues
+    // Use Number() to ensure proper decimal precision without additional rounding
+    const finalScoreRounded = Number(finalScore.toFixed(1));
+    this.score.set(finalScoreRounded);
 
     // Create comparison text (for desktop/pre view)
     const comparison = `
@@ -260,6 +345,38 @@ FT%:    Your Guess: ${(ftGuess.toFixed(1) + '%').padEnd(8, ' ')}    Actual: ${ac
     this.comparisonText.set(comparison);
     this.comparisonStats.set(stats);
     this.showResult.set(true);
+
+    // Submit score to leaderboard
+    const currentPlayer = this.player();
+    if (currentPlayer && currentPlayer.player_id) {
+      const gameDate = this.getCentralTimeDate();
+      const playerIdSeason = `${currentPlayer.player_id}-2026`;
+      
+      // Use the exact same score value shown in the modal
+      // This ensures the POST value matches what's displayed
+      const scoreToSubmit = this.score() ?? finalScoreRounded;
+      
+      const guessData = {
+        userName: this.username(),
+        score: scoreToSubmit,
+        gameDate: gameDate,
+        playerIdSeason: playerIdSeason
+      };
+      
+      this.guessPlayerService.submitGuess(guessData).subscribe({
+        next: (response) => {
+          console.log('Guess submitted successfully:', response);
+          // Reload leaderboard after submission
+          if (currentPlayer.player_id) {
+            this.loadLeaderboard(currentPlayer.player_id);
+          }
+        },
+        error: (err) => {
+          console.error('Error submitting guess:', err);
+          // Don't show error to user as the game result is already displayed
+        }
+      });
+    }
 
     // Clear all input fields after submission
     this.ppg.set('');

@@ -491,6 +491,8 @@ app.get('/api/guess-player/random', async (req, res) => {
     // Get a random player with their stats from season_averages
     const randomPlayerQuery = `
       SELECT
+        p.id AS player_id,
+        sa.season,
         p.full_name,
         sa.points AS ppg,
         sa.rebounds AS rpg,
@@ -774,6 +776,48 @@ app.get('/api/player/:playerName', async (req, res) => {
 });
 
 /**
+ * API endpoint for submitting Guess Player leaderboard scores (proxies to backend service)
+ */
+app.post('/api/guess-player-leaderboard', async (req, res) => {
+  try {
+    const backendUrl = process.env['BACKEND_SERVICE'];
+    const apiAuthKey = process.env['API_AUTH_KEY'];
+    
+    if (!backendUrl) {
+      return res.status(500).json({
+        error: 'Backend service URL not configured',
+        details: 'BACKEND_SERVICE environment variable is not set'
+      });
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add authentication header from .env file (backend checks x-api-key or authorization header)
+    if (apiAuthKey) {
+      headers['x-api-key'] = apiAuthKey;
+    }
+
+    const response = await fetch(`${backendUrl}/api/guess-player-leaderboard`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(req.body)
+    });
+
+    const data = await response.json();
+    
+    return res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Error proxying guess player leaderboard request:', error);
+    return res.status(500).json({
+      error: 'Failed to submit guess player score',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * API endpoint for submitting Bogle game scores (proxies to backend service)
  */
 app.post('/api/bogle/scores', async (req, res) => {
@@ -892,6 +936,47 @@ app.get('/api/bogle/scores', async (req, res) => {
     console.error('Error proxying scores request:', error);
     return res.status(500).json({
       error: 'Failed to fetch scores.',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * API endpoint for fetching Guess Player leaderboard by player ID and season (proxies to backend service)
+ */
+app.get('/api/guess-player-leaderboard/player', async (req, res) => {
+  try {
+    const backendUrl = process.env['BACKEND_SERVICE'];
+    const playerIdSeason = req.query['playerIdSeason'] as string;
+    
+    if (!playerIdSeason) {
+      return res.status(400).json({
+        error: 'playerIdSeason query parameter is required',
+        details: 'playerIdSeason must be in format "playerId-season" (e.g., "246-2026")'
+      });
+    }
+    
+    if (!backendUrl) {
+      return res.status(500).json({
+        error: 'Backend service URL not configured',
+        details: 'BACKEND_SERVICE environment variable is not set'
+      });
+    }
+
+    const response = await fetch(`${backendUrl}/api/guess-player-leaderboard/player?playerIdSeason=${encodeURIComponent(playerIdSeason)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const data = await response.json();
+    
+    return res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Error proxying guess player leaderboard request:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch leaderboard.',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }

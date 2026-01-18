@@ -157,8 +157,9 @@ Draft year filters:
 - For explicit mentions like "players drafted in 2023", set filters.draft_year_range accordingly (both gte and lte equal to 2023).
 
 College filters:
-- If the user mentions a college/university (e.g., "Duke players"), populate filters.colleges with an array of matching school names (e.g., ["Duke"]).
+- If the user mentions a college/university (e.g., "Duke players", "best Duke players", "Give me the best Duke players", "Duke alumni", "players from Duke"), populate filters.colleges with an array of matching school names (e.g., ["Duke"]).
 - Recognize common abbreviations or nicknames (e.g., "UNC" for "North Carolina").
+- Examples: "Give me the best Duke players in the NBA" → filters.colleges = ["Duke"], "top scorers from Kentucky" → filters.colleges = ["Kentucky"], "best UNC players" → filters.colleges = ["North Carolina"].
 
 Country filters:
 - If the user mentions a country (e.g., "players from Serbia", "best Serbian players", "who are the best players from France"), populate filters.countries with an array of country names (e.g., ["Serbia"], ["France"]).
@@ -188,10 +189,18 @@ Salary filters:
 - For "players making between X and Y million", set filters.salary_range.gte = X * 1000000 and filters.salary_range.lte = Y * 1000000.
 - Examples: "players making less than 30 million a year" → salary_range.lte = 30000000, "players earning over 20 million" → salary_range.gte = 20000000.
 
-Minimum metric value filters:
+Minimum and maximum metric value filters:
 - If the user asks for players "scoring over X points", "averaging more than X assists", "rebounding over X per game", etc., set filters.min_metric_value to the specified number.
-- Match the min_metric_value to the metric being queried (e.g., if metric is "ppg" and user says "scoring over 20", set min_metric_value = 20).
-- Examples: "scoring over 20 points" → min_metric_value = 20 (with metric = ppg), "averaging more than 10 assists" → min_metric_value = 10 (with metric = apg).
+- If the user asks for players "scoring under X points", "averaging less than X assists", "shooting X or less shots", "15 or less shots per game", "at most X", etc., set filters.max_metric_value to the specified number.
+- Match the min_metric_value or max_metric_value to the metric being queried (e.g., if metric is "ppg" and user says "scoring over 20", set min_metric_value = 20).
+- When filtering by a different metric (using filter_by_metric), apply min_metric_value or max_metric_value to that filter metric.
+- Examples: 
+  * "scoring over 20 points" → min_metric_value = 20 (with metric = ppg)
+  * "averaging more than 10 assists" → min_metric_value = 10 (with metric = apg)
+  * "shooting 15 or less shots per game" → max_metric_value = 15 (with filter_by_metric = fga_pg if ranking by ppg)
+  * "for guys who shoot 15 or less shots a game, who averages the most points per game?" → metric = ppg, filter_by_metric = fga_pg, max_metric_value = 15
+  * "players averaging less than 20 points" → max_metric_value = 20 (with metric = ppg)
+  * "players with at most 10 assists per game" → max_metric_value = 10 (with metric = apg)
 
 Combined stat filtering (filtering by one metric while ranking by another):
 - If the user asks to filter by one metric while ranking by a different metric (e.g., "Of players averaging over 20 points per game, who has the highest field goal percentage?"), you need to:
@@ -210,7 +219,8 @@ Combined stat filtering (filtering by one metric while ranking by another):
 
 Metric rules:
 - Always set metric to one of the allowed values.
-- If the user asks about players in general without mentioning a specific stat (e.g., "show me all the raptors players", "find me the greatest duke players", "team best players", "who on the nuggets are playing the highest performing"), use metric = "all".
+- If the user asks about players in general without mentioning a specific stat (e.g., "show me all the raptors players", "find me the greatest duke players", "Give me the best Duke players in the NBA", "team best players", "who on the nuggets are playing the highest performing"), use metric = "all".
+- IMPORTANT: When the user asks for "best [college] players", "top [college] players", "greatest [college] players", or similar phrasing without a specific stat, set metric = "all" AND include filters.colleges = ["[college]"]. For example, "Give me the best Duke players in the NBA" → { metric: "all", filters: { colleges: ["Duke"] } }.
 - If the user mentions a specific stat (points, assists, rebounds, steals, blocks, shooting percentages, etc.), use the corresponding metric.
 - If the user does not specify a metric but is asking who is better overall in a comparison context, default to "ppg".
 - Do NOT return an empty string for metric.
@@ -1070,10 +1080,16 @@ app.get('/api/bogle/daily-game', async (req, res) => {
     }
 
     // Add minimum games filter for Bogle (players must have played at least 15 games)
-    if (!query.filters) {
-      query.filters = {};
+    // Exception: Skip min_games requirement for clutch queries
+    if (!query.clutch) {
+      if (!query.filters) {
+        query.filters = {};
+      }
+      // Only set min_games if not already set and not a clutch query
+      if (query.filters.min_games == null) {
+        query.filters.min_games = 15;
+      }
     }
-    query.filters.min_games = 15;
 
     const rows = await runQuery(query);
     

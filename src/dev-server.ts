@@ -169,8 +169,9 @@ Draft year filters:
 - For explicit mentions like "players drafted in 2023", set filters.draft_year_range accordingly (both gte and lte equal to 2023).
 
 College filters:
-- If the user mentions a college/university (e.g., "Duke players"), populate filters.colleges with an array of matching school names (e.g., ["Duke"]).
+- If the user mentions a college/university (e.g., "Duke players", "best Duke players", "Give me the best Duke players", "Duke alumni", "players from Duke"), populate filters.colleges with an array of matching school names (e.g., ["Duke"]).
 - Recognize common abbreviations or nicknames (e.g., "UNC" for "North Carolina").
+- Examples: "Give me the best Duke players in the NBA" → filters.colleges = ["Duke"], "top scorers from Kentucky" → filters.colleges = ["Kentucky"], "best UNC players" → filters.colleges = ["North Carolina"].
 
 Country filters:
 - If the user mentions a country (e.g., "players from Serbia", "best Serbian players", "who are the best players from France"), populate filters.countries with an array of country names (e.g., ["Serbia"], ["France"]).
@@ -207,7 +208,8 @@ Minimum metric value filters:
 
 Metric rules:
 - Always set metric to one of the allowed values.
-- If the user asks about players in general without mentioning a specific stat (e.g., "show me all the raptors players", "find me the greatest duke players", "team best players", "who on the nuggets are playing the highest performing"), use metric = "all".
+- If the user asks about players in general without mentioning a specific stat (e.g., "show me all the raptors players", "find me the greatest duke players", "Give me the best Duke players in the NBA", "team best players", "who on the nuggets are playing the highest performing"), use metric = "all".
+- IMPORTANT: When the user asks for "best [college] players", "top [college] players", "greatest [college] players", or similar phrasing without a specific stat, set metric = "all" AND include filters.colleges = ["[college]"]. For example, "Give me the best Duke players in the NBA" → { metric: "all", filters: { colleges: ["Duke"] } }.
 - If the user mentions a specific stat (points, assists, rebounds, steals, blocks, shooting percentages, etc.), use the corresponding metric.
 - If the user does not specify a metric but is asking who is better overall in a comparison context, default to "ppg".
 - Do NOT return an empty string for metric.

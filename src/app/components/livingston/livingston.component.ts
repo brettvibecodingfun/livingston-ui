@@ -31,7 +31,7 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
   sampleQuestions = [
     "Who are the top scoring rookies in the NBA this year?",
     "Who leads the NBA in NET Rating this year?",
-    "Give me the best Duke players in the NBA",
+    "Who are the best Duke players in the NBA?",
     "Of players who shoot more than 7 threes per game, who has the best percentage?",
     "Compare Stephen Curry and Cade Cunningham"
   ];

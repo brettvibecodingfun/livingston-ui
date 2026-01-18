@@ -284,6 +284,47 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     whereAgg.push(`sa.${seasonAvgCol} >= $${i}`);
   }
 
+  // Add maximum metric value filter (e.g., "shooting 15 or less shots per game")
+  // If filter_by_metric is specified, filter by that metric instead of the ranking metric
+  if (q.filters?.max_metric_value != null) {
+    // Use filter_by_metric if specified, otherwise use the ranking metric
+    const filterMetric = q.filters?.filter_by_metric || q.metric;
+    if (!filterMetric) return []; // Need at least one metric to filter by
+    
+    const metricCol = METRIC_COL_MAP[filterMetric] || 'points_per_game';
+    const seasonAvgCol = metricCol === 'points_per_game' ? 'points' :
+                        metricCol === 'assists_per_game' ? 'assists' :
+                        metricCol === 'rebounds_per_game' ? 'rebounds' :
+                        metricCol === 'steals_per_game' ? 'steals' :
+                        metricCol === 'blocks_per_game' ? 'blocks' :
+                        metricCol === 'field_goal_percentage' ? 'fg_pct' :
+                        metricCol === 'three_point_percentage' ? 'three_pct' :
+                        metricCol === 'free_throw_percentage' ? 'ft_pct' :
+                        metricCol === 'tpm' ? 'tpm' :
+                        metricCol === 'tpa' ? 'tpa' :
+                        metricCol === 'ftm' ? 'ftm' :
+                        metricCol === 'fta' ? 'fta' :
+                        metricCol === 'offensive_rating' ? 'off_rating' :
+                        metricCol === 'defensive_rating' ? 'def_rating' :
+                        metricCol === 'net_rating' ? 'net_rating' :
+                        metricCol === 'player_impact_estimate' ? 'pie' :
+                        metricCol === 'estimated_pace' ? 'e_pace' :
+                        metricCol === 'field_goals_attempted_per_game' ? 'fga_pg' :
+                        metricCol === 'field_goals_made_per_game' ? 'fgm_pg' :
+                        metricCol === 'true_shooting_percentage' ? 'ts_pct' :
+                        metricCol === 'assist_percentage' ? 'ast_pct' :
+                        metricCol === 'effective_field_goal_percentage' ? 'efg_pct' :
+                        metricCol === 'rebound_percentage' ? 'reb_pct' :
+                        metricCol === 'usage_percentage' ? 'usg_pct' :
+                        metricCol === 'defensive_rebound_percentage' ? 'dreb_pct' :
+                        metricCol === 'offensive_rebound_percentage' ? 'oreb_pct' :
+                        metricCol === 'assist_ratio' ? 'ast_ratio' :
+                        metricCol === 'estimated_turnover_percentage' ? 'e_tov_pct' :
+                        metricCol === 'estimated_usage_percentage' ? 'e_usg_pct' : 'points';
+    params.push(q.filters.max_metric_value); i++;
+    whereAgg.push(`sa.${seasonAvgCol} <= $${i}`);
+  }
+
   // For compare tasks, don't order by metric - just return the requested players
   // For other tasks, order by the metric or by age if specified
   let orderByClause: string;

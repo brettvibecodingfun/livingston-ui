@@ -60,10 +60,45 @@ export interface TeamData {
   topScorers?: TeamPlayer[];
 }
 
+export interface HistoricalComparison {
+  playerName: string;
+  age?: number;
+  clusterNumber?: number;
+  noClusterFound?: boolean;
+  ageBreaksModel?: boolean;
+  currentPlayer?: {
+    fullName: string;
+    team: string | null;
+    season: number;
+    points: number;
+    assists: number;
+    rebounds: number;
+    fgPct: number;
+    threePct: number;
+    ftPct: number;
+    gamesPlayed: number;
+    minutes: number;
+  };
+  comparisons?: {
+    playerName: string;
+    playerFullName: string;
+    season: number;
+    points: number;
+    assists: number;
+    rebounds: number;
+    fgPct: number;
+    threePct: number;
+    ftPct: number;
+    gamesPlayed: number;
+    minutes: number;
+  }[];
+}
+
 export interface QueryResponse {
   query: Query;
   rows?: PlayerStatsRow[];
   teams?: TeamData[];
+  historicalComparison?: HistoricalComparison;
   summary?: string;
 }
 

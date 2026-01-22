@@ -36,11 +36,19 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
     "Compare Stephen Curry and Cade Cunningham"
   ];
   
-  private autoScrollInterval: any = null;
+  private animationFrameId: number | null = null;
   private isAutoScrolling = true;
   private hasUserClicked = false; // Track if user has clicked a chip
+  private isUserInteracting = false; // Track if user is manually scrolling
+  private resumeTimeout: any = null;
+  private boundHandleUserInteraction: () => void;
+  private boundHandleUserInteractionEnd: () => void;
 
-  constructor(private livingstonService: LivingstonService) {}
+  constructor(private livingstonService: LivingstonService) {
+    // Bind event handlers once in constructor so we can properly remove them
+    this.boundHandleUserInteraction = this.handleUserInteraction.bind(this);
+    this.boundHandleUserInteractionEnd = this.handleUserInteractionEnd.bind(this);
+  }
   
   ngOnInit() {
     // Component initialization
@@ -50,45 +58,103 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
     // Start auto-scroll after view is initialized (ViewChild is available)
     setTimeout(() => {
       this.startAutoScroll();
+      this.setupTouchHandlers();
     }, 100);
   }
   
   ngOnDestroy() {
     this.stopAutoScroll();
+    this.removeTouchHandlers();
+  }
+  
+  setupTouchHandlers() {
+    const container = this.sampleQuestionsContainer?.nativeElement;
+    if (!container) return;
+    
+    // Pause scrolling when user touches/interacts
+    container.addEventListener('touchstart', this.boundHandleUserInteraction, { passive: true });
+    container.addEventListener('mousedown', this.boundHandleUserInteraction);
+    container.addEventListener('wheel', this.boundHandleUserInteraction, { passive: true });
+    
+    // Resume scrolling after user stops interacting
+    container.addEventListener('touchend', this.boundHandleUserInteractionEnd, { passive: true });
+    container.addEventListener('mouseup', this.boundHandleUserInteractionEnd);
+    container.addEventListener('mouseleave', this.boundHandleUserInteractionEnd);
+  }
+  
+  removeTouchHandlers() {
+    const container = this.sampleQuestionsContainer?.nativeElement;
+    if (!container) return;
+    
+    container.removeEventListener('touchstart', this.boundHandleUserInteraction);
+    container.removeEventListener('mousedown', this.boundHandleUserInteraction);
+    container.removeEventListener('wheel', this.boundHandleUserInteraction);
+    container.removeEventListener('touchend', this.boundHandleUserInteractionEnd);
+    container.removeEventListener('mouseup', this.boundHandleUserInteractionEnd);
+    container.removeEventListener('mouseleave', this.boundHandleUserInteractionEnd);
+  }
+  
+  handleUserInteraction() {
+    this.isUserInteracting = true;
+    if (this.resumeTimeout) {
+      clearTimeout(this.resumeTimeout);
+    }
+  }
+  
+  handleUserInteractionEnd() {
+    // Resume scrolling after 2 seconds of no interaction
+    if (this.resumeTimeout) {
+      clearTimeout(this.resumeTimeout);
+    }
+    this.resumeTimeout = setTimeout(() => {
+      this.isUserInteracting = false;
+    }, 2000);
   }
   
   startAutoScroll() {
-    if (this.autoScrollInterval || this.hasUserClicked) return;
+    if (this.animationFrameId !== null || this.hasUserClicked) return;
     
     this.isAutoScrolling = true;
-    this.autoScrollInterval = setInterval(() => {
-      if (!this.isAutoScrolling || this.hasUserClicked) return;
+    const scroll = () => {
+      if (!this.isAutoScrolling || this.hasUserClicked || this.isUserInteracting) {
+        this.animationFrameId = requestAnimationFrame(scroll);
+        return;
+      }
       
       const container = this.sampleQuestionsContainer?.nativeElement;
-      if (!container) return;
-      
-      const scrollAmount = 1; // Slow scroll speed
-      const containerWidth = container.clientWidth;
-      const scrollWidth = container.scrollWidth;
-      const maxScroll = scrollWidth - containerWidth;
-      
-      // Calculate the width of one set of questions (half of total since we duplicate)
-      const singleSetWidth = scrollWidth / 2;
-      
-      if (container.scrollLeft >= singleSetWidth) {
-        // When we've scrolled past the first set, reset to beginning seamlessly
-        container.scrollLeft = container.scrollLeft - singleSetWidth;
-      } else {
-        container.scrollBy({ left: scrollAmount, behavior: 'auto' });
+      if (!container) {
+        this.animationFrameId = requestAnimationFrame(scroll);
+        return;
       }
-    }, 30); // Update every 30ms for smooth scrolling
+      
+      const scrollWidth = container.scrollWidth;
+      const singleSetWidth = scrollWidth / 2;
+      const currentScroll = container.scrollLeft;
+      
+      // If we've scrolled past the first set, reset seamlessly
+      if (currentScroll >= singleSetWidth - 1) {
+        // Reset to the beginning of the first set without animation
+        container.scrollLeft = currentScroll - singleSetWidth;
+      } else {
+        // Smoothly scroll forward
+        container.scrollLeft = currentScroll + 0.5; // Slower, smoother scroll
+      }
+      
+      this.animationFrameId = requestAnimationFrame(scroll);
+    };
+    
+    this.animationFrameId = requestAnimationFrame(scroll);
   }
   
   stopAutoScroll() {
     this.isAutoScrolling = false;
-    if (this.autoScrollInterval) {
-      clearInterval(this.autoScrollInterval);
-      this.autoScrollInterval = null;
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    if (this.resumeTimeout) {
+      clearTimeout(this.resumeTimeout);
+      this.resumeTimeout = null;
     }
   }
   
@@ -145,6 +211,14 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isSingleTeam(): boolean {
     return this.getTeamData().length === 1;
+  }
+
+  isHistoricalComparison(): boolean {
+    return !!this.results()?.historicalComparison;
+  }
+
+  getHistoricalComparison() {
+    return this.results()?.historicalComparison;
   }
 
   // Determine which columns to show based on the query metric
@@ -341,13 +415,17 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  getHeadshotSrc(player: PlayerStatsRow): string {
-    if (!player.full_name) {
+  /**
+   * Normalizes a player name for use in file paths by replacing spaces with underscores
+   * and converting special characters to English equivalents.
+   */
+  private normalizePlayerName(fullName: string): string {
+    if (!fullName) {
       return '';
     }
     
-    // Normalize name: replace spaces with underscores and remove special characters
-    let name = player.full_name.replace(/ /g, '_');
+    // Normalize name: replace spaces with underscores
+    let name = fullName.replace(/ /g, '_');
     
     // Replace special characters with English equivalents
     name = name
@@ -377,18 +455,59 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
       .replace(/ò/g, 'o').replace(/Ò/g, 'O')
       .replace(/ù/g, 'u').replace(/Ù/g, 'U');
     
-    if (this.headshotErrorMap.has(name)) {
-      return '';
-    }
-    return `/assets/playerHeadshots/${encodeURIComponent(name)}.jpg`;
+    return name;
   }
 
-  onHeadshotError(player: PlayerStatsRow, event: Event) {
-    if (player.full_name) {
-      this.headshotErrorMap.add(player.full_name);
+  /**
+   * Gets the headshot image source path for a player name.
+   * Works with either a PlayerStatsRow object or a string name.
+   */
+  getHeadshotSrc(playerOrName: PlayerStatsRow | string): string {
+    const fullName = typeof playerOrName === 'string' ? playerOrName : playerOrName.full_name;
+    
+    if (!fullName) {
+      return '';
     }
+    
+    const normalizedName = this.normalizePlayerName(fullName);
+    
+    if (this.headshotErrorMap.has(normalizedName)) {
+      return '';
+    }
+    
+    return `/assets/playerHeadshots/${encodeURIComponent(normalizedName)}.jpg`;
+  }
+
+  /**
+   * Gets the headshot image source path for a player name string.
+   * @deprecated Use getHeadshotSrc instead - it now accepts both PlayerStatsRow and string
+   */
+  getHeadshotSrcForName(fullName: string): string {
+    return this.getHeadshotSrc(fullName);
+  }
+
+  /**
+   * Handles headshot image load errors by adding the player to the error map and hiding the image.
+   * Works with either a PlayerStatsRow object or a string name.
+   */
+  onHeadshotError(playerOrName: PlayerStatsRow | string, event: Event) {
+    const fullName = typeof playerOrName === 'string' ? playerOrName : playerOrName.full_name;
+    
+    if (fullName) {
+      const normalizedName = this.normalizePlayerName(fullName);
+      this.headshotErrorMap.add(normalizedName);
+    }
+    
     const img = event.target as HTMLImageElement;
     img.style.display = 'none';
+  }
+
+  /**
+   * Handles headshot image load errors for a player name string.
+   * @deprecated Use onHeadshotError instead - it now accepts both PlayerStatsRow and string
+   */
+  onHeadshotErrorForName(fullName: string, event: Event) {
+    this.onHeadshotError(fullName, event);
   }
 
   openHelpModal() {

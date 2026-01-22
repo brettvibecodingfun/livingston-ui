@@ -89,6 +89,7 @@ Available tasks:
 - lookup: find specific players
 - compare: compare players
 - team: query about teams (e.g., "best team", "worst team", "top teams", "who's the best team"). When task is "team", do NOT include metric in the response.
+- historical_comparison: find historical player comparisons (e.g., "Find me a historical comparison for Tyrese Maxey", "Find someone from the past like Anthony Edwards", "Who are similar players to Stephen Curry historically?"). When task is "historical_comparison", include the player name in filters.players array. DO NOT include metric when task is "historical_comparison".
 
 Team abbreviations mapping (use these exact abbreviations):
 - Brooklyn Nets, Nets, Brooklyn → BKN
@@ -133,8 +134,9 @@ Team (OPTIONAL - only include if user explicitly mentions a team):
 Task selection rules (follow strictly):
 - If the user asks about teams (keywords such as "best team", "worst team", "top teams", "who's the best team", "what team has the best record", "summary of the thunder", "tell me about the lakers", etc.), set task = "team". DO NOT include metric when task is "team".
 - When task = "team" and the user mentions a specific team name (e.g., "thunder", "lakers", "celtics"), include the team field with the team abbreviation (e.g., "OKC", "LAL", "BOS"). This will return detailed information about that specific team including top scorers.
+- If the user asks for historical comparisons (keywords such as "historical comparison", "find someone from the past like", "find me a historical comparison for", "who are similar players to", "players like", "comparable players to", "historical comp", "find players like", etc.), set task = "historical_comparison". Include the player name in filters.players array. DO NOT include metric when task is "historical_comparison".
 - If the user explicitly compares players (keywords such as "compare", "versus", "vs", "better than", "better season", "who is having the better year", etc.), set task = "compare".
-- If the user asks for "top", "best", "leaders", "highest", "lowest", etc. without naming specific players and NOT asking about teams, use task = "leaders".
+- If the user asks for "top", "best", "leaders", "highest", "lowest", etc. without naming specific players and NOT asking about teams or historical comparisons, use task = "leaders".
 - Use task = "rank" when the request implies ordering/ranking but not necessarily top-N leaders wording.
 - Use task = "lookup" when the user searches for specific stats about one player or a constrained list without comparing.
 
@@ -654,6 +656,255 @@ app.post('/api/ask', async (req, res) => {
     let query = await toStructuredQuery(question);
     console.log('Parsed query:', JSON.stringify(query, null, 2));
 
+    // Check if this is a historical comparison query
+    if (query.task === 'historical_comparison') {
+      // Get player name from filters.players or extract from question
+      let playerName: string | null = null;
+      
+      if (query.filters?.players && query.filters.players.length > 0) {
+        playerName = query.filters.players[0];
+      } else {
+        // Fallback: Extract player name from question
+        const extractedNames = extractPlayerNames(question);
+        if (extractedNames.length > 0) {
+          playerName = extractedNames[0];
+        }
+      }
+      
+      if (!playerName) {
+        return res.status(400).json({ 
+          error: 'Could not find a player name in your question. Please specify a player name for historical comparison.' 
+        });
+      }
+      
+      // Check if this is a player whose age breaks the model (e.g., LeBron James)
+      const playerNameLower = playerName.toLowerCase();
+      const playersWithAgeIssues = ['lebron james', 'lebron', 'le bron james'];
+      
+      if (playersWithAgeIssues.some(name => playerNameLower.includes(name))) {
+        const historicalComparison = {
+          playerName: playerName,
+          ageBreaksModel: true
+        };
+
+        const query: Query = {
+          task: 'lookup',
+          season: DEFAULT_SEASON,
+          metric: 'all'
+        };
+
+        return res.json({
+          query: query,
+          historicalComparison: historicalComparison
+        });
+      }
+      
+      const backendUrl = process.env['BACKEND_SERVICE'];
+      
+      if (!backendUrl) {
+        return res.status(500).json({
+          error: 'Backend service URL not configured',
+          details: 'BACKEND_SERVICE environment variable is not set'
+        });
+      }
+
+      try {
+        // Step 1: Get player cluster data (case-insensitive - backend should handle this, but we'll send as-is)
+        const playerClusterResponse = await fetch(`${backendUrl}/api/clusters/player?name=${encodeURIComponent(playerName)}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!playerClusterResponse.ok) {
+          throw new Error(`Failed to fetch player cluster: ${playerClusterResponse.statusText}`);
+        }
+
+        const playerClusterData = await playerClusterResponse.json();
+        
+        if (!playerClusterData.success || !playerClusterData.data || playerClusterData.data.length === 0) {
+          // Return a response indicating no cluster was found, but still return successfully
+          // so the frontend can display a proper message
+          const historicalComparison = {
+            playerName: playerName,
+            noClusterFound: true
+          };
+
+          const query: Query = {
+            task: 'lookup',
+            season: DEFAULT_SEASON,
+            metric: 'all'
+          };
+
+          return res.json({
+            query: query,
+            historicalComparison: historicalComparison
+          });
+        }
+
+        // Get age and clusterNumber from the first result
+        const firstCluster = playerClusterData.data[0];
+        const age = firstCluster.age;
+        const clusterNumber = firstCluster.clusterNumber;
+
+        // Step 2: Get all clusters for this age and clusterNumber
+        const clustersResponse = await fetch(`${backendUrl}/api/clusters?age=${encodeURIComponent(age)}&clusterNumber=${encodeURIComponent(clusterNumber)}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!clustersResponse.ok) {
+          throw new Error(`Failed to fetch clusters: ${clustersResponse.statusText}`);
+        }
+
+        const clustersData = await clustersResponse.json();
+        
+        if (!clustersData.success || !clustersData.data || clustersData.data.length === 0) {
+          // Return a response indicating no cluster was found, but still return successfully
+          // so the frontend can display a proper message
+          const historicalComparison = {
+            playerName: playerName,
+            noClusterFound: true
+          };
+
+          const query: Query = {
+            task: 'lookup',
+            season: DEFAULT_SEASON,
+            metric: 'all'
+          };
+
+          return res.json({
+            query: query,
+            historicalComparison: historicalComparison
+          });
+        }
+
+        // Step 3: Filter out the original player and randomly select 3 players (case-insensitive matching)
+        const playerNameLower = playerName.toLowerCase();
+        const otherPlayers = clustersData.data.filter((p: any) => {
+          const pNameLower = (p.playerName || '').toLowerCase();
+          const pFullNameLower = (p.playerFullName || '').toLowerCase();
+          return pNameLower !== playerNameLower && pFullNameLower !== playerNameLower;
+        });
+
+        if (otherPlayers.length === 0) {
+          // Return a response indicating no cluster was found, but still return successfully
+          // so the frontend can display a proper message
+          const historicalComparison = {
+            playerName: playerName,
+            noClusterFound: true
+          };
+
+          const query: Query = {
+            task: 'lookup',
+            season: DEFAULT_SEASON,
+            metric: 'all'
+          };
+
+          return res.json({
+            query: query,
+            historicalComparison: historicalComparison
+          });
+        }
+
+        // Randomly select up to 3 players
+        const shuffled = otherPlayers.sort(() => 0.5 - Math.random());
+        const selectedPlayers = shuffled.slice(0, Math.min(3, shuffled.length));
+
+        // Step 4: Fetch current player's stats from the database
+        let currentPlayerStats = null;
+        try {
+          const playerQuery = `
+            SELECT
+              p.full_name,
+              t.abbreviation AS team,
+              sa.season,
+              sa.points,
+              sa.assists,
+              sa.rebounds,
+              sa.fg_pct,
+              sa.three_pct,
+              sa.ft_pct,
+              sa.games_played,
+              sa.minutes
+            FROM players p
+            LEFT JOIN teams t ON p.team_id = t.id
+            LEFT JOIN season_averages sa ON sa.player_id = p.id AND sa.season = $2
+            WHERE LOWER(p.full_name) = LOWER($1)
+            LIMIT 1
+          `;
+          
+          const playerResult = await pool.query(playerQuery, [playerName, DEFAULT_SEASON]);
+          
+          if (playerResult.rows.length > 0) {
+            const playerRow = playerResult.rows[0];
+            // Increment season by 1 for current season (2025 -> 2026)
+            const seasonFromDb = playerRow.season || DEFAULT_SEASON;
+            const displaySeason = seasonFromDb === DEFAULT_SEASON ? seasonFromDb + 1 : seasonFromDb;
+            currentPlayerStats = {
+              fullName: playerRow.full_name,
+              team: playerRow.team,
+              season: displaySeason,
+              points: playerRow.points || 0,
+              assists: playerRow.assists || 0,
+              rebounds: playerRow.rebounds || 0,
+              fgPct: playerRow.fg_pct || 0,
+              threePct: playerRow.three_pct || 0,
+              ftPct: playerRow.ft_pct || 0,
+              gamesPlayed: playerRow.games_played || 0,
+              minutes: playerRow.minutes || 0
+            };
+          }
+        } catch (error) {
+          console.error('Error fetching current player stats:', error);
+          // Continue without current player stats if there's an error
+        }
+
+        // Step 5: Format the response
+        const historicalComparison = {
+          playerName: playerName,
+          age: age,
+          clusterNumber: clusterNumber,
+          currentPlayer: currentPlayerStats,
+          comparisons: selectedPlayers.map((p: any) => ({
+            playerName: p.playerName,
+            playerFullName: p.playerFullName,
+            season: p.season,
+            points: p.points,
+            assists: p.assists,
+            rebounds: p.rebounds,
+            fgPct: p.fgPct,
+            threePct: p.threePct,
+            ftPct: p.ftPct,
+            gamesPlayed: p.gamesPlayed,
+            minutes: p.minutes
+          }))
+        };
+
+        // Create a minimal query for the response
+        const query: Query = {
+          task: 'lookup',
+          season: DEFAULT_SEASON,
+          metric: 'all'
+        };
+
+        return res.json({
+          query: query,
+          historicalComparison: historicalComparison
+        });
+
+      } catch (error) {
+        console.error('Error fetching historical comparison:', error);
+        return res.status(500).json({
+          error: 'Failed to fetch historical comparison data.',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    }
+
     // Query the database
     const extractedNames = extractPlayerNames(question);
     
@@ -693,6 +944,7 @@ app.post('/api/ask', async (req, res) => {
       query: Query;
       rows?: any[];
       teams?: any[];
+      historicalComparison?: any;
       summary?: string;
     } = {
       query: query,
@@ -1130,6 +1382,96 @@ app.get('/api/bogle/daily-game', async (req, res) => {
     console.error('API Error:', error);
     return res.status(500).json({
       error: 'Failed to fetch daily game data.',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * API endpoint for fetching clusters by age and cluster number (proxies to backend service)
+ */
+app.get('/api/clusters', async (req, res) => {
+  try {
+    const backendUrl = process.env['BACKEND_SERVICE'];
+    const age = req.query['age'] as string;
+    const clusterNumber = req.query['clusterNumber'] as string;
+    
+    if (!age) {
+      return res.status(400).json({
+        error: 'age query parameter is required',
+        details: 'age must be a number'
+      });
+    }
+    
+    if (!clusterNumber) {
+      return res.status(400).json({
+        error: 'clusterNumber query parameter is required',
+        details: 'clusterNumber must be a number'
+      });
+    }
+    
+    if (!backendUrl) {
+      return res.status(500).json({
+        error: 'Backend service URL not configured',
+        details: 'BACKEND_SERVICE environment variable is not set'
+      });
+    }
+
+    const response = await fetch(`${backendUrl}/api/clusters?age=${encodeURIComponent(age)}&clusterNumber=${encodeURIComponent(clusterNumber)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const data = await response.json();
+    
+    return res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Error proxying clusters request:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch clusters.',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * API endpoint for fetching player cluster data by name (proxies to backend service)
+ */
+app.get('/api/clusters/player', async (req, res) => {
+  try {
+    const backendUrl = process.env['BACKEND_SERVICE'];
+    const name = req.query['name'] as string;
+    
+    if (!name) {
+      return res.status(400).json({
+        error: 'name query parameter is required',
+        details: 'name must be a string'
+      });
+    }
+    
+    if (!backendUrl) {
+      return res.status(500).json({
+        error: 'Backend service URL not configured',
+        details: 'BACKEND_SERVICE environment variable is not set'
+      });
+    }
+
+    const response = await fetch(`${backendUrl}/api/clusters/player?name=${encodeURIComponent(name)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const data = await response.json();
+    
+    return res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Error proxying player cluster request:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch player cluster.',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }

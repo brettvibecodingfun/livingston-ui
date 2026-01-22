@@ -267,6 +267,122 @@
             }
           </div>
         </div>
+      } @else if (isHistoricalComparison()) {
+        <!-- Historical Comparison View -->
+        @let historicalComp = getHistoricalComparison();
+        <div class="card overflow-hidden">
+          @if (submittedQuestion()) {
+            <div class="submitted-question-container">
+              <h3 class="submitted-question-label">Question:</h3>
+              <p class="submitted-question-text">{{ submittedQuestion() }}</p>
+            </div>
+          }
+          @if (historicalComp!.ageBreaksModel) {
+            <!-- Age Breaks Model Message -->
+            <div class="historical-comparison-container">
+              <div class="no-cluster-found-container">
+                <div class="no-cluster-found-icon">
+                  <svg class="w-16 h-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <h2 class="no-cluster-found-title">Age Breaks Model</h2>
+                <p class="no-cluster-found-message">
+                  We couldn't generate a historical comparison for <strong>{{ historicalComp!.playerName }}</strong>.
+                </p>
+                <p class="no-cluster-found-submessage">
+                  {{ historicalComp!.playerName }}'s age is beyond the range our cluster model was trained on. 
+                  Historical comparisons require players to be within a specific age range to match with similar statistical profiles. (Longevity merchant)
+                </p>
+              </div>
+            </div>
+          } @else if (historicalComp!.noClusterFound) {
+            <!-- No Cluster Found Message -->
+            <div class="historical-comparison-container">
+              <div class="no-cluster-found-container">
+                <div class="no-cluster-found-icon">
+                  <svg class="w-16 h-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.647M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h2 class="no-cluster-found-title">No Cluster Found</h2>
+                <p class="no-cluster-found-message">
+                  We couldn't find cluster data for <strong>{{ historicalComp!.playerName }}</strong>.
+                </p>
+                <p class="no-cluster-found-submessage">
+                  Historical comparisons require cluster data to match players with similar statistical profiles. 
+                  Please check the player name and try again.
+                </p>
+              </div>
+            </div>
+          } @else {
+          <div class="historical-comparison-container">
+            <h2 class="historical-comparison-title">Historical Comparison for {{ historicalComp!.playerName }}</h2>
+            @if (historicalComp!.currentPlayer) {
+              <div class="historical-comparison-photo-container">
+                <img
+                  class="historical-comparison-photo"
+                  [src]="getHeadshotSrcForName(historicalComp!.currentPlayer.fullName)"
+                  [alt]="historicalComp!.currentPlayer.fullName + ' headshot'"
+                  (error)="onHeadshotErrorForName(historicalComp!.currentPlayer.fullName, $event)"
+                />
+              </div>
+            }
+            <p class="historical-comparison-subtitle">
+              Age {{ historicalComp!.age }}
+            </p>
+            <div class="overflow-x-auto">
+              <table class="data-table">
+                <thead class="table-header">
+                  <tr>
+                    <th class="table-header-cell">Player</th>
+                    <th class="table-header-cell">Season</th>
+                    <th class="table-header-cell">PPG</th>
+                    <th class="table-header-cell">APG</th>
+                    <th class="table-header-cell">RPG</th>
+                    <th class="table-header-cell">FG%</th>
+                    <th class="table-header-cell">3P%</th>
+                    <th class="table-header-cell">FT%</th>
+                    <th class="table-header-cell">GP</th>
+                    <th class="table-header-cell">MPG</th>
+                  </tr>
+                </thead>
+                <tbody class="table-body">
+                  @if (historicalComp!.currentPlayer) {
+                    @let currentPlayer = historicalComp!.currentPlayer;
+                    <tr class="table-row current-player-row">
+                      <td class="table-cell-bold">{{ currentPlayer.fullName }}</td>
+                      <td class="table-cell">{{ currentPlayer.season }}</td>
+                      <td class="table-cell">{{ currentPlayer.points.toFixed(1) }}</td>
+                      <td class="table-cell">{{ currentPlayer.assists.toFixed(1) }}</td>
+                      <td class="table-cell">{{ currentPlayer.rebounds.toFixed(1) }}</td>
+                      <td class="table-cell">{{ (currentPlayer.fgPct * 100).toFixed(1) }}%</td>
+                      <td class="table-cell">{{ (currentPlayer.threePct * 100).toFixed(1) }}%</td>
+                      <td class="table-cell">{{ (currentPlayer.ftPct * 100).toFixed(1) }}%</td>
+                      <td class="table-cell">{{ currentPlayer.gamesPlayed }}</td>
+                      <td class="table-cell">{{ currentPlayer.minutes.toFixed(1) }}</td>
+                    </tr>
+                  }
+                  @for (comparison of historicalComp!.comparisons; track comparison.playerName + comparison.season) {
+                    <tr class="table-row">
+                      <td class="table-cell-bold">{{ comparison.playerFullName }}</td>
+                      <td class="table-cell">{{ comparison.season }}</td>
+                      <td class="table-cell">{{ comparison.points.toFixed(1) }}</td>
+                      <td class="table-cell">{{ comparison.assists.toFixed(1) }}</td>
+                      <td class="table-cell">{{ comparison.rebounds.toFixed(1) }}</td>
+                      <td class="table-cell">{{ (comparison.fgPct * 100).toFixed(1) }}%</td>
+                      <td class="table-cell">{{ (comparison.threePct * 100).toFixed(1) }}%</td>
+                      <td class="table-cell">{{ (comparison.ftPct * 100).toFixed(1) }}%</td>
+                      <td class="table-cell">{{ comparison.gamesPlayed }}</td>
+                      <td class="table-cell">{{ comparison.minutes.toFixed(1) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+          }
+        </div>
       } @else if (results()!.rows && results()!.rows!.length > 0) {
         <!-- Table View -->
         <div class="card overflow-hidden">

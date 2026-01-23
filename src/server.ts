@@ -90,6 +90,10 @@ Available tasks:
 - compare: compare players
 - team: query about teams (e.g., "best team", "worst team", "top teams", "who's the best team"). When task is "team", do NOT include metric in the response.
 - historical_comparison: find historical player comparisons (e.g., "Find me a historical comparison for Tyrese Maxey", "Find someone from the past like Anthony Edwards", "Who are similar players to Stephen Curry historically?"). When task is "historical_comparison", include the player name in filters.players array. DO NOT include metric when task is "historical_comparison".
+  - For historical_comparison tasks, you can optionally include historical_comparison_count at the TOP LEVEL:
+    * If the user asks for "all" comparisons (e.g., "give me all the historical comparisons", "show me all comparisons", "all the historical comparisons for [player]"), set historical_comparison_count = "all".
+    * If the user specifies a number (e.g., "give me 5 historical comparisons", "show me 10 players like [player]"), set historical_comparison_count to that number.
+    * If the user just asks for a historical comparison without specifying a count (e.g., "find me a historical comparison for Anthony Edwards"), do NOT include historical_comparison_count (defaults to 3).
 
 Team abbreviations mapping (use these exact abbreviations):
 - Brooklyn Nets, Nets, Brooklyn → BKN
@@ -708,6 +712,9 @@ app.post('/api/ask', async (req, res) => {
         });
       }
 
+      // Store the historical_comparison_count from the query before entering try block
+      const historicalComparisonCount = query.historical_comparison_count;
+
       try {
         // Step 1: Get player cluster data (case-insensitive - backend should handle this, but we'll send as-is)
         const playerClusterResponse = await fetch(`${backendUrl}/api/clusters/player?name=${encodeURIComponent(playerName)}`, {
@@ -782,7 +789,7 @@ app.post('/api/ask', async (req, res) => {
           });
         }
 
-        // Step 3: Filter out the original player and randomly select 3 players (case-insensitive matching)
+        // Step 3: Filter out the original player (case-insensitive matching)
         const playerNameLower = playerName.toLowerCase();
         const otherPlayers = clustersData.data.filter((p: any) => {
           const pNameLower = (p.playerName || '').toLowerCase();
@@ -810,11 +817,24 @@ app.post('/api/ask', async (req, res) => {
           });
         }
 
-        // Randomly select up to 3 players
-        const shuffled = otherPlayers.sort(() => 0.5 - Math.random());
-        const selectedPlayers = shuffled.slice(0, Math.min(3, shuffled.length));
+        // Step 4: Determine how many players to return based on the query
+        const requestedCount = historicalComparisonCount;
+        let selectedPlayers: any[];
+        
+        if (requestedCount === 'all') {
+          // Return all players
+          selectedPlayers = otherPlayers;
+        } else if (typeof requestedCount === 'number' && requestedCount > 0) {
+          // Randomly select the requested number (or as many as available)
+          const shuffled = otherPlayers.sort(() => 0.5 - Math.random());
+          selectedPlayers = shuffled.slice(0, Math.min(requestedCount, shuffled.length));
+        } else {
+          // Default to 3 if nothing is specified
+          const shuffled = otherPlayers.sort(() => 0.5 - Math.random());
+          selectedPlayers = shuffled.slice(0, Math.min(3, shuffled.length));
+        }
 
-        // Step 4: Fetch current player's stats from the database
+        // Step 5: Fetch current player's stats from the database
         let currentPlayerStats = null;
         try {
           const playerQuery = `
@@ -863,7 +883,7 @@ app.post('/api/ask', async (req, res) => {
           // Continue without current player stats if there's an error
         }
 
-        // Step 5: Format the response
+        // Step 6: Format the response
         const historicalComparison = {
           playerName: playerName,
           age: age,

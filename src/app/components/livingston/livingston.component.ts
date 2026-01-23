@@ -29,6 +29,7 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedPlayerName = signal<string>('');
   
   sampleQuestions = [
+    "Find me a historical comparison for Cooper Flagg.",
     "Who are the top scoring rookies in the NBA this year?",
     "Who leads the NBA in NET Rating this year?",
     "Who are the best Duke players in the NBA?",

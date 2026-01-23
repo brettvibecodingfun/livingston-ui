@@ -1,10 +1,13 @@
 <div class="chat-container">
     <div class="chat-header">
       <h2 class="chat-subtitle">Ask a question about the 2026 NBA Season</h2>
-      <button class="help-button" (click)="openHelpModal()" type="button" title="What questions can I ask?">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="help-icon">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+      <button class="help-button help-button-desktop" (click)="openHelpModal()" type="button" title="What questions can I ask?">
+        Click Here for More Questions
+      </button>
+    </div>
+    <div class="help-button-mobile-wrapper">
+      <button class="help-button help-button-mobile" (click)="openHelpModal()" type="button" title="What questions can I ask?">
+        Click Here for More Questions
       </button>
     </div>
     
@@ -170,6 +173,9 @@
                 <p class="submitted-question-text">{{ submittedQuestion() }}</p>
               </div>
             }
+            <div class="mobile-scroll-hint">
+              <span class="mobile-scroll-hint-text">← Swipe to see more stats →</span>
+            </div>
             <div class="overflow-x-auto">
               <table class="data-table">
                 <thead class="table-header">
@@ -331,6 +337,9 @@
             <p class="historical-comparison-subtitle">
               Age {{ historicalComp!.age }}
             </p>
+            <div class="mobile-scroll-hint">
+              <span class="mobile-scroll-hint-text">← Swipe to see more stats →</span>
+            </div>
             <div class="overflow-x-auto">
               <table class="data-table">
                 <thead class="table-header">
@@ -393,6 +402,9 @@
               <p class="submitted-question-text">{{ submittedQuestion() }}</p>
             </div>
           }
+          <div class="mobile-scroll-hint">
+            <span class="mobile-scroll-hint-text">← Swipe to see more stats →</span>
+          </div>
           <div class="overflow-x-auto">
             <table class="data-table">
               <thead class="table-header">
@@ -478,6 +490,9 @@
             </div>
             <div class="help-example">
               <strong>Rankings:</strong> "Give me the top assist leaders in the NBA this year"
+            </div>
+            <div class="help-example">
+              <strong>Historical Comparison:</strong> "Find me a historical comparison for Anthony Edwards."
             </div>
             <div class="help-example">
               <strong>Team Rankings:</strong> "Who are the top rebounders on the Pistons?"

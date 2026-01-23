@@ -43,7 +43,8 @@ export const QueryZ = z.object({
   }).optional(),
   order_direction: z.enum(['asc', 'desc']).optional(),
   limit: z.number().optional(),
-  clutch: z.boolean().optional()
+  clutch: z.boolean().optional(),
+  historical_comparison_count: z.union([z.number(), z.literal('all')]).optional()
 });
 
 // Export the inferred TypeScript type
@@ -145,6 +146,12 @@ export const QuerySchema = {
     },
     clutch: {
       type: 'boolean'
+    },
+    historical_comparison_count: {
+      oneOf: [
+        { type: 'number' },
+        { type: 'string', enum: ['all'] }
+      ]
     }
   },
   required: ['task', 'season'],

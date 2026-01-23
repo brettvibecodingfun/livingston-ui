@@ -13,6 +13,10 @@
   position: relative;
 }
 
+.help-button-mobile-wrapper {
+  display: none;
+}
+
 .chat-subtitle {
   font-family: 'Inter', sans-serif;
   font-size: 1.125rem;
@@ -25,25 +29,27 @@
 .help-button {
   background: transparent;
   border: 2px solid #0B1F3B;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  padding: 0;
+  padding: 0.5rem 1rem;
   flex-shrink: 0;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #0B1F3B;
+  white-space: nowrap;
 }
 
 .help-button:hover {
   background: #0B1F3B;
-  transform: scale(1.1);
-}
-
-.help-button:hover .help-icon {
   color: #FDB931;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(11, 31, 59, 0.2);
 }
 
 /* Sample Questions Chips */
@@ -129,6 +135,38 @@
 }
 
 @media (max-width: 767px) {
+  .chat-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .help-button-desktop {
+    display: none;
+  }
+
+  .help-button-mobile-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0 1.5rem;
+  }
+
+  .help-button-mobile {
+    width: auto;
+    min-width: auto;
+    border: none;
+    border-radius: 9999px;
+    box-sizing: border-box;
+    background: transparent;
+    padding: 0.5rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .sample-questions-wrapper {
     /* Ensure wrapper allows scrolling on mobile */
     position: relative;
@@ -523,6 +561,29 @@
 .submitted-question-container {
   padding: 1.5rem 1.5rem 1rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-scroll-hint {
+  display: none;
+}
+
+.mobile-scroll-hint-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #9CA3AF;
+  text-align: center;
+  display: block;
+  padding: 0.5rem 1rem;
+  background: rgba(11, 31, 59, 0.05);
+  border-radius: 4px;
+  margin: 0 1rem 0.5rem 1rem;
+}
+
+@media (max-width: 767px) {
+  .mobile-scroll-hint {
+    display: block;
+  }
 }
 
 .submitted-question-label {

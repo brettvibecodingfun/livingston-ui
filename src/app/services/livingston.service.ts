@@ -100,6 +100,8 @@ export interface QueryResponse {
   teams?: TeamData[];
   historicalComparison?: HistoricalComparison;
   summary?: string;
+  error?: string;
+  suggestions?: string[];
 }
 
 export interface AskRequest {

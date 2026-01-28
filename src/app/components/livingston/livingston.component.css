@@ -418,6 +418,25 @@
 }
 
 .alert-info,
+.informational-answer-container {
+  background: #0b152b;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(253, 185, 49, 0.2);
+  margin-top: 1rem;
+}
+
+.informational-answer-content {
+  color: #E5E7EB;
+}
+
+.informational-answer-text {
+  font: 400 1rem 'Inter', sans-serif;
+  line-height: 1.6;
+  color: #E5E7EB;
+  margin: 0;
+}
+
 .alert-error {
   background: #102244;
   border: none;

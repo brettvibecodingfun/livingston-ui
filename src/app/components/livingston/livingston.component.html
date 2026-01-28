@@ -467,10 +467,28 @@
             </svg>
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">Error</h3>
+            <h3 class="text-sm font-medium text-red-800">Unable to Process Question</h3>
             <div class="mt-2 text-sm text-red-700">
               <p>{{ error() }}</p>
             </div>
+            @if (errorSuggestions().length > 0) {
+              <div class="mt-4">
+                <p class="text-sm font-medium text-red-800 mb-2">Try asking one of these questions instead:</p>
+                <ul class="list-disc list-inside space-y-1">
+                  @for (suggestion of errorSuggestions(); track suggestion) {
+                    <li>
+                      <button 
+                        type="button"
+                        class="text-sm text-red-600 hover:text-red-800 underline"
+                        (click)="onSampleQuestionClick(suggestion)"
+                      >
+                        {{ suggestion }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
           </div>
         </div>
       </div>

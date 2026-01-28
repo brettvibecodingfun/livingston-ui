@@ -23,6 +23,7 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
   results = signal<QueryResponse | null>(null);
   queryDebug = signal<Query | null>(null);
   error = signal<string | null>(null);
+  errorSuggestions = signal<string[]>([]);
   isDebugMode = environment.DEBUG;
   showHelpModal = signal(false);
   showPlayerModal = signal(false);
@@ -175,6 +176,7 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
     this.submittedQuestion.set(questionText); // Store the submitted question
     this.isLoading.set(true);
     this.error.set(null);
+    this.errorSuggestions.set([]);
     this.results.set(null);
     this.queryDebug.set(null);
     this.question.set(''); // Clear the input field
@@ -182,13 +184,26 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
     this.livingstonService.askQuestion({ question: questionText, narrate: this.narrate() })
       .subscribe({
         next: (response) => {
-          this.results.set(response);
-          this.queryDebug.set(response.query);
-          this.isLoading.set(false);
+          // Check if there's an error in the response
+          if (response.error) {
+            this.error.set(response.error);
+            this.errorSuggestions.set(response.suggestions || []);
+            this.isLoading.set(false);
+          } else {
+            this.results.set(response);
+            this.queryDebug.set(response.query);
+            this.isLoading.set(false);
+          }
         },
         error: (err) => {
           console.error('API Error:', err);
-          this.error.set(err.message || 'An error occurred while processing your question');
+          // Try to extract error message and suggestions from error response
+          if (err.error?.error) {
+            this.error.set(err.error.error);
+            this.errorSuggestions.set(err.error.suggestions || []);
+          } else {
+            this.error.set(err.message || 'An error occurred while processing your question');
+          }
           this.isLoading.set(false);
         }
       });

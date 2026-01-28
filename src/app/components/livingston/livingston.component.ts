@@ -221,6 +221,75 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
     return query?.task === 'team';
   }
 
+  isTeamStatsQuery(): boolean {
+    const query = this.results()?.query;
+    return !!(query?.task === 'team' && query?.metric && query.metric.startsWith('team_'));
+  }
+
+  getTeamStatColumn(): string | null {
+    const query = this.results()?.query;
+    if (query?.task === 'team' && query?.metric && query.metric.startsWith('team_')) {
+      return query.metric;
+    }
+    return null;
+  }
+
+  getTeamStatDisplayName(metric: string): string {
+    const displayNames: Record<string, string> = {
+      'team_ppg': 'PPG',
+      'team_fgm': 'FGM',
+      'team_fga': 'FGA',
+      'team_fg_pct': 'FG%',
+      'team_fta': 'FTA',
+      'team_ftm': 'FTM',
+      'team_ft_pct': 'FT%',
+      'team_fg3a': '3PA',
+      'team_fg3m': '3PM',
+      'team_fg3_pct': '3P%',
+      'team_pace': 'Pace',
+      'team_efg_pct': 'eFG%',
+      'team_ts_pct': 'TS%',
+      'team_def_rating': 'Def Rating',
+      'team_off_rating': 'Off Rating',
+      'team_net_rating': 'Net Rating',
+    };
+    return displayNames[metric] || metric;
+  }
+
+  getTeamStatValue(team: any, metric: string): string {
+    const valueMap: Record<string, keyof typeof team> = {
+      'team_ppg': 'points',
+      'team_fgm': 'fgm',
+      'team_fga': 'fga',
+      'team_fg_pct': 'fgPct',
+      'team_fta': 'fta',
+      'team_ftm': 'ftm',
+      'team_ft_pct': 'ftPct',
+      'team_fg3a': 'fg3a',
+      'team_fg3m': 'fg3m',
+      'team_fg3_pct': 'fg3Pct',
+      'team_pace': 'pace',
+      'team_efg_pct': 'efgPct',
+      'team_ts_pct': 'tsPct',
+      'team_def_rating': 'defensiveRating',
+      'team_off_rating': 'offensiveRating',
+      'team_net_rating': 'netRating',
+    };
+    const field = valueMap[metric];
+    if (!field || team[field] == null) return 'N/A';
+    
+    const value = team[field];
+    // Format percentages - multiply by 100 and add % sign
+    if (metric.includes('_pct')) {
+      return typeof value === 'number' ? `${(value * 100).toFixed(1)}%` : 'N/A';
+    } else {
+      // Format rating metrics (not percentages, just numbers) - remove trailing zeros
+      if (typeof value !== 'number') return 'N/A';
+      // Remove trailing zeros by using parseFloat which automatically removes them
+      return parseFloat(value.toFixed(1)).toString();
+    }
+  }
+
   getTeamData(): TeamData[] {
     return this.results()?.teams || [];
   }

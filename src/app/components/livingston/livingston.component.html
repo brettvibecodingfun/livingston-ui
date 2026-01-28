@@ -182,9 +182,13 @@
                   <tr>
                     <th class="table-header-cell">Rank</th>
                     <th class="table-header-cell">Team</th>
-                    <th class="table-header-cell">Record</th>
-                    <th class="table-header-cell">Win %</th>
-                    <th class="table-header-cell">Conference</th>
+                    @if (isTeamStatsQuery()) {
+                      <th class="table-header-cell">{{ getTeamStatDisplayName(getTeamStatColumn()!) }}</th>
+                    } @else {
+                      <th class="table-header-cell">Record</th>
+                      <th class="table-header-cell">Win %</th>
+                      <th class="table-header-cell">Conference</th>
+                    }
                   </tr>
                 </thead>
                 <tbody class="table-body">
@@ -192,9 +196,13 @@
                     <tr class="table-row">
                       <td class="table-cell">{{ i + 1 }}</td>
                       <td class="table-cell-bold">{{ team.teamName }}</td>
-                      <td class="table-cell">{{ team.wins }}-{{ team.losses }}</td>
-                      <td class="table-cell">{{ (team.winPct * 100).toFixed(1) }}%</td>
-                      <td class="table-cell">{{ team.conference === 'east' ? 'East' : 'West' }}</td>
+                      @if (isTeamStatsQuery() && getTeamStatColumn()) {
+                        <td class="table-cell">{{ getTeamStatValue(team, getTeamStatColumn()!) }}</td>
+                      } @else {
+                        <td class="table-cell">{{ team.wins }}-{{ team.losses }}</td>
+                        <td class="table-cell">{{ (team.winPct * 100).toFixed(1) }}%</td>
+                        <td class="table-cell">{{ team.conference === 'east' ? 'East' : 'West' }}</td>
+                      }
                     </tr>
                   }
                 </tbody>

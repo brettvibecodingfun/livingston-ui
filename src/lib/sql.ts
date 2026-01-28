@@ -250,7 +250,10 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     const filterMetric = q.filters?.filter_by_metric || q.metric;
     if (!filterMetric) return []; // Need at least one metric to filter by
     
-    const metricCol = METRIC_COL_MAP[filterMetric] || 'points_per_game';
+    // Skip team metrics - they're not valid for player queries
+    if (filterMetric.startsWith('team_')) return [];
+    
+    const metricCol = METRIC_COL_MAP[filterMetric as keyof typeof METRIC_COL_MAP] || 'points_per_game';
     const seasonAvgCol = metricCol === 'points_per_game' ? 'points' :
                         metricCol === 'assists_per_game' ? 'assists' :
                         metricCol === 'rebounds_per_game' ? 'rebounds' :
@@ -291,7 +294,10 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     const filterMetric = q.filters?.filter_by_metric || q.metric;
     if (!filterMetric) return []; // Need at least one metric to filter by
     
-    const metricCol = METRIC_COL_MAP[filterMetric] || 'points_per_game';
+    // Skip team metrics - they're not valid for player queries
+    if (filterMetric.startsWith('team_')) return [];
+    
+    const metricCol = METRIC_COL_MAP[filterMetric as keyof typeof METRIC_COL_MAP] || 'points_per_game';
     const seasonAvgCol = metricCol === 'points_per_game' ? 'points' :
                         metricCol === 'assists_per_game' ? 'assists' :
                         metricCol === 'rebounds_per_game' ? 'rebounds' :

@@ -8,6 +8,35 @@
   gap: 2rem;
 }
 
+.bogle-banner {
+  background: linear-gradient(135deg, #0B1F3B 0%, #1a3a5c 100%);
+  border-radius: 0.75rem;
+  padding: 1.25rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid #FDB931;
+}
+
+.bogle-banner-text {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #FDB931;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 767px) {
+  .bogle-banner {
+    padding: 1rem 1.5rem;
+  }
+  
+  .bogle-banner-text {
+    font-size: 1rem;
+  }
+}
+
 .start-game-container {
   display: flex;
   flex-direction: column;

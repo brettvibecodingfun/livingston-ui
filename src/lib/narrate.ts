@@ -22,7 +22,10 @@ export async function summarizeAnswer(query: Query, rows: any[]): Promise<string
   const topRows = rows.slice(0, 5);
   
   // Get the metric column name for display
-  const metricColumn = query.metric === 'all' ? null : METRIC_COL_MAP[query.metric];
+  // Skip team metrics - they're not valid for player queries
+  const metricColumn = query.metric === 'all' || query.metric?.startsWith('team_') 
+    ? null 
+    : METRIC_COL_MAP[query.metric as keyof typeof METRIC_COL_MAP];
   
   // Include full stat line for compare tasks or when metric is 'all'
   const includeFullStatLine = query.task === 'compare' || query.metric === 'all';
@@ -152,7 +155,12 @@ function generateSimpleSummary(query: Query, topRows: any[], formattedRows: stri
     }
   }
   
-  const metricValue = topPlayer[query.metric] || topPlayer[METRIC_COL_MAP[query.metric]];
+  // Skip team metrics - they're not valid for player queries
+  if (query.metric.startsWith('team_')) {
+    return "";
+  }
+  
+  const metricValue = topPlayer[query.metric] || topPlayer[METRIC_COL_MAP[query.metric as keyof typeof METRIC_COL_MAP]];
   
   let displayValue = metricValue;
   if (query.metric.includes('_pct')) {
@@ -167,7 +175,7 @@ function generateSimpleSummary(query: Query, topRows: any[], formattedRows: stri
       return `${topPlayer.full_name} (${topPlayer.team || 'N/A'}) leads the ${query.season} season with ${displayValue} ${query.metric}.`;
     } else {
       const secondPlayer = topRows[1];
-      const secondMetricValue = secondPlayer[query.metric] || secondPlayer[METRIC_COL_MAP[query.metric]];
+      const secondMetricValue = secondPlayer[query.metric] || secondPlayer[METRIC_COL_MAP[query.metric as keyof typeof METRIC_COL_MAP]];
       const secondValue = query.metric.includes('_pct') 
         ? `${(secondMetricValue * 100).toFixed(1)}%`
         : secondMetricValue?.toFixed(1) || '0.0';
@@ -177,7 +185,7 @@ function generateSimpleSummary(query: Query, topRows: any[], formattedRows: stri
   } else if (query.task === 'compare') {
     const opponent = topRows[1];
     if (opponent) {
-      const opponentMetricValue = opponent[query.metric] || opponent[METRIC_COL_MAP[query.metric]];
+      const opponentMetricValue = opponent[query.metric] || opponent[METRIC_COL_MAP[query.metric as keyof typeof METRIC_COL_MAP]];
       const opponentDisplay = query.metric.includes('_pct')
         ? `${(opponentMetricValue * 100).toFixed(1)}%`
         : opponentMetricValue?.toFixed(1) || '0.0';

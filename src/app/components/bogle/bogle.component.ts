@@ -56,6 +56,8 @@ export class BogleComponent implements OnInit, OnDestroy {
   mostCorrectAnswers = signal<{ playerName: string; percentage: number }[]>([]);
   mostMissedAnswers = signal<{ playerName: string; percentage: number }[]>([]);
   gamesPlayedCount = signal<number>(0);
+  showUsernameInput = signal(false);
+  showStartGameButton = signal(false);
 
   // Correct answers loaded from database
   private correctAnswers: RookiePlayer[] = [];
@@ -65,10 +67,20 @@ export class BogleComponent implements OnInit, OnDestroy {
   private rankType: string = 'ppg'; // Default to points per game
   private readonly STORAGE_KEY = 'bogle_last_played_date';
   private readonly ANSWERS_STORAGE_KEY = 'bogle_game_answers'; // Store game answers by date
+  private readonly USERNAME_STORAGE_KEY = 'bogle_username';
 
   constructor(private bogleService: BogleService) {}
 
   ngOnInit() {
+    // Load username from localStorage if it exists
+    const savedUsername = localStorage.getItem(this.USERNAME_STORAGE_KEY);
+    if (savedUsername) {
+      this.playerName.set(savedUsername);
+      this.showStartGameButton.set(true);
+    } else {
+      this.showUsernameInput.set(true);
+    }
+    
     // Check if user has already played today
     this.checkIfPlayedToday();
   }
@@ -655,6 +667,17 @@ export class BogleComponent implements OnInit, OnDestroy {
     this.playerName.set(value);
   }
 
+  onUsernameSubmit() {
+    const name = this.playerName().trim();
+    if (name.length > 0) {
+      // Save username to localStorage
+      localStorage.setItem(this.USERNAME_STORAGE_KEY, name);
+      // Hide username input and show start game button
+      this.showUsernameInput.set(false);
+      this.showStartGameButton.set(true);
+    }
+  }
+
   onStartGame() {
     // Check if user has already played today
     this.checkIfPlayedToday();
@@ -670,6 +693,13 @@ export class BogleComponent implements OnInit, OnDestroy {
       this.timeRemaining.set(180);
       this.timeElapsed.set(0);
       this.loadDailyGame();
+    }
+  }
+
+  clearLocalStorage() {
+    if (confirm('Are you sure you want to clear all local storage? This will reset your saved preferences and game data.')) {
+      localStorage.clear();
+      window.location.reload();
     }
   }
 

@@ -741,3 +741,36 @@
     font-size: 0.8125rem;
   }
 }
+
+/* Local Storage Disclaimer */
+.local-storage-disclaimer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #E5E7EB;
+  text-align: center;
+}
+
+.disclaimer-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6B7280;
+  margin: 0;
+}
+
+.disclaimer-clear-link {
+  background: none;
+  border: none;
+  color: #0B1F3B;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.disclaimer-clear-link:hover {
+  color: #FDB931;
+}

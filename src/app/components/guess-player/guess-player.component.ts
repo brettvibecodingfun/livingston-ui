@@ -435,5 +435,12 @@ FT%:    Your Guess: ${(ftGuess.toFixed(1) + '%').padEnd(8, ' ')}    Actual: ${ac
       img.style.display = 'none';
     }
   }
+
+  clearLocalStorage() {
+    if (confirm('Are you sure you want to clear all local storage? This will reset your saved preferences and game data.')) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  }
 }
 

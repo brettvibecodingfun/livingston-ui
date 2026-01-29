@@ -32,6 +32,7 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
   sampleQuestions = [
     "Find me a historical comparison for Cooper Flagg.",
     "Who are the top scoring rookies in the NBA this year?",
+    "What team leads the NBA in 3 pointers attempted per game?",
     "Who leads the NBA in NET Rating this year?",
     "Who are the best Duke players in the NBA?",
     "Of players who shoot more than 7 threes per game, who has the best percentage?",
@@ -320,6 +321,9 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const metric = query.metric;
+    
+    // If there's a team filter but no specific metric handling, ensure the metric is shown
+    const hasTeamFilter = !!query.team;
 
     // If metric is "all", show all stats
     if (metric === 'all') {
@@ -363,6 +367,13 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
              metric === 'reb_pct' || metric === 'usg_pct' || metric === 'dreb_pct' || 
              metric === 'oreb_pct' || metric === 'ast_ratio' || metric === 'e_tov_pct' || 
              metric === 'e_usg_pct') {
+      columns.push(metric);
+    }
+    
+    // If metric wasn't added by any of the above conditions, add it now
+    // This handles cases where team filtering might have skipped metric addition
+    // Note: metric can't be 'all' here because we return early above if it is
+    if (metric && !columns.includes(metric)) {
       columns.push(metric);
     }
 

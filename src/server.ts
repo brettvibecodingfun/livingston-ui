@@ -94,13 +94,13 @@ Player metrics:
 Team metrics (use when asking about team statistics):
 - team_ppg: team points per game (e.g., "which team scores the most points per game")
 - team_fgm: team field goals made per game (e.g., "what team hits the most shots per game")
-- team_fga: team field goals attempted per game
+- team_fga: team field goals attempted per game (ALL field goals, including 2-pointers and 3-pointers combined)
 - team_fg_pct: team field goal percentage
 - team_fta: team free throws attempted per game
 - team_ftm: team free throws made per game
 - team_ft_pct: team free throw percentage
-- team_fg3a: team three pointers attempted per game
-- team_fg3m: team three pointers made per game
+- team_fg3a: team three pointers attempted per game (e.g., "what team leads in 3 pointers attempted per game", "which team attempts the most threes per game", "3 pointers attempted")
+- team_fg3m: team three pointers made per game (e.g., "what team makes the most 3 pointers per game")
 - team_fg3_pct: team three-point percentage
 - team_pace: team pace per game (e.g., "what team plays with the most pace per game")
 - team_efg_pct: team effective field goal percentage
@@ -165,7 +165,8 @@ Team (OPTIONAL - only include if user explicitly mentions a team):
 
 Task selection rules (follow strictly):
 - If the user asks about teams (keywords such as "best team", "worst team", "top teams", "who's the best team", "what team has the best record", "summary of the thunder", "tell me about the lakers", etc.), set task = "team".
-- When asking about team statistics (e.g., "which team scores the most points", "who has the best defense", "what team plays with the most pace", "who is analytically the best team"), set task = "team" and use the appropriate team_* metric (e.g., team_ppg, team_def_rating, team_pace, team_net_rating).
+- IMPORTANT DISTINCTION: When asking about team statistics comparing teams (e.g., "which team scores the most points", "who has the best defense", "what team plays with the most pace", "who is analytically the best team"), set task = "team" and use the appropriate team_* metric (e.g., team_ppg, team_def_rating, team_pace, team_net_rating).
+- CRITICAL: When asking about PLAYER statistics filtered by team (e.g., "net rating leaders on the rockets", "top scorers on the lakers", "best rebounders on the celtics"), set task = "leaders" or "rank" (NOT "team") and use the PLAYER metric (e.g., net_rating, ppg, rpg) with the team field set to filter players. Do NOT use team_* metrics for player queries.
 - When task = "team" and the user mentions a specific team name (e.g., "thunder", "lakers", "celtics"), include the team field with the team abbreviation (e.g., "OKC", "LAL", "BOS"). This will return detailed information about that specific team including top scorers.
 - When task = "team" and the user asks about team statistics (not just records/wins), include the appropriate team_* metric. If asking about records/wins only, do NOT include metric.
 - If the user asks for historical comparisons (keywords such as "historical comparison", "find someone from the past like", "find me a historical comparison for", "who are similar players to", "players like", "comparable players to", "historical comp", "find players like", etc.), set task = "historical_comparison". Include the player name in filters.players array. DO NOT include metric when task is "historical_comparison".
@@ -255,6 +256,11 @@ Combined stat filtering (filtering by one metric while ranking by another):
 
 Metric rules:
 - Always set metric to one of the allowed values.
+- IMPORTANT: When asking about shooting stats, distinguish carefully:
+  * "3 pointers attempted", "three pointers attempted", "3 point attempts", "threes attempted", "3PA" → use team_fg3a (NOT team_fga)
+  * "3 pointers made", "three pointers made", "3 point makes", "threes made", "3PM" → use team_fg3m
+  * "field goals attempted" (without "three" or "3") → use team_fga (all field goals including 2-pointers and 3-pointers)
+  * "field goals made" (without "three" or "3") → use team_fgm (all field goals including 2-pointers and 3-pointers)
 - If the user asks about players in general without mentioning a specific stat (e.g., "show me all the raptors players", "find me the greatest duke players", "Give me the best Duke players in the NBA", "team best players", "who on the nuggets are playing the highest performing"), use metric = "all".
 - IMPORTANT: When the user asks for "best [college] players", "top [college] players", "greatest [college] players", or similar phrasing without a specific stat, set metric = "all" AND include filters.colleges = ["[college]"]. For example, "Give me the best Duke players in the NBA" → { metric: "all", filters: { colleges: ["Duke"] } }.
 - If the user mentions a specific stat (points, assists, rebounds, steals, blocks, shooting percentages, etc.), use the corresponding metric.

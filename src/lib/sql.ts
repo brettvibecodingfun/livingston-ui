@@ -370,7 +370,9 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
   // Query season_averages table for all rank/leaders/lookup tasks
   // This ensures accurate, up-to-date statistics from the player stats table
   // Include age in SELECT if we're ordering by age
+  // Include position for solo queries (when limit is 1 and has player filter)
   const selectAge = orderByAge ? ', p.age' : '';
+  const selectPosition = (q.limit === 1 && hasPlayerFilter) ? ', p.position' : '';
   const sql = `
     SELECT
       p.full_name,
@@ -405,7 +407,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       sa.oreb_pct,
       sa.ast_ratio,
       sa.e_tov_pct,
-      sa.e_usg_pct${selectAge}
+      sa.e_usg_pct${selectAge}${selectPosition}
     FROM ${tableName} sa
     INNER JOIN players p ON sa.player_id = p.id
     LEFT JOIN teams t ON p.team_id = t.id

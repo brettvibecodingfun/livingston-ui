@@ -1,6 +1,6 @@
 import express from 'express';
 import { Query } from '../lib/types';
-import { toStructuredQuery, extractPlayerNames, isInformationalQuestion } from '../server';
+import { toStructuredQuery, extractPlayerNames } from '../server';
 import { runQuery } from '../lib/sql';
 import { runTeamQuery } from '../lib/teams';
 import { summarizeAnswer } from '../lib/narrate';
@@ -19,26 +19,7 @@ export function setupAskRoutes(app: express.Application) {
         return res.status(400).json({ error: 'Question is required and must be a string' });
       }
 
-      // First check if this is an informational question BEFORE trying to parse
-      const isInformational = await isInformationalQuestion(question);
-      
-      if (isInformational) {
-        // For informational questions, return suggestions instead of answering directly
-        return res.status(400).json({
-          error: 'I can help you with statistics and comparisons for the 2026 NBA season. Try asking about player statistics, team comparisons, or historical player comparisons.',
-          suggestions: [
-            'Who are the top scorers in the NBA?',
-            'Compare Stephen Curry and Kevin Durant',
-            'Find me a historical comparison for Anthony Edwards',
-            'Who are the best Duke players in the NBA?',
-            'What team has the best record?',
-            'Who leads the league in assists?',
-            'Show me players averaging over 25 points per game'
-          ]
-        });
-      }
-
-      // Parse the question into a structured query (only for data queries)
+      // Parse the question into a structured query
       let query: Query;
       try {
         query = await toStructuredQuery(question);
@@ -113,20 +94,11 @@ export function setupAskRoutes(app: express.Application) {
           });
         }
 
-        // Get player position and additional info from players table
-        const playerInfoQuery = `
-          SELECT p.position, p.full_name
-          FROM players p
-          WHERE LOWER(p.full_name) LIKE LOWER($1)
-          LIMIT 1
-        `;
-        const playerInfoResult = await pool.query(playerInfoQuery, [`%${playerName}%`]);
-        const playerInfo = playerInfoResult.rows[0];
-
+        // Position should now be included in the query result from runQuery
         const soloPlayer = {
           player: {
             ...playerRows[0],
-            position: playerInfo?.position || null
+            position: playerRows[0]?.position || null
           },
           isAdvanced: isAdvanced
         };

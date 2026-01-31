@@ -1,0 +1,110 @@
+<div class="game-container">
+  <div class="question-timer-container">
+    <h2 class="bogle-question">{{ question() }}</h2>
+    @if (!isLoading() && !error()) {
+      <div class="timer-display" [class.timer-warning]="timeRemaining() <= 30" [class.timer-danger]="timeRemaining() <= 10">
+        <span class="timer-label">Time:</span>
+        <span class="timer-value">{{ formatTime(timeRemaining()) }}</span>
+      </div>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <p>Loading game...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <p>{{ error() }}</p>
+      <button class="retry-button" (click)="loadDailyGame()">Retry</button>
+    </div>
+  } @else {
+    <!-- Input Bar -->
+    <div class="input-container">
+      <input
+        type="text"
+        class="player-input"
+        [value]="playerInput()"
+        [disabled]="gameOver() || isLoading()"
+        (input)="onInputChange($any($event.target).value)"
+        (keydown)="onKeyPress($event)"
+        [placeholder]="gameOver() ? 'Game Over' : 'Type player name...'"
+        autocomplete="off"
+      />
+      <button 
+        class="give-up-button give-up-button-desktop" 
+        (click)="onGiveUp()"
+        [disabled]="gameOver()"
+      >
+        {{ gameOver() ? 'Game Over' : 'Give Up' }}
+      </button>
+    </div>
+
+    <!-- Answers Table -->
+    <div class="answers-table-container">
+      <table class="answers-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Photo</th>
+            <th>Player Name</th>
+            <th>{{ getStatHeaderName() }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rank of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track rank) {
+            @let answer = getAnswerForRank(rank);
+            @let isCorrectAnswer = answer?.isCorrect === true;
+            @let isIncorrectAnswer = answer?.isCorrect === false;
+            <tr 
+              [class.correct-row]="isCorrectAnswer" 
+              [class.incorrect-row]="isIncorrectAnswer"
+              [class.empty-row]="!answer && !gameOver()"
+            >
+              <td class="rank-cell">{{ rank }}</td>
+              <td class="photo-cell">
+                @if (answer?.playerData) {
+                  <img 
+                    [src]="getHeadshotSrc(answer?.playerData!)"
+                    [alt]="answer?.playerData?.fullName"
+                    class="player-photo"
+                    (error)="$any($event.target).style.display = 'none'"
+                  />
+                } @else {
+                  <div class="photo-placeholder">—</div>
+                }
+              </td>
+              <td class="player-cell">
+                @if (answer) {
+                  <span [class.correct-text]="isCorrectAnswer" [class.incorrect-text]="isIncorrectAnswer">
+                    {{ answer.playerName }}
+                  </span>
+                } @else {
+                  <span class="empty-cell">—</span>
+                }
+              </td>
+              <td class="ppg-cell">
+                @if (answer?.playerData) {
+                  <span class="ppg-value" [class.correct-text]="isCorrectAnswer" [class.incorrect-text]="isIncorrectAnswer">
+                    {{ getStatValue(answer?.playerData) }}
+                  </span>
+                } @else {
+                  <span class="empty-cell">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Give Up Button for Mobile (at bottom) -->
+    <button 
+      class="give-up-button give-up-button-mobile" 
+      (click)="onGiveUp()"
+      [disabled]="gameOver()"
+    >
+      {{ gameOver() ? 'Game Over' : 'Give Up' }}
+    </button>
+  }
+</div>

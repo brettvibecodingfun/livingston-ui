@@ -1,0 +1,112 @@
+.username-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem 2rem;
+}
+
+.start-game-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #0B1F3B;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .start-game-title {
+    font-size: 1.5rem;
+  }
+}
+
+.welcome-back-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.welcome-back-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #0B1F3B;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .welcome-back-title {
+    font-size: 1.5rem;
+  }
+}
+
+.player-name-input-container {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (max-width: 767px) {
+  .player-name-input-container {
+    flex-direction: column;
+  }
+}
+
+.player-name-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  border: 2px solid #0B1F3B;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  color: #0B1F3B;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.player-name-input:focus {
+  border-color: #FDB931;
+}
+
+.player-name-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.start-button {
+  padding: 0.75rem 2rem;
+  background-color: #FDB931;
+  color: #0B1F3B;
+  border: 2px solid #FDB931;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.start-button:hover:not(:disabled) {
+  background-color: #f5c91a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.start-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 767px) {
+  .start-button {
+    width: 100%;
+  }
+}

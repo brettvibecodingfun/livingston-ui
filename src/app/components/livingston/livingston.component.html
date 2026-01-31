@@ -400,6 +400,225 @@
           </div>
           }
         </div>
+      } @else if (isSoloQuery() && getSoloPlayer()) {
+        <!-- Solo Player Display -->
+        @let player = getSoloPlayer();
+        <div class="solo-player-container">
+          <div class="solo-player-header">
+            <div class="solo-player-photo-container">
+              <img
+                class="solo-player-photo"
+                [src]="getHeadshotSrc(player)"
+                alt="{{ player.full_name }} headshot"
+                (error)="onHeadshotError(player, $event)"
+              />
+            </div>
+            <div class="solo-player-info">
+              <h2 class="solo-player-name">{{ player.full_name }}</h2>
+              <div class="solo-player-details">
+                @if (player.position) {
+                  <span class="solo-player-detail">{{ player.position }}</span>
+                }
+                @if (player.team) {
+                  <span class="solo-player-detail">{{ player.team }}</span>
+                }
+                @if (player.games_played != null) {
+                  <span class="solo-player-detail">{{ player.games_played }} GP</span>
+                }
+              </div>
+            </div>
+          </div>
+          
+          @if (isAdvancedStats()) {
+            <!-- Advanced Stats -->
+            <div class="solo-stats-section">
+              <h3 class="solo-stats-title">Advanced Statistics</h3>
+              <div class="solo-stats-grid">
+                @if (player.off_rating != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Offensive Rating:</span>
+                    <span class="solo-stat-value">{{ player.off_rating.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.def_rating != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Defensive Rating:</span>
+                    <span class="solo-stat-value">{{ player.def_rating.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.net_rating != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Net Rating:</span>
+                    <span class="solo-stat-value">{{ player.net_rating.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.pie != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">PIE:</span>
+                    <span class="solo-stat-value">{{ player.pie.toFixed(3) }}</span>
+                  </div>
+                }
+                @if (player.e_pace != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Estimated Pace:</span>
+                    <span class="solo-stat-value">{{ player.e_pace.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.ts_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">True Shooting %:</span>
+                    <span class="solo-stat-value">{{ (player.ts_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.ast_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Assist %:</span>
+                    <span class="solo-stat-value">{{ (player.ast_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.efg_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Effective FG %:</span>
+                    <span class="solo-stat-value">{{ (player.efg_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.reb_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Rebound %:</span>
+                    <span class="solo-stat-value">{{ (player.reb_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.usg_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Usage %:</span>
+                    <span class="solo-stat-value">{{ (player.usg_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.dreb_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Defensive Rebound %:</span>
+                    <span class="solo-stat-value">{{ (player.dreb_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.oreb_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Offensive Rebound %:</span>
+                    <span class="solo-stat-value">{{ (player.oreb_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.ast_ratio != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Assist Ratio:</span>
+                    <span class="solo-stat-value">{{ player.ast_ratio.toFixed(2) }}</span>
+                  </div>
+                }
+                @if (player.e_usg_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Estimated Usage %:</span>
+                    <span class="solo-stat-value">{{ (player.e_usg_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <!-- Basic Stats -->
+            <div class="solo-stats-section">
+              <h3 class="solo-stats-title">Basic Statistics</h3>
+              <div class="solo-stats-grid">
+                @if (player.ppg != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Points Per Game:</span>
+                    <span class="solo-stat-value">{{ player.ppg.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.apg != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Assists Per Game:</span>
+                    <span class="solo-stat-value">{{ player.apg.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.rpg != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Rebounds Per Game:</span>
+                    <span class="solo-stat-value">{{ player.rpg.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.spg != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Steals Per Game:</span>
+                    <span class="solo-stat-value">{{ player.spg.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.bpg != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Blocks Per Game:</span>
+                    <span class="solo-stat-value">{{ player.bpg.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.fg_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Field Goal %:</span>
+                    <span class="solo-stat-value">{{ (player.fg_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.three_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Three Point %:</span>
+                    <span class="solo-stat-value">{{ (player.three_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.ft_pct != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Free Throw %:</span>
+                    <span class="solo-stat-value">{{ (player.ft_pct * 100).toFixed(1) }}%</span>
+                  </div>
+                }
+                @if (player.tpm != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Three Pointers Made:</span>
+                    <span class="solo-stat-value">{{ player.tpm.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.tpa != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Three Pointers Attempted:</span>
+                    <span class="solo-stat-value">{{ player.tpa.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.ftm != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Free Throws Made:</span>
+                    <span class="solo-stat-value">{{ player.ftm.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.fta != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Free Throws Attempted:</span>
+                    <span class="solo-stat-value">{{ player.fta.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.fgm_pg != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Field Goals Made:</span>
+                    <span class="solo-stat-value">{{ player.fgm_pg.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.fga_pg != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Field Goals Attempted:</span>
+                    <span class="solo-stat-value">{{ player.fga_pg.toFixed(1) }}</span>
+                  </div>
+                }
+                @if (player.minutes != null) {
+                  <div class="solo-stat-item">
+                    <span class="solo-stat-label">Minutes Per Game:</span>
+                    <span class="solo-stat-value">{{ player.minutes.toFixed(1) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
       } @else if (results()!.rows && results()!.rows!.length > 0) {
         <!-- Table View -->
         <div class="card overflow-hidden">

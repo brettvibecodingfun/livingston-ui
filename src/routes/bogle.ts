@@ -252,6 +252,7 @@ export function setupBogleRoutes(app: express.Application) {
           tpm: row.tpm || 0,
           tpa: row.tpa || 0,
           three_pct: row.three_pct || 0,
+          net_rating: row.net_rating || null,
           photoName: photoName
         };
       });

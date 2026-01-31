@@ -94,11 +94,17 @@ export interface HistoricalComparison {
   }[];
 }
 
+export interface SoloPlayerData {
+  player: PlayerStatsRow;
+  isAdvanced?: boolean; // true if showing advanced stats, false if basic stats
+}
+
 export interface QueryResponse {
   query: Query;
   rows?: PlayerStatsRow[];
   teams?: TeamData[];
   historicalComparison?: HistoricalComparison;
+  soloPlayer?: SoloPlayerData;
   summary?: string;
   error?: string;
   suggestions?: string[];

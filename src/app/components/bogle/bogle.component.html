@@ -5,7 +5,7 @@
   </div>
   
   @if (!gameStarted()) {
-    <!-- Player Name Input and Start Button -->
+    <!-- Start Game Container -->
     <div class="start-game-container">
       @if (hasPlayedToday()) {
         <div class="already-played-message">
@@ -15,251 +15,32 @@
           </p>
 
           <!-- Leaderboard -->
-          @if (leaderboard().length > 0) {
-            <div class="leaderboard-container leaderboard-light">
-              <h3 class="leaderboard-title leaderboard-title-light">Today's Leaderboard</h3>
-              @if (playerName()) {
-                <p class="leaderboard-username">Your username: {{ playerName() }}</p>
-              }
-              @if (gamesPlayedCount() > 0) {
-                <p class="games-played-count games-played-count-light">{{ gamesPlayedCount() }} {{ gamesPlayedCount() === 1 ? 'game' : 'games' }} played today</p>
-              }
-              <table class="leaderboard-table leaderboard-table-light">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Username</th>
-                    <th>Score</th>
-                    <th>Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (score of leaderboard(); track score.id; let i = $index) {
-                    <tr>
-                      <td class="rank-cell">{{ i + 1 }}</td>
-                      <td class="username-cell">{{ score.username }}</td>
-                      <td class="score-cell">{{ score.gameScore }}/10</td>
-                      <td class="time-cell">{{ formatTimeForLeaderboard(score.timeTaken) }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Answer Statistics -->
-            @if (mostCorrectAnswers().length > 0 || mostMissedAnswers().length > 0) {
-              <div class="answer-statistics-container answer-statistics-light">
-                @if (mostCorrectAnswers().length > 0) {
-                  <div class="statistics-section">
-                    <h4 class="statistics-title statistics-title-light">Most Correct Answers</h4>
-                    <ul class="statistics-list">
-                      @for (item of mostCorrectAnswers(); track item.playerName) {
-                        <li class="statistics-item statistics-item-correct">
-                          <span class="statistics-player-name">{{ item.playerName }}</span>
-                          <span class="statistics-percentage">{{ item.percentage }}%</span>
-                        </li>
-                      }
-                    </ul>
-                  </div>
-                }
-                @if (mostMissedAnswers().length > 0) {
-                  <div class="statistics-section">
-                    <h4 class="statistics-title statistics-title-light">Most Missed Answers</h4>
-                    <ul class="statistics-list">
-                      @for (item of mostMissedAnswers(); track item.playerName) {
-                        <li class="statistics-item statistics-item-missed">
-                          <span class="statistics-player-name">{{ item.playerName }}</span>
-                          <span class="statistics-percentage">{{ item.percentage }}%</span>
-                        </li>
-                      }
-                    </ul>
-                  </div>
-                }
-              </div>
-            }
-          } @else if (isLoadingLeaderboard()) {
-            <div class="leaderboard-loading leaderboard-loading-light">Loading leaderboard...</div>
-          }
-
-          <!-- Game Answers List -->
-          @if (storedGameAnswers().length > 0) {
-            <div class="game-answers-container game-answers-light">
-              <h3 class="game-answers-title game-answers-title-light">Today's Answers</h3>
-              <div class="answers-list">
-                @for (player of storedGameAnswers(); track player.rank) {
-                  @let wasCorrect = wasPlayerCorrect(player.rank);
-                  <div class="answer-item" [class.answer-correct]="wasCorrect" [class.answer-incorrect]="!wasCorrect">
-                    <span class="answer-rank">{{ player.rank }}.</span>
-                    <img 
-                      [src]="getHeadshotSrc(player)"
-                      [alt]="player.fullName"
-                      class="answer-photo"
-                      (error)="$any($event.target).style.display = 'none'"
-                    />
-                    <span class="answer-name">{{ player.fullName }}</span>
-                    <span class="answer-stat">{{ getStatValue(player) }}</span>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
-          <!-- Local Storage Disclaimer -->
-          <div class="local-storage-disclaimer">
-            <p class="disclaimer-text">
-              Website uses local storage, <button type="button" class="disclaimer-clear-link" (click)="clearLocalStorage()">click here to clear local storage</button>
-            </p>
-          </div>
+          <app-bogle-leaderboard
+            [leaderboard]="leaderboard()"
+            [isLoadingLeaderboard]="isLoadingLeaderboard()"
+            [playerName]="playerName()"
+            [gamesPlayedCount]="gamesPlayedCount()"
+            [mostCorrectAnswers]="mostCorrectAnswers()"
+            [mostMissedAnswers]="mostMissedAnswers()"
+            [storedGameAnswers]="storedGameAnswers()"
+            [storedUserCorrectRanks]="storedUserCorrectRanks()"
+            [rankType]="rankType()"
+            [isLightMode]="true"
+            (clearStorage)="clearLocalStorage()"
+          />
         </div>
       } @else {
-        <!-- Username Input Step -->
-        @if (showUsernameInput()) {
-          <h2 class="start-game-title">Enter Your Name</h2>
-          <div class="player-name-input-container">
-            <input
-              type="text"
-              class="player-name-input"
-              [value]="playerName()"
-              [disabled]="hasPlayedToday()"
-              (input)="onPlayerNameChange($any($event.target).value)"
-              (keydown.enter)="onUsernameSubmit()"
-              placeholder="Enter your name..."
-              autocomplete="off"
-            />
-            <button
-              class="start-button"
-              (click)="onUsernameSubmit()"
-              [disabled]="!playerName().trim() || hasPlayedToday()"
-            >
-              Continue
-            </button>
-          </div>
-        }
-        
-        <!-- Start Game Button Step -->
-        @if (showStartGameButton()) {
-          <div class="welcome-back-container">
-            <h2 class="welcome-back-title">Welcome back, {{ playerName() }}!</h2>
-            <button
-              class="start-button"
-              (click)="onStartGame()"
-              [disabled]="hasPlayedToday()"
-            >
-              Start Game
-            </button>
-          </div>
-        }
+        <app-bogle-username
+          [hasPlayedToday]="hasPlayedToday()"
+          (startGame)="onStartGame($event)"
+        />
       }
     </div>
   } @else {
-    <div class="question-timer-container">
-      <h2 class="bogle-question">{{ question() }}</h2>
-      @if (!isLoading() && !error()) {
-        <div class="timer-display" [class.timer-warning]="timeRemaining() <= 30" [class.timer-danger]="timeRemaining() <= 10">
-          <span class="timer-label">Time:</span>
-          <span class="timer-value">{{ formatTime(timeRemaining()) }}</span>
-        </div>
-      }
-    </div>
-
-    @if (isLoading()) {
-      <div class="loading-state">
-        <p>Loading game...</p>
-      </div>
-    } @else if (error()) {
-      <div class="error-state">
-        <p>{{ error() }}</p>
-        <button class="retry-button" (click)="loadDailyGame()">Retry</button>
-      </div>
-    } @else {
-  <!-- Input Bar -->
-  <div class="input-container">
-    <input
-      type="text"
-      class="player-input"
-      [value]="playerInput()"
-      [disabled]="gameOver() || isLoading()"
-      (input)="onInputChange($any($event.target).value)"
-      (keydown)="onKeyPress($event)"
-      [placeholder]="gameOver() ? 'Game Over' : 'Type player name...'"
-      autocomplete="off"
+    <app-bogle-game
+      [playerName]="playerName()"
+      (gameEnded)="onGameEnded($event)"
     />
-    <button 
-      class="give-up-button give-up-button-desktop" 
-      (click)="onGiveUp()"
-      [disabled]="gameOver()"
-    >
-      {{ gameOver() ? 'Game Over' : 'Give Up' }}
-    </button>
-  </div>
-
-  <!-- Answers Table -->
-  <div class="answers-table-container">
-    <table class="answers-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Photo</th>
-          <th>Player Name</th>
-          <th>{{ getStatHeaderName() }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (rank of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track rank) {
-          @let answer = getAnswerForRank(rank);
-          @let isCorrectAnswer = answer?.isCorrect === true;
-          @let isIncorrectAnswer = answer?.isCorrect === false;
-          <tr 
-            [class.correct-row]="isCorrectAnswer" 
-            [class.incorrect-row]="isIncorrectAnswer"
-            [class.empty-row]="!answer && !gameOver()"
-          >
-            <td class="rank-cell">{{ rank }}</td>
-            <td class="photo-cell">
-              @if (answer?.playerData) {
-                <img 
-                  [src]="getHeadshotSrc(answer?.playerData!)"
-                  [alt]="answer?.playerData?.fullName"
-                  class="player-photo"
-                  (error)="$any($event.target).style.display = 'none'"
-                />
-              } @else {
-                <div class="photo-placeholder">—</div>
-              }
-            </td>
-            <td class="player-cell">
-              @if (answer) {
-                <span [class.correct-text]="isCorrectAnswer" [class.incorrect-text]="isIncorrectAnswer">
-                  {{ answer.playerName }}
-                </span>
-              } @else {
-                <span class="empty-cell">—</span>
-              }
-            </td>
-            <td class="ppg-cell">
-              @if (answer?.playerData) {
-                <span class="ppg-value" [class.correct-text]="isCorrectAnswer" [class.incorrect-text]="isIncorrectAnswer">
-                  {{ getStatValue(answer?.playerData) }}
-                </span>
-              } @else {
-                <span class="empty-cell">—</span>
-              }
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-  
-  <!-- Give Up Button for Mobile (at bottom) -->
-  <button 
-    class="give-up-button give-up-button-mobile" 
-    (click)="onGiveUp()"
-    [disabled]="gameOver()"
-  >
-    {{ gameOver() ? 'Game Over' : 'Give Up' }}
-  </button>
-    }
   }
 
   <!-- Score Modal -->
@@ -284,105 +65,22 @@
         </p>
 
         <!-- Leaderboard -->
-        @if (leaderboard().length > 0) {
-          <div class="leaderboard-container">
-            <h3 class="leaderboard-title">Today's Leaderboard</h3>
-            @if (playerName()) {
-              <p class="leaderboard-username">Your username: {{ playerName() }}</p>
-            }
-            @if (gamesPlayedCount() > 0) {
-              <p class="games-played-count">{{ gamesPlayedCount() }} {{ gamesPlayedCount() === 1 ? 'game' : 'games' }} played today</p>
-            }
-            <table class="leaderboard-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Username</th>
-                  <th>Score</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (score of leaderboard(); track score.id; let i = $index) {
-                  <tr>
-                    <td class="rank-cell">{{ i + 1 }}</td>
-                    <td class="username-cell">{{ score.username }}</td>
-                    <td class="score-cell">{{ score.gameScore }}/10</td>
-                    <td class="time-cell">{{ formatTimeForLeaderboard(score.timeTaken) }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-
-            <!-- Answer Statistics -->
-            @if (mostCorrectAnswers().length > 0 || mostMissedAnswers().length > 0) {
-              <div class="answer-statistics-container">
-                @if (mostCorrectAnswers().length > 0) {
-                  <div class="statistics-section">
-                    <h4 class="statistics-title">Most Correct Answers</h4>
-                    <ul class="statistics-list">
-                      @for (item of mostCorrectAnswers(); track item.playerName) {
-                        <li class="statistics-item statistics-item-correct">
-                          <span class="statistics-player-name">{{ item.playerName }}</span>
-                          <span class="statistics-percentage">{{ item.percentage }}%</span>
-                        </li>
-                      }
-                    </ul>
-                  </div>
-                }
-                @if (mostMissedAnswers().length > 0) {
-                  <div class="statistics-section">
-                    <h4 class="statistics-title">Most Missed Answers</h4>
-                    <ul class="statistics-list">
-                      @for (item of mostMissedAnswers(); track item.playerName) {
-                        <li class="statistics-item statistics-item-missed">
-                          <span class="statistics-player-name">{{ item.playerName }}</span>
-                          <span class="statistics-percentage">{{ item.percentage }}%</span>
-                        </li>
-                      }
-                    </ul>
-                  </div>
-                }
-              </div>
-            }
-
-            <!-- Game Answers List -->
-            @if (storedGameAnswers().length > 0) {
-              <div class="game-answers-container">
-                <h3 class="game-answers-title">Today's Answers</h3>
-                <div class="answers-list">
-                  @for (player of storedGameAnswers(); track player.rank) {
-                    @let wasCorrect = wasPlayerCorrect(player.rank);
-                    <div class="answer-item" [class.answer-correct]="wasCorrect" [class.answer-incorrect]="!wasCorrect">
-                      <span class="answer-rank">{{ player.rank }}.</span>
-                      <img 
-                        [src]="getHeadshotSrc(player)"
-                        [alt]="player.fullName"
-                        class="answer-photo"
-                        (error)="$any($event.target).style.display = 'none'"
-                      />
-                      <span class="answer-name">{{ player.fullName }}</span>
-                      <span class="answer-stat">{{ getStatValue(player) }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-
-            <!-- Local Storage Disclaimer -->
-            <div class="local-storage-disclaimer">
-              <p class="disclaimer-text">
-                Website uses local storage, <button type="button" class="disclaimer-clear-link" (click)="clearLocalStorage()">click here to clear local storage</button>
-              </p>
-            </div>
-          </div>
-        } @else if (isLoadingLeaderboard()) {
-          <div class="leaderboard-loading">Loading leaderboard...</div>
-        }
+        <app-bogle-leaderboard
+          [leaderboard]="leaderboard()"
+          [isLoadingLeaderboard]="isLoadingLeaderboard()"
+          [playerName]="playerName()"
+          [gamesPlayedCount]="gamesPlayedCount()"
+          [mostCorrectAnswers]="mostCorrectAnswers()"
+          [mostMissedAnswers]="mostMissedAnswers()"
+          [storedGameAnswers]="storedGameAnswers()"
+          [storedUserCorrectRanks]="storedUserCorrectRanks()"
+          [rankType]="rankType()"
+          [isLightMode]="false"
+          (clearStorage)="clearLocalStorage()"
+        />
 
         <button class="modal-close-button" (click)="closeScoreModal()">Close</button>
       </div>
     </div>
   }
 </div>
-

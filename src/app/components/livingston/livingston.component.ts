@@ -227,6 +227,19 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
     return !!(query?.task === 'team' && query?.metric && query.metric.startsWith('team_'));
   }
 
+  isSoloQuery(): boolean {
+    const query = this.results()?.query;
+    return query?.task === 'solo';
+  }
+
+  getSoloPlayer(): any {
+    return this.results()?.soloPlayer?.player;
+  }
+
+  isAdvancedStats(): boolean {
+    return this.results()?.soloPlayer?.isAdvanced === true;
+  }
+
   getTeamStatColumn(): string | null {
     const query = this.results()?.query;
     if (query?.task === 'team' && query?.metric && query.metric.startsWith('team_')) {

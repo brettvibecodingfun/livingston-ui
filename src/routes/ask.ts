@@ -43,6 +43,8 @@ export function setupAskRoutes(app: express.Application) {
       try {
         query = await toStructuredQuery(question);
         console.log('Parsed query:', JSON.stringify(query, null, 2));
+        const querySchemaString = JSON.stringify(query).replace(/"/g, '\\"');
+        console.log(`"querySchema": "${querySchemaString}"`);
       } catch (error) {
         // If query parsing fails, return helpful error with suggestions
         if (error instanceof Error && error.message === 'QUERY_PARSE_FAILED') {
@@ -60,6 +62,79 @@ export function setupAskRoutes(app: express.Application) {
         
         // Re-throw if it's a different error
         throw error;
+      }
+
+      // Check if this is a solo player query
+      if (query.task === 'solo') {
+        // Get player name from filters.players or extract from question
+        let playerName: string | null = null;
+        
+        if (query.filters?.players && query.filters.players.length > 0) {
+          playerName = query.filters.players[0];
+        } else {
+          // Fallback: Extract player name from question
+          const extractedNames = extractPlayerNames(question);
+          if (extractedNames.length > 0) {
+            playerName = extractedNames[0];
+          }
+        }
+        
+        if (!playerName) {
+          return res.status(400).json({ 
+            error: 'Could not find a player name in your question. Please specify a player name.' 
+          });
+        }
+
+        // Check if user asked for advanced stats
+        const questionLower = question.toLowerCase();
+        const isAdvanced = questionLower.includes('advanced') || questionLower.includes('advanced stats');
+
+        // Query the player's stats
+        const playerQuery: Query = {
+          task: 'lookup',
+          season: DEFAULT_SEASON,
+          metric: 'all',
+          filters: {
+            players: [playerName]
+          },
+          limit: 1
+        };
+
+        const playerRows = await runQuery(playerQuery, [playerName]);
+        
+        if (playerRows.length === 0) {
+          return res.status(404).json({
+            error: `Could not find player "${playerName}" in the database.`,
+            suggestions: [
+              'Who are the top scorers in the NBA?',
+              'Compare Stephen Curry and Kevin Durant',
+              'Find me a historical comparison for Anthony Edwards'
+            ]
+          });
+        }
+
+        // Get player position and additional info from players table
+        const playerInfoQuery = `
+          SELECT p.position, p.full_name
+          FROM players p
+          WHERE LOWER(p.full_name) LIKE LOWER($1)
+          LIMIT 1
+        `;
+        const playerInfoResult = await pool.query(playerInfoQuery, [`%${playerName}%`]);
+        const playerInfo = playerInfoResult.rows[0];
+
+        const soloPlayer = {
+          player: {
+            ...playerRows[0],
+            position: playerInfo?.position || null
+          },
+          isAdvanced: isAdvanced
+        };
+
+        return res.json({
+          query: query,
+          soloPlayer: soloPlayer
+        });
       }
 
       // Check if this is a historical comparison query

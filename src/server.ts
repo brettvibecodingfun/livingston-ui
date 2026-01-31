@@ -118,6 +118,7 @@ Available tasks:
 - compare: compare players
 - team: query about teams (e.g., "best team", "worst team", "top teams", "who's the best team"). When task is "team", do NOT include metric in the response.
 - historical_comparison: find historical player comparisons (e.g., "Find me a historical comparison for Tyrese Maxey", "Find someone from the past like Anthony Edwards", "Who are similar players to Stephen Curry historically?"). When task is "historical_comparison", include the player name in filters.players array. DO NOT include metric when task is "historical_comparison".
+- solo: show a single player's stats in a detailed solo display (e.g., "show me Kon Knueppel's stats", "show me Kon Knueppel's basic stats", "show me Kon Knueppel's advanced stats"). When task is "solo", include the player name in filters.players array. If the user asks for "advanced stats", the system will show advanced stats; otherwise it shows basic stats. DO NOT include metric when task is "solo".
   - For historical_comparison tasks, you can optionally include historical_comparison_count at the TOP LEVEL:
     * If the user asks for "all" comparisons (e.g., "give me all the historical comparisons", "show me all comparisons", "all the historical comparisons for [player]"), set historical_comparison_count = "all".
     * If the user specifies a number (e.g., "give me 5 historical comparisons", "show me 10 players like [player]"), set historical_comparison_count to that number.

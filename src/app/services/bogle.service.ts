@@ -20,6 +20,7 @@ export interface BoglePlayer {
   tpm?: number;
   tpa?: number;
   three_pct?: number;
+  net_rating?: number;
   photoName: string;
 }
 

@@ -1286,3 +1286,118 @@
     gap: 0.25rem;
   }
 }
+
+/* Solo Player Display Styles */
+.solo-player-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.solo-player-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid #FDB931;
+}
+
+.solo-player-photo-container {
+  flex-shrink: 0;
+}
+
+.solo-player-photo {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 4px solid #FDB931;
+}
+
+.solo-player-info {
+  flex: 1;
+}
+
+.solo-player-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0B1F3B;
+  margin: 0 0 1rem 0;
+}
+
+.solo-player-details {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.solo-player-detail {
+  font-size: 1.125rem;
+  color: #666;
+  padding: 0.5rem 1rem;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.solo-stats-section {
+  margin-top: 1.5rem;
+}
+
+.solo-stats-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0B1F3B;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #FDB931;
+}
+
+.solo-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.solo-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #FDB931;
+}
+
+.solo-stat-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.solo-stat-value {
+  font-weight: 700;
+  color: #0B1F3B;
+  font-size: 1.125rem;
+}
+
+@media (max-width: 767px) {
+  .solo-player-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .solo-player-photo {
+    width: 150px;
+    height: 150px;
+  }
+
+  .solo-player-name {
+    font-size: 1.5rem;
+  }
+
+  .solo-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

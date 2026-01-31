@@ -1,0 +1,43 @@
+<div class="username-container">
+  @if (hasPlayedToday()) {
+    <!-- Already played message is handled by parent -->
+  } @else {
+    <!-- Username Input Step -->
+    @if (showUsernameInput()) {
+      <h2 class="start-game-title">Enter Your Name</h2>
+      <div class="player-name-input-container">
+        <input
+          type="text"
+          class="player-name-input"
+          [value]="playerName()"
+          [disabled]="hasPlayedToday()"
+          (input)="onPlayerNameChange($any($event.target).value)"
+          (keydown.enter)="onUsernameSubmit()"
+          placeholder="Enter your name..."
+          autocomplete="off"
+        />
+        <button
+          class="start-button"
+          (click)="onUsernameSubmit()"
+          [disabled]="!playerName().trim() || hasPlayedToday()"
+        >
+          Continue
+        </button>
+      </div>
+    }
+    
+    <!-- Start Game Button Step -->
+    @if (showStartGameButton()) {
+      <div class="welcome-back-container">
+        <h2 class="welcome-back-title">Welcome back, {{ playerName() }}!</h2>
+        <button
+          class="start-button"
+          (click)="onStartGame()"
+          [disabled]="hasPlayedToday()"
+        >
+          Start Game
+        </button>
+      </div>
+    }
+  }
+</div>

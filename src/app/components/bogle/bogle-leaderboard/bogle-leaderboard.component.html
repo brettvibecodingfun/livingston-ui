@@ -1,0 +1,97 @@
+@if (leaderboard().length > 0) {
+  <div class="leaderboard-container" [class.leaderboard-light]="isLightMode()">
+    <h3 class="leaderboard-title" [class.leaderboard-title-light]="isLightMode()">Today's Leaderboard</h3>
+    @if (playerName()) {
+      <p class="leaderboard-username">Your username: {{ playerName() }}</p>
+    }
+    @if (gamesPlayedCount() > 0) {
+      <p class="games-played-count" [class.games-played-count-light]="isLightMode()">
+        {{ gamesPlayedCount() }} {{ gamesPlayedCount() === 1 ? 'game' : 'games' }} played today
+      </p>
+    }
+    <table class="leaderboard-table" [class.leaderboard-table-light]="isLightMode()">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Username</th>
+          <th>Score</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (score of leaderboard(); track score.id; let i = $index) {
+          <tr>
+            <td class="rank-cell">{{ i + 1 }}</td>
+            <td class="username-cell">{{ score.username }}</td>
+            <td class="score-cell">{{ score.gameScore }}/10</td>
+            <td class="time-cell">{{ formatTimeForLeaderboard(score.timeTaken) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Answer Statistics -->
+    @if (mostCorrectAnswers().length > 0 || mostMissedAnswers().length > 0) {
+      <div class="answer-statistics-container" [class.answer-statistics-light]="isLightMode()">
+        @if (mostCorrectAnswers().length > 0) {
+          <div class="statistics-section">
+            <h4 class="statistics-title" [class.statistics-title-light]="isLightMode()">Most Correct Answers</h4>
+            <ul class="statistics-list">
+              @for (item of mostCorrectAnswers(); track item.playerName) {
+                <li class="statistics-item statistics-item-correct">
+                  <span class="statistics-player-name">{{ item.playerName }}</span>
+                  <span class="statistics-percentage">{{ item.percentage }}%</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        @if (mostMissedAnswers().length > 0) {
+          <div class="statistics-section">
+            <h4 class="statistics-title" [class.statistics-title-light]="isLightMode()">Most Missed Answers</h4>
+            <ul class="statistics-list">
+              @for (item of mostMissedAnswers(); track item.playerName) {
+                <li class="statistics-item statistics-item-missed">
+                  <span class="statistics-player-name">{{ item.playerName }}</span>
+                  <span class="statistics-percentage">{{ item.percentage }}%</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Game Answers List -->
+    @if (storedGameAnswers().length > 0) {
+      <div class="game-answers-container" [class.game-answers-light]="isLightMode()">
+        <h3 class="game-answers-title" [class.game-answers-title-light]="isLightMode()">Today's Answers</h3>
+        <div class="answers-list">
+          @for (player of storedGameAnswers(); track player.rank) {
+            @let wasCorrect = wasPlayerCorrect(player.rank);
+            <div class="answer-item" [class.answer-correct]="wasCorrect" [class.answer-incorrect]="!wasCorrect">
+              <span class="answer-rank">{{ player.rank }}.</span>
+              <img 
+                [src]="getHeadshotSrc(player)"
+                [alt]="player.fullName"
+                class="answer-photo"
+                (error)="$any($event.target).style.display = 'none'"
+              />
+              <span class="answer-name">{{ player.fullName }}</span>
+              <span class="answer-stat">{{ getStatValue(player) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Local Storage Disclaimer -->
+    <div class="local-storage-disclaimer" [class.leaderboard-light]="isLightMode()">
+      <p class="disclaimer-text">
+        Website uses local storage, <button type="button" class="disclaimer-clear-link" (click)="onClearStorage()">click here to clear local storage</button>
+      </p>
+    </div>
+  </div>
+} @else if (isLoadingLeaderboard()) {
+  <div class="leaderboard-loading" [class.leaderboard-loading-light]="isLightMode()">Loading leaderboard...</div>
+}

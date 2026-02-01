@@ -402,10 +402,8 @@ export function setupAskRoutes(app: express.Application) {
       
       if (query.task === 'team') {
         teams = await runTeamQuery(query);
-        console.log(`Team query returned ${teams.length} teams`);
       } else {
         rows = await runQuery(query, playerNames);
-        console.log(`Query returned ${rows.length} rows`);
       }
 
       // Prepare response

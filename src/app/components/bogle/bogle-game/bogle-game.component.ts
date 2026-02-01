@@ -158,53 +158,59 @@ export class BogleGameComponent implements OnInit, OnDestroy {
     
     const trimmedValue = value.trim();
     if (trimmedValue.length > 0) {
-      const matchedPlayer = this.findMatchingPlayer(trimmedValue);
+      const matchedPlayers = this.findMatchingPlayers(trimmedValue);
       
-      if (matchedPlayer) {
-        const alreadyAnswered = this.answers().some(
-          answer => answer.rank === matchedPlayer.rank
+      if (matchedPlayers.length > 0) {
+        const unAnsweredPlayers = matchedPlayers.filter(
+          player => !this.answers().some(answer => answer.rank === player.rank)
         );
         
-        if (!alreadyAnswered) {
+        if (unAnsweredPlayers.length > 0) {
           setTimeout(() => {
-            this.submitAnswer(trimmedValue, matchedPlayer);
+            this.submitAnswers(trimmedValue, unAnsweredPlayers);
           }, 0);
         }
       }
     }
   }
   
-  private submitAnswer(input: string, matchedPlayer: RookiePlayer | null) {
+  private submitAnswers(input: string, matchedPlayers: RookiePlayer[]) {
     if (!input) return;
     
-    const alreadyAnswered = this.answers().some(
-      answer => answer.playerName.toLowerCase() === input.toLowerCase() ||
-                 answer.rank === matchedPlayer?.rank
+    // Check if this exact input was already submitted
+    const alreadySubmitted = this.answers().some(
+      answer => answer.playerName.toLowerCase() === input.toLowerCase()
     );
 
-    if (alreadyAnswered) {
+    if (alreadySubmitted) {
       this.playerInput.set('');
       return;
     }
 
-    if (matchedPlayer) {
-      const rankAlreadyFilled = this.answers().some(
-        answer => answer.rank === matchedPlayer.rank
+    if (matchedPlayers.length > 0) {
+      // Filter out players whose ranks are already filled
+      const availablePlayers = matchedPlayers.filter(
+        player => !this.answers().some(answer => answer.rank === player.rank)
       );
 
-      if (rankAlreadyFilled) {
+      if (availablePlayers.length === 0) {
+        // All matched players are already answered, mark as incorrect
         this.answers.update(answers => [
           ...answers,
           { playerName: input, rank: null, isCorrect: false }
         ]);
       } else {
+        // Add all available matched players as correct answers
         this.answers.update(answers => {
-          const newAnswers = [...answers, {
-            playerName: matchedPlayer.fullName,
-            rank: matchedPlayer.rank,
-            isCorrect: true,
-            playerData: matchedPlayer
-          }];
+          const newAnswers = [
+            ...answers,
+            ...availablePlayers.map(player => ({
+              playerName: player.fullName,
+              rank: player.rank,
+              isCorrect: true,
+              playerData: player
+            }))
+          ];
           const sorted = newAnswers.sort((a, b) => {
             if (a.rank === null) return 1;
             if (b.rank === null) return -1;
@@ -222,6 +228,7 @@ export class BogleGameComponent implements OnInit, OnDestroy {
         });
       }
     } else {
+      // No matches found, mark as incorrect
       this.answers.update(answers => [
         ...answers,
         { playerName: input, rank: null, isCorrect: false }
@@ -237,33 +244,42 @@ export class BogleGameComponent implements OnInit, OnDestroy {
     const input = this.playerInput().trim();
     if (!input) return;
 
-    const matchedPlayer = this.findMatchingPlayer(input);
-    this.submitAnswer(input, matchedPlayer);
+    const matchedPlayers = this.findMatchingPlayers(input);
+    const unAnsweredPlayers = matchedPlayers.filter(
+      player => !this.answers().some(answer => answer.rank === player.rank)
+    );
+    this.submitAnswers(input, unAnsweredPlayers);
   }
 
-  private findMatchingPlayer(input: string): RookiePlayer | null {
+  private findMatchingPlayers(input: string): RookiePlayer[] {
     const inputLower = input.toLowerCase().trim();
+    const matches: RookiePlayer[] = [];
     
-    let match = this.correctAnswers.find(
+    // First, try exact full name matches
+    const exactMatches = this.correctAnswers.filter(
       player => player.fullName.toLowerCase() === inputLower
     );
+    if (exactMatches.length > 0) {
+      return exactMatches;
+    }
     
-    if (match) return match;
-    
-    match = this.correctAnswers.find(
+    // Then try matches with normalized spacing
+    const normalizedMatches = this.correctAnswers.filter(
       player => player.fullName.toLowerCase().replace(/\s+/g, ' ') === inputLower.replace(/\s+/g, ' ')
     );
+    if (normalizedMatches.length > 0) {
+      return normalizedMatches;
+    }
     
-    if (match) return match;
-    
-    match = this.correctAnswers.find(player => {
+    // Finally, try partial matches (first name, last name, or any name part)
+    const partialMatches = this.correctAnswers.filter(player => {
       const nameParts = player.fullName.toLowerCase().split(' ');
       return nameParts.some(part => part === inputLower) ||
              (nameParts.length > 0 && nameParts[0] === inputLower) ||
              (nameParts.length > 1 && nameParts[nameParts.length - 1] === inputLower);
     });
     
-    return match || null;
+    return partialMatches;
   }
 
   onKeyPress(event: KeyboardEvent) {

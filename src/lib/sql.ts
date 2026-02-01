@@ -143,11 +143,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       ORDER BY p.full_name ASC
     `;
 
-    console.log(`Compare SQL (${compareTableName}):`, sql);
-    console.log('Compare params:', params);
-    console.log('Searching for players:', normalizedPlayerNames);
     const result = await pool.query(sql, params);
-    console.log(`Found ${result.rows.length} players in ${compareTableName}`);
     if (result.rows.length === 0 && normalizedPlayerNames.length > 0) {
       // Try to see if players exist in the database at all
       const checkSql = `
@@ -160,7 +156,6 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
       `;
       const checkParams = normalizedPlayerNames.map(name => `%${name}%`);
       const checkResult = await pool.query(checkSql, checkParams);
-      console.log(`Players found in database:`, checkResult.rows.map(r => r.full_name));
     }
     return result.rows;
   }
@@ -416,11 +411,7 @@ export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]>
     LIMIT ${finalLimit}
   `;
 
-  console.log(`Query SQL (${tableName}):`, sql);
-  console.log('Query params:', params);
-  console.log('Task:', q.task, 'Metric:', q.metric);
   const result = await pool.query(sql, params);
-  console.log(`Found ${result.rows.length} players in season_averages`);
   return result.rows;
 }
 

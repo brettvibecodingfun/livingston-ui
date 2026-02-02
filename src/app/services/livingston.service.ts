@@ -37,6 +37,31 @@ export interface PlayerStatsRow {
   ast_ratio: number | null;
   e_tov_pct: number | null;
   e_usg_pct: number | null;
+  // Shooting stats
+  corner_3_fgm?: number | null;
+  corner_3_fga?: number | null;
+  corner_3_fg_pct?: number | null;
+  left_corner_3_fgm?: number | null;
+  left_corner_3_fga?: number | null;
+  left_corner_3_fg_pct?: number | null;
+  right_corner_3_fgm?: number | null;
+  right_corner_3_fga?: number | null;
+  right_corner_3_fg_pct?: number | null;
+  above_the_break_3_fgm?: number | null;
+  above_the_break_3_fga?: number | null;
+  above_the_break_3_fg_pct?: number | null;
+  backcourt_fgm?: number | null;
+  backcourt_fga?: number | null;
+  backcourt_fg_pct?: number | null;
+  mid_range_fgm?: number | null;
+  mid_range_fga?: number | null;
+  mid_range_fg_pct?: number | null;
+  restricted_area_fgm?: number | null;
+  restricted_area_fga?: number | null;
+  restricted_area_fg_pct?: number | null;
+  in_the_paint_non_ra_fgm?: number | null;
+  in_the_paint_non_ra_fga?: number | null;
+  in_the_paint_non_ra_fg_pct?: number | null;
 }
 
 export interface TeamPlayer {

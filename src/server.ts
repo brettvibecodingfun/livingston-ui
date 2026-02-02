@@ -91,6 +91,32 @@ Player metrics:
 - e_tov_pct: estimated turnover percentage
 - e_usg_pct: estimated usage percentage
 
+Shooting stats by zone (from shooting_stats table):
+- corner_3_fgm: corner 3 pointers made per game (e.g., "who leads in corner 3s made", "most corner 3s per game")
+- corner_3_fga: corner 3 pointers attempted per game (e.g., "who attempts the most corner 3s")
+- corner_3_fg_pct: corner 3 point percentage (e.g., "best corner 3 percentage")
+- left_corner_3_fgm: left corner 3 pointers made per game
+- left_corner_3_fga: left corner 3 pointers attempted per game
+- left_corner_3_fg_pct: left corner 3 point percentage
+- right_corner_3_fgm: right corner 3 pointers made per game
+- right_corner_3_fga: right corner 3 pointers attempted per game
+- right_corner_3_fg_pct: right corner 3 point percentage
+- above_the_break_3_fgm: above the break 3 pointers made per game
+- above_the_break_3_fga: above the break 3 pointers attempted per game
+- above_the_break_3_fg_pct: above the break 3 point percentage
+- backcourt_fgm: backcourt field goals made per game
+- backcourt_fga: backcourt field goals attempted per game
+- backcourt_fg_pct: backcourt field goal percentage
+- mid_range_fgm: mid-range field goals made per game
+- mid_range_fga: mid-range field goals attempted per game
+- mid_range_fg_pct: mid-range field goal percentage
+- restricted_area_fgm: restricted area field goals made per game
+- restricted_area_fga: restricted area field goals attempted per game
+- restricted_area_fg_pct: restricted area field goal percentage
+- in_the_paint_non_ra_fgm: in the paint (non-RA) field goals made per game
+- in_the_paint_non_ra_fga: in the paint (non-RA) field goals attempted per game
+- in_the_paint_non_ra_fg_pct: in the paint (non-RA) field goal percentage
+
 Team metrics (use when asking about team statistics):
 - team_ppg: team points per game (e.g., "which team scores the most points per game")
 - team_fgm: team field goals made per game (e.g., "what team hits the most shots per game")

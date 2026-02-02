@@ -335,12 +335,31 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const metric = query.metric;
     
+    // Check if this is a shooting stat
+    const shootingStats = [
+      'corner_3_fgm', 'corner_3_fga', 'corner_3_fg_pct',
+      'left_corner_3_fgm', 'left_corner_3_fga', 'left_corner_3_fg_pct',
+      'right_corner_3_fgm', 'right_corner_3_fga', 'right_corner_3_fg_pct',
+      'above_the_break_3_fgm', 'above_the_break_3_fga', 'above_the_break_3_fg_pct',
+      'backcourt_fgm', 'backcourt_fga', 'backcourt_fg_pct',
+      'mid_range_fgm', 'mid_range_fga', 'mid_range_fg_pct',
+      'restricted_area_fgm', 'restricted_area_fga', 'restricted_area_fg_pct',
+      'in_the_paint_non_ra_fgm', 'in_the_paint_non_ra_fga', 'in_the_paint_non_ra_fg_pct'
+    ];
+    const isShootingStat = metric && shootingStats.includes(metric);
+
     // If there's a team filter but no specific metric handling, ensure the metric is shown
     const hasTeamFilter = !!query.team;
 
     // If metric is "all", show all stats
     if (metric === 'all') {
       columns.push('ppg', 'apg', 'rpg', 'fg_pct', 'three_pct', 'ft_pct');
+      return columns;
+    }
+
+    // If shooting stat, add the metric column
+    if (isShootingStat && metric) {
+      columns.push(metric);
       return columns;
     }
 
@@ -445,7 +464,32 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
       'oreb_pct': 'OREB%',
       'ast_ratio': 'AST Ratio',
       'e_tov_pct': 'E TOV%',
-      'e_usg_pct': 'E USG%'
+      'e_usg_pct': 'E USG%',
+      // Shooting stats - FGM metrics show as 3PM, FGA as 3PA, FG_PCT as 3P%
+      'corner_3_fgm': '3PM',
+      'corner_3_fga': '3PA',
+      'corner_3_fg_pct': '3P%',
+      'left_corner_3_fgm': '3PM',
+      'left_corner_3_fga': '3PA',
+      'left_corner_3_fg_pct': '3P%',
+      'right_corner_3_fgm': '3PM',
+      'right_corner_3_fga': '3PA',
+      'right_corner_3_fg_pct': '3P%',
+      'above_the_break_3_fgm': '3PM',
+      'above_the_break_3_fga': '3PA',
+      'above_the_break_3_fg_pct': '3P%',
+      'backcourt_fgm': 'FGM',
+      'backcourt_fga': 'FGA',
+      'backcourt_fg_pct': 'FG%',
+      'mid_range_fgm': 'FGM',
+      'mid_range_fga': 'FGA',
+      'mid_range_fg_pct': 'FG%',
+      'restricted_area_fgm': 'FGM',
+      'restricted_area_fga': 'FGA',
+      'restricted_area_fg_pct': 'FG%',
+      'in_the_paint_non_ra_fgm': 'FGM',
+      'in_the_paint_non_ra_fga': 'FGA',
+      'in_the_paint_non_ra_fg_pct': 'FG%'
     };
     return displayNames[column] || column.toUpperCase();
   }
@@ -519,6 +563,37 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
         return player.e_tov_pct != null ? (player.e_tov_pct * 100).toFixed(1) + '%' : '';
       case 'e_usg_pct':
         return player.e_usg_pct != null ? (player.e_usg_pct * 100).toFixed(1) + '%' : '';
+      // Shooting stats
+      case 'corner_3_fgm':
+      case 'left_corner_3_fgm':
+      case 'right_corner_3_fgm':
+      case 'above_the_break_3_fgm':
+        return player[column as keyof PlayerStatsRow] != null ? (player[column as keyof PlayerStatsRow] as number).toFixed(1) : '0.0';
+      case 'corner_3_fga':
+      case 'left_corner_3_fga':
+      case 'right_corner_3_fga':
+      case 'above_the_break_3_fga':
+        return player[column as keyof PlayerStatsRow] != null ? (player[column as keyof PlayerStatsRow] as number).toFixed(1) : '0.0';
+      case 'corner_3_fg_pct':
+      case 'left_corner_3_fg_pct':
+      case 'right_corner_3_fg_pct':
+      case 'above_the_break_3_fg_pct':
+        return player[column as keyof PlayerStatsRow] != null ? ((player[column as keyof PlayerStatsRow] as number) * 100).toFixed(1) + '%' : '0.0%';
+      case 'backcourt_fgm':
+      case 'mid_range_fgm':
+      case 'restricted_area_fgm':
+      case 'in_the_paint_non_ra_fgm':
+        return player[column as keyof PlayerStatsRow] != null ? (player[column as keyof PlayerStatsRow] as number).toFixed(1) : '0.0';
+      case 'backcourt_fga':
+      case 'mid_range_fga':
+      case 'restricted_area_fga':
+      case 'in_the_paint_non_ra_fga':
+        return player[column as keyof PlayerStatsRow] != null ? (player[column as keyof PlayerStatsRow] as number).toFixed(1) : '0.0';
+      case 'backcourt_fg_pct':
+      case 'mid_range_fg_pct':
+      case 'restricted_area_fg_pct':
+      case 'in_the_paint_non_ra_fg_pct':
+        return player[column as keyof PlayerStatsRow] != null ? ((player[column as keyof PlayerStatsRow] as number) * 100).toFixed(1) + '%' : '0.0%';
       default:
         return '';
     }

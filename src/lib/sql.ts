@@ -16,10 +16,186 @@ function mapPositionGroup(positionGroup: string): string {
   }
 }
 
+// Check if a metric is a shooting stat (from shooting_stats table)
+function isShootingStat(metric: string): boolean {
+  const shootingStats = [
+    'corner_3_fgm', 'corner_3_fga', 'corner_3_fg_pct',
+    'left_corner_3_fgm', 'left_corner_3_fga', 'left_corner_3_fg_pct',
+    'right_corner_3_fgm', 'right_corner_3_fga', 'right_corner_3_fg_pct',
+    'above_the_break_3_fgm', 'above_the_break_3_fga', 'above_the_break_3_fg_pct',
+    'backcourt_fgm', 'backcourt_fga', 'backcourt_fg_pct',
+    'mid_range_fgm', 'mid_range_fga', 'mid_range_fg_pct',
+    'restricted_area_fgm', 'restricted_area_fga', 'restricted_area_fg_pct',
+    'in_the_paint_non_ra_fgm', 'in_the_paint_non_ra_fga', 'in_the_paint_non_ra_fg_pct'
+  ];
+  return shootingStats.includes(metric);
+}
+
+// Map shooting stat metrics to database column names
+function getShootingStatColumn(metric: string): string | null {
+  const columnMap: Record<string, string> = {
+    'corner_3_fgm': 'corner_3_fgm',
+    'corner_3_fga': 'corner_3_fga',
+    'corner_3_fg_pct': 'corner_3_fg_pct',
+    'left_corner_3_fgm': 'left_corner_3_fgm',
+    'left_corner_3_fga': 'left_corner_3_fga',
+    'left_corner_3_fg_pct': 'left_corner_3_fg_pct',
+    'right_corner_3_fgm': 'right_corner_3_fgm',
+    'right_corner_3_fga': 'right_corner_3_fga',
+    'right_corner_3_fg_pct': 'right_corner_3_fg_pct',
+    'above_the_break_3_fgm': 'above_the_break_3_fgm',
+    'above_the_break_3_fga': 'above_the_break_3_fga',
+    'above_the_break_3_fg_pct': 'above_the_break_3_fg_pct',
+    'backcourt_fgm': 'backcourt_fgm',
+    'backcourt_fga': 'backcourt_fga',
+    'backcourt_fg_pct': 'backcourt_fg_pct',
+    'mid_range_fgm': 'mid_range_fgm',
+    'mid_range_fga': 'mid_range_fga',
+    'mid_range_fg_pct': 'mid_range_fg_pct',
+    'restricted_area_fgm': 'restricted_area_fgm',
+    'restricted_area_fga': 'restricted_area_fga',
+    'restricted_area_fg_pct': 'restricted_area_fg_pct',
+    'in_the_paint_non_ra_fgm': 'in_the_paint_non_ra_fgm',
+    'in_the_paint_non_ra_fga': 'in_the_paint_non_ra_fga',
+    'in_the_paint_non_ra_fg_pct': 'in_the_paint_non_ra_fg_pct'
+  };
+  return columnMap[metric] || null;
+}
+
+// Query shooting stats table
+async function runShootingStatsQuery(q: Query, playerNames?: string[]): Promise<any[]> {
+  if (!q.metric || !isShootingStat(q.metric)) {
+    return [];
+  }
+
+  const limit = Math.min(q.limit ?? 10, 25);
+  const params: any[] = [];
+  let i = 0;
+  
+  const effectivePlayerNames = (q.filters?.players?.length ? q.filters.players : playerNames) ?? [];
+  const normalizedPlayerNames = effectivePlayerNames.map((name) => name.toLowerCase());
+  const hasPlayerFilter = normalizedPlayerNames.length > 0;
+  
+  const metricColumn = getShootingStatColumn(q.metric);
+  if (!metricColumn) {
+    return [];
+  }
+
+  params.push(q.season); i++;
+  params.push('regular'); i++; // season_type
+
+  const whereConditions: string[] = [
+    `ss.season = $1`,
+    `ss.season_type = $2`
+  ];
+
+  // Add team filter if specified
+  if (q.team) {
+    if (Array.isArray(q.team) && q.team.length > 0) {
+      params.push(q.team); i++;
+      whereConditions.push(`t.abbreviation = ANY($${i})`);
+    } else if (typeof q.team === 'string') {
+      params.push(q.team.toUpperCase()); i++;
+      whereConditions.push(`t.abbreviation = $${i}`);
+    }
+  }
+
+  // Add player filter
+  if (hasPlayerFilter) {
+    const nameConditions = normalizedPlayerNames.map((name) => {
+      params.push(`%${name}%`); i++;
+      return `LOWER(p.full_name) LIKE $${i}`;
+    });
+    whereConditions.push(`(${nameConditions.join(' OR ')})`);
+  }
+
+  // Add min/max metric value filters
+  if (q.filters?.min_metric_value != null) {
+    params.push(q.filters.min_metric_value); i++;
+    whereConditions.push(`ss.${metricColumn} >= $${i}`);
+  }
+  if (q.filters?.max_metric_value != null) {
+    params.push(q.filters.max_metric_value); i++;
+    whereConditions.push(`ss.${metricColumn} <= $${i}`);
+  }
+
+  // Add minimum games filter (only if season_averages exists)
+  if (q.filters?.min_games != null) {
+    params.push(q.filters.min_games); i++;
+    whereConditions.push(`(sa.games_played IS NULL OR sa.games_played >= $${i})`);
+  }
+
+  // Order by the metric
+  const orderDirection = q.order_direction?.toUpperCase() || 'DESC';
+  const orderBy = `ss.${metricColumn} ${orderDirection} NULLS LAST`;
+
+  // Build the query - join with season_averages to get games_played and other basic stats
+  const sql = `
+    SELECT
+      p.full_name,
+      t.abbreviation AS team,
+      sa.games_played,
+      sa.minutes,
+      sa.points AS ppg,
+      sa.assists AS apg,
+      sa.rebounds AS rpg,
+      sa.steals AS spg,
+      sa.blocks AS bpg,
+      sa.fg_pct,
+      sa.three_pct,
+      sa.ft_pct,
+      sa.tpm,
+      sa.tpa,
+      sa.ftm,
+      sa.fta,
+      ss.corner_3_fgm,
+      ss.corner_3_fga,
+      ss.corner_3_fg_pct,
+      ss.left_corner_3_fgm,
+      ss.left_corner_3_fga,
+      ss.left_corner_3_fg_pct,
+      ss.right_corner_3_fgm,
+      ss.right_corner_3_fga,
+      ss.right_corner_3_fg_pct,
+      ss.above_the_break_3_fgm,
+      ss.above_the_break_3_fga,
+      ss.above_the_break_3_fg_pct,
+      ss.backcourt_fgm,
+      ss.backcourt_fga,
+      ss.backcourt_fg_pct,
+      ss.mid_range_fgm,
+      ss.mid_range_fga,
+      ss.mid_range_fg_pct,
+      ss.restricted_area_fgm,
+      ss.restricted_area_fga,
+      ss.restricted_area_fg_pct,
+      ss.in_the_paint_non_ra_fgm,
+      ss.in_the_paint_non_ra_fga,
+      ss.in_the_paint_non_ra_fg_pct
+    FROM shooting_stats ss
+    INNER JOIN players p ON ss.player_id = p.id
+    LEFT JOIN teams t ON p.team_id = t.id
+    LEFT JOIN season_averages sa ON sa.player_id = p.id AND sa.season = ss.season
+    WHERE ${whereConditions.join(' AND ')}
+    ORDER BY ${orderBy}
+    LIMIT $${++i}
+  `;
+
+  params.push(limit);
+
+  const result = await pool.query(sql, params);
+  return result.rows;
+}
+
 export async function runQuery(q: Query, playerNames?: string[]): Promise<any[]> {
   // Team queries shouldn't use this function
   if (q.task === 'team' || !q.metric) {
     return [];
+  }
+
+  // Check if this is a shooting stats query
+  if (isShootingStat(q.metric)) {
+    return await runShootingStatsQuery(q, playerNames);
   }
 
   const limit = Math.min(q.limit ?? 10, 25);

@@ -198,6 +198,7 @@ Task selection rules (follow strictly):
 - When task = "team" and the user asks about team statistics (not just records/wins), include the appropriate team_* metric. If asking about records/wins only, do NOT include metric.
 - If the user asks for historical comparisons (keywords such as "historical comparison", "find someone from the past like", "find me a historical comparison for", "who are similar players to", "players like", "comparable players to", "historical comp", "find players like", etc.), set task = "historical_comparison". Include the player name in filters.players array. DO NOT include metric when task is "historical_comparison".
 - If the user explicitly compares players (keywords such as "compare", "versus", "vs", "better than", "better season", "who is having the better year", etc.), set task = "compare".
+- IMPORTANT: If the user provides just a player name (e.g., "Cade Cunningham", "LeBron James", "Stephen Curry") without any other context like "top", "best", "compare", "stats", etc., set task = "solo" and include the player name in filters.players array. This will show the player's detailed stats page.
 - If the user asks for "top", "best", "leaders", "highest", "lowest", etc. without naming specific players and NOT asking about teams or historical comparisons, use task = "leaders".
 - Use task = "rank" when the request implies ordering/ranking but not necessarily top-N leaders wording.
 - Use task = "lookup" when the user searches for specific stats about one player or a constrained list without comparing.
@@ -214,6 +215,7 @@ Clutch queries:
 
 Player filters:
 - When the user mentions specific player names, populate filters.players as an array of the exact full names in the question (e.g., ["Kevin Durant", "Cade Cunningham"]). Do NOT include team names in this list.
+- IMPORTANT: If the user mentions "Steph Curry" or "Steph", normalize it to "Stephen Curry" in filters.players (the database uses "Stephen Curry").
 
 Draft year filters:
 - If the user asks for "rookies" or "first-year players", add filters.draft_year_range = { gte: 2025, lte: 2025 } (drafted in the current season).
@@ -331,7 +333,7 @@ User question: "${question}"
 
 Parse this question into the structured query format. Only include optional fields (team, position, filters, limit, order_direction) if they are explicitly mentioned in the user's question or needed based on the rules above. If the user mentions "this year", "this season", or "current season", use ${DEFAULT_SEASON} as the season. Remember: If the user asks for "least", "lowest", or "worst", you MUST include "order_direction": "asc" at the top level.
 
-IMPORTANT: If the question cannot be answered with structured data (e.g., it asks for explanations, definitions, or general knowledge that isn't about specific player/team statistics), you should still attempt to parse it, but use your best judgment to map it to the closest valid query structure. For questions about general NBA concepts, rules, or explanations that don't involve specific stats, try to use task = "lookup" with metric = "all" and appropriate filters if possible.`;
+IMPORTANT: If the question cannot be answered with structured data (e.g., it asks for explanations, definitions, or general knowledge that isn't about specific player/team statistics), you should still attempt to parse it, but use your best judgment to map it to the closest valid query structure. If you cannot parse the query, return an empty object.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -364,7 +366,21 @@ IMPORTANT: If the question cannot be answered with structured data (e.g., it ask
 
     const parsed = JSON.parse(content);
     
-    // Ensure required fields are present with defaults
+    // Check if the parsed query is essentially empty (OpenAI couldn't parse it properly)
+    // This happens when the question is unparseable or non-NBA related
+    // An empty object or object with only season indicates OpenAI couldn't parse it
+    const isEssentiallyEmpty = Object.keys(parsed).length === 0 || 
+                               (Object.keys(parsed).length === 1 && parsed.season) ||
+                               (!parsed.metric && !parsed.task);
+    
+    // If query is essentially empty, reject it instead of applying defaults
+    if (isEssentiallyEmpty) {
+      console.warn('Query is essentially empty - OpenAI could not parse the question. Rejecting instead of defaulting.');
+      throw new Error('QUERY_PARSE_FAILED');
+    }
+    
+    // Only apply defaults if we have a reasonable query structure
+    // This means OpenAI parsed something meaningful, just missing a field or two
     if (!parsed.metric || parsed.metric === 'undefined') {
       console.warn('OpenAI returned query without metric, defaulting to ppg');
       parsed.metric = 'ppg';

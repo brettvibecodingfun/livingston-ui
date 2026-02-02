@@ -193,6 +193,8 @@ export class LivingstonComponent implements OnInit, AfterViewInit, OnDestroy {
           } else {
             this.results.set(response);
             this.queryDebug.set(response.query);
+            // Set suggestions if available (for no results case)
+            this.errorSuggestions.set(response.suggestions || []);
             this.isLoading.set(false);
           }
         },

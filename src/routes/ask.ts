@@ -85,11 +85,13 @@ export function setupAskRoutes(app: express.Application) {
         
         if (playerRows.length === 0) {
           return res.status(404).json({
-            error: `Could not find player "${playerName}" in the database.`,
+            error: `Could not find player "${playerName}" in the 2026 season database.`,
             suggestions: [
               'Who are the top scorers in the NBA?',
               'Compare Stephen Curry and Kevin Durant',
-              'Find me a historical comparison for Anthony Edwards'
+              'Find me a historical comparison for Anthony Edwards',
+              'What are Victor Wembanyama\'s Advanced stats?',
+              'Of players who shoot more than 5 free throws per game, who has the best percentage?'
             ]
           });
         }
@@ -413,14 +415,36 @@ export function setupAskRoutes(app: express.Application) {
         teams?: any[];
         historicalComparison?: any;
         summary?: string;
+        suggestions?: string[];
       } = {
         query: query,
       };
 
       if (query.task === 'team') {
         response.teams = teams;
+        // If no teams found, add suggestions
+        if (teams.length === 0) {
+          response.suggestions = [
+            'Who are the top scorers in the NBA?',
+            'Compare Stephen Curry and Kevin Durant',
+            'Find me a historical comparison for Anthony Edwards',
+            'What are Victor Wembanyama\'s Advanced stats?',
+            'Of players who shoot more than 5 free throws per game, who has the best percentage?'
+          ]
+        }
       } else {
         response.rows = rows;
+        
+        // If no rows found, add suggestions
+        if (rows.length === 0) {
+          response.suggestions = [
+            'Who are the top scorers in the NBA?',
+            'Compare Stephen Curry and Kevin Durant',
+            'Find me a historical comparison for Anthony Edwards',
+            'What are Victor Wembanyama\'s Advanced stats?',
+            'Of players who shoot more than 5 free throws per game, who has the best percentage?'
+          ];
+        }
         
         // Add summary if narrate is requested (only for player queries)
         if (narrate) {

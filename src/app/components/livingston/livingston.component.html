@@ -670,15 +670,34 @@
         </div>
       } @else {
         <!-- No Results -->
-        <div class="card">
-          <div class="text-center py-12">
-            <div class="text-gray-400 mb-4">
-              <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.647M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <div class="alert-error">
+          <div class="error-content">
+            <div class="error-icon-wrapper">
+              <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
             </div>
-            <p class="text-lg text-gray-500">No results found</p>
-            <p class="text-sm text-gray-400 mt-2">Try asking a different question about the 2026 NBA Season</p>
+            <div class="error-text-content">
+              <h3 class="error-title">No Results Found</h3>
+              <p class="error-message">We couldn't find any results for your query. Try asking a different question about the 2026 NBA Season.</p>
+              @if (errorSuggestions().length > 0) {
+                <div class="error-suggestions">
+                  <p class="error-suggestions-title">Try asking one of these questions instead:</p>
+                  <div class="error-suggestions-list">
+                    @for (suggestion of errorSuggestions(); track suggestion) {
+                      <button 
+                        type="button"
+                        class="error-suggestion-button"
+                        (click)="onSampleQuestionClick(suggestion)"
+                        [disabled]="isLoading()"
+                      >
+                        {{ suggestion }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
           </div>
         </div>
       }
@@ -687,33 +706,30 @@
     <!-- Error Message -->
     @if (error()) {
       <div class="alert-error">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        <div class="error-content">
+          <div class="error-icon-wrapper">
+            <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
             </svg>
           </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">Unable to Process Question</h3>
-            <div class="mt-2 text-sm text-red-700">
-              <p>{{ error() }}</p>
-            </div>
+          <div class="error-text-content">
+            <h3 class="error-title">Unable to Process Question</h3>
+            <p class="error-message">{{ error() }}</p>
             @if (errorSuggestions().length > 0) {
-              <div class="mt-4">
-                <p class="text-sm font-medium text-red-800 mb-2">Try asking one of these questions instead:</p>
-                <ul class="list-disc list-inside space-y-1">
+              <div class="error-suggestions">
+                <p class="error-suggestions-title">Try asking one of these questions instead:</p>
+                <div class="error-suggestions-list">
                   @for (suggestion of errorSuggestions(); track suggestion) {
-                    <li>
-                      <button 
-                        type="button"
-                        class="text-sm text-red-600 hover:text-red-800 underline"
-                        (click)="onSampleQuestionClick(suggestion)"
-                      >
-                        {{ suggestion }}
-                      </button>
-                    </li>
+                    <button 
+                      type="button"
+                      class="error-suggestion-button"
+                      (click)="onSampleQuestionClick(suggestion)"
+                      [disabled]="isLoading()"
+                    >
+                      {{ suggestion }}
+                    </button>
                   }
-                </ul>
+                </div>
               </div>
             }
           </div>

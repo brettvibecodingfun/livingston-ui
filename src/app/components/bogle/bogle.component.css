@@ -192,7 +192,7 @@
 
 @media (max-width: 767px) {
   .bogle-container {
-    padding: 1.5rem 0;
+    padding: 1.5rem 0.5rem;
   }
 
   .already-played-message {
